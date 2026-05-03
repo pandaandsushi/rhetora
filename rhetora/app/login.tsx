@@ -71,7 +71,9 @@ export default function Login() {
           </View>
         </View>
 
-        <Text style={styles.forgotText}>Forgot Password?</Text>
+        <Link href="/enter-code" style={styles.forgotText}>
+          Forgot Password?
+        </Link>
 
         <Pressable
           disabled={isDisabled}
