@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   Image,
@@ -13,6 +13,7 @@ import {
 import { Colors } from "../constants/colors";
 
 export default function Signup() {
+  const router = useRouter();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -94,6 +95,7 @@ export default function Signup() {
             isDisabled && styles.buttonDisabled,
             pressed && !isDisabled && styles.buttonPressed,
           ]}
+          onPress={() => router.push("/onboarding")}
         >
           <Text style={styles.buttonText}>Sign Up</Text>
         </Pressable>
