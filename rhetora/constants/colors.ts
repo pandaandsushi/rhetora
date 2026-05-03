@@ -80,7 +80,7 @@ export const Colors = {
     600: "#4A313C",
     700: "#24161C",
   },
-  nonary: {
+  grey: {
     DEFAULT: "#717570",
     100: "#E3E9E2",
     200: "#BBC1B9",

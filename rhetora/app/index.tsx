@@ -1,17 +1,20 @@
-import { useFonts } from "expo-font";
+import { useEffect } from "react";
 import { Text, View } from "react-native";
+import { useRouter } from "expo-router";
 
 import BgMotif from "../assets/images/bg-motif.svg";
 import LogoRhetora from "../assets/images/logorhetora.svg";
 
 export default function Index() {
-  const [fontsLoaded] = useFonts({
-    "AlbertSans-Regular": require("../assets/fonts/AlbertSans/AlbertSans-Regular.ttf"),
-  });
+  const router = useRouter();
 
-  if (!fontsLoaded) {
-    return null;
-  }
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      router.replace("/login");
+    }, 2000);
+
+    return () => clearTimeout(timeoutId);
+  }, [router]);
 
   return (
     <View
