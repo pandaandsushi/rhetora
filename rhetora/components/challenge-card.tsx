@@ -29,19 +29,21 @@ export default function ChallengeCard({
   const showGift = claimable && !claimed;
 
   return (
-    <View style={styles.card}>
-      <View style={styles.coinWrap}>
-        <View style={styles.coinHalo}>
-          <Image source={coinImage} style={styles.coinImage} />
+    <View style={[styles.card, claimed && styles.cardClaimed]}>
+      <View style={[styles.contentWrap, claimed && styles.contentMuted]}>
+        <View style={styles.coinWrap}>
+          <View style={styles.coinHalo}>
+            <Image source={coinImage} style={styles.coinImage} />
+          </View>
+          <Text style={styles.coinText}>{coinValue}</Text>
         </View>
-        <Text style={styles.coinText}>{coinValue}</Text>
-      </View>
 
-      <View style={styles.body}>
-        <Text style={styles.title}>{title}</Text>
-        <View style={styles.progressRow}>
-          <ProgressBar progress={progress} />
-          <Text style={styles.count}>{current}/{total}</Text>
+        <View style={styles.body}>
+          <Text style={styles.title}>{title}</Text>
+          <View style={styles.progressRow}>
+            <ProgressBar progress={progress} />
+            <Text style={styles.count}>{current}/{total}</Text>
+          </View>
         </View>
       </View>
 
@@ -53,13 +55,13 @@ export default function ChallengeCard({
         >
           <Ionicons name="gift" size={22} color={Colors.octonary.DEFAULT} />
         </Pressable>
+      ) : claimed ? (
+        <View style={styles.checkWrap}>
+          <Ionicons name="checkmark" size={20} color={Colors.octonary.DEFAULT} />
+        </View>
       ) : (
         <View style={styles.chevronWrap}>
-          <Ionicons
-            name={claimed ? "checkmark" : "chevron-forward"}
-            size={20}
-            color={Colors.octonary.DEFAULT}
-          />
+          <Ionicons name="chevron-forward" size={20} color={Colors.octonary.DEFAULT} />
         </View>
       )}
     </View>
@@ -77,6 +79,18 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 16,
     gap: 12,
+  },
+  cardClaimed: {
+    backgroundColor: Colors.neutral[300],
+  },
+  contentWrap: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  contentMuted: {
+    opacity: 0.55,
   },
   coinWrap: {
     alignItems: "center",
@@ -139,5 +153,15 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.neutral[100],
     borderWidth: 1,
     borderColor: Colors.neutral[200],
+  },
+  checkWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.warning[300],
+    borderWidth: 2,
+    borderColor: Colors.octonary.DEFAULT,
   },
 });

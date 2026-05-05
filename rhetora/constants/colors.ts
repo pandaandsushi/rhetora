@@ -94,7 +94,7 @@ export const Colors = {
   // --- New Palettes ---
   shade: {
     100: "#060606",
-    200: "#FFFEFE",
+    200: "#FFFFFF",
   },
   neutral: {
     50: "#F5F5FF",

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   Image,
+  Modal,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -17,6 +18,8 @@ import TopHeader from "../components/top-header";
 import { Colors } from "../constants/colors";
 
 const backgroundImage = require("../assets/images/challenge-bg.png");
+const coinImage = require("../assets/images/shop/coin.png");
+const confettiImage = require("../assets/images/confetti.png");
 
 type Challenge = {
   id: string;
@@ -37,7 +40,7 @@ const dailyChallenges: Challenge[] = [
   {
     id: "daily-2",
     title: "Finish public speaking\nexercise 1 time",
-    current: 1,
+    current: 2,
     total: 2,
     coinValue: 160,
   },
@@ -77,9 +80,31 @@ const weeklyChallenges: Challenge[] = [
 export default function Challenges() {
   const router = useRouter();
   const [claimedIds, setClaimedIds] = useState<string[]>([]);
+  const [rewardAmount, setRewardAmount] = useState(0);
+  const [rewardVisible, setRewardVisible] = useState(false);
 
-  const claim = (id: string) => {
+  const claim = (id: string, coinValue: number) => {
     setClaimedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setRewardAmount(coinValue);
+    setRewardVisible(true);
+  };
+
+  const claimAll = () => {
+    const allChallenges = [...dailyChallenges, ...weeklyChallenges];
+    const claimable = allChallenges.filter(
+      (item) => item.current >= item.total && !claimedIds.includes(item.id),
+    );
+
+    if (claimable.length === 0) {
+      return;
+    }
+
+    const updatedClaimedIds = claimable.map((item) => item.id);
+    const totalReward = claimable.reduce((sum, item) => sum + item.coinValue, 0);
+
+    setClaimedIds((prev) => [...prev, ...updatedClaimedIds]);
+    setRewardAmount(totalReward);
+    setRewardVisible(true);
   };
 
   const dailyClaimableCount = dailyChallenges.filter(
@@ -137,7 +162,7 @@ export default function Challenges() {
                 coinValue={item.coinValue}
                 claimable={claimable}
                 claimed={claimedIds.includes(item.id)}
-                onClaim={() => claim(item.id)}
+                onClaim={() => claim(item.id, item.coinValue)}
               />
             );
           })}
@@ -164,7 +189,7 @@ export default function Challenges() {
                 coinValue={item.coinValue}
                 claimable={claimable}
                 claimed={claimedIds.includes(item.id)}
-                onClaim={() => claim(item.id)}
+                onClaim={() => claim(item.id, item.coinValue)}
               />
             );
           })}
@@ -173,10 +198,33 @@ export default function Challenges() {
 
       <View style={styles.claimWrap}>
         <View style={styles.claimShadow} />
-        <Pressable style={styles.claimButton} onPress={() => {}}>
+        <Pressable style={styles.claimButton} onPress={claimAll}>
           <Text style={styles.claimText}>Claim All</Text>
         </Pressable>
       </View>
+
+      <Modal transparent animationType="fade" visible={rewardVisible}>
+        <View style={styles.modalOverlay}>
+          <Image
+            source={confettiImage}
+            style={styles.confetti}
+            pointerEvents="none"
+          />
+          <View style={styles.rewardCard}>
+            <Text style={styles.rewardTitle}>Here is your reward!</Text>
+            <View style={styles.rewardRow}>
+              <Image source={coinImage} style={styles.rewardCoin} />
+              <Text style={styles.rewardValue}>{rewardAmount}</Text>
+            </View>
+            <Pressable
+              style={styles.rewardButton}
+              onPress={() => setRewardVisible(false)}
+            >
+              <Text style={styles.rewardButtonText}>Collect Rewards</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -191,6 +239,8 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     width: "100%",
+    height: 320,
+    resizeMode: "contain",
     opacity: 0.5,
   },
   safeArea: {
@@ -247,6 +297,65 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   claimText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.shade[200],
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.50)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  confetti: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+  rewardCard: {
+    width: "100%",
+    borderRadius: 20,
+    backgroundColor: Colors.shade[200],
+    paddingHorizontal: 24,
+    paddingVertical: 30,
+    alignItems: "center",
+    gap: 20,
+  },
+  rewardTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 22,
+    color: Colors.octonary.DEFAULT,
+  },
+  rewardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  rewardCoin: {
+    width: 64,
+    height: 64,
+    resizeMode: "contain",
+  },
+  rewardValue: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 26,
+    color: Colors.octonary.DEFAULT,
+  },
+  rewardButton: {
+    width: "100%",
+    height: 54,
+    borderRadius: 16,
+    backgroundColor: Colors.senary[300],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rewardButtonText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 18,
     color: Colors.shade[200],
