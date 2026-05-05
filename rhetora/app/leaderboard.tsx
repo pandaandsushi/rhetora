@@ -31,6 +31,8 @@ const avatars = {
 
 const coinImage = require("../assets/images/shop/coin.png");
 const confettiImage = require("../assets/images/confetti.png");
+const titleBadgeImage = require("../assets/images/title/title.png");
+const titleCardImage = require("../assets/images/title/ttitle-1.png");
 
 type Leader = {
   id: string;
@@ -87,6 +89,8 @@ export default function Leaderboard() {
   const [userRowY, setUserRowY] = useState(0);
   const [helpVisible, setHelpVisible] = useState(false);
   const [rewardStep, setRewardStep] = useState<"congrats" | "collect" | null>(null);
+  const [weeklyVisible, setWeeklyVisible] = useState(false);
+  const [titleVisible, setTitleVisible] = useState(false);
   const rewardAmount = 160;
 
   useEffect(() => {
@@ -118,7 +122,7 @@ export default function Leaderboard() {
             <Ionicons name="chevron-back" size={24} color={Colors.octonary.DEFAULT} />
           </Pressable>
           <Text style={styles.headerTitle}>Leaderboard</Text>
-          <Pressable style={styles.giftButton} onPress={() => {}}>
+          <Pressable style={styles.giftButton} onPress={() => setWeeklyVisible(true)}>
             <Ionicons name="gift" size={20} color={Colors.octonary.DEFAULT} />
           </Pressable>
         </View>
@@ -304,6 +308,145 @@ export default function Leaderboard() {
           )}
         </View>
       </Modal>
+
+      <Modal transparent animationType="slide" visible={weeklyVisible}>
+        <View style={styles.drawerOverlay}>
+          <Pressable style={styles.drawerBackdrop} onPress={() => setWeeklyVisible(false)} />
+          <View style={styles.drawerSheet}>
+            <Pressable
+              style={styles.drawerHandle}
+              onPress={() => setWeeklyVisible(false)}
+            />
+            <Text style={styles.drawerTitle}>Weekly Rewards</Text>
+
+            <View style={styles.drawerUserCard}>
+              <View style={styles.drawerUserTop}>
+                <Text style={styles.drawerRankText}>17</Text>
+                <Image source={avatars.ready} style={styles.drawerAvatar} />
+                <Text style={styles.drawerName}>You</Text>
+                <Text style={styles.drawerPoints}>21 pts</Text>
+              </View>
+              <View style={styles.drawerUserBottom}>
+                <Text style={styles.drawerUserLabel}>Top 10.0%</Text>
+                <View style={styles.drawerCoinRow}>
+                  <Image source={coinImage} style={styles.drawerCoin} />
+                  <Text style={styles.drawerCoinValue}>160</Text>
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.drawerHeaderRow}>
+              <Text style={styles.drawerHeaderText}>Rank</Text>
+              <Text style={styles.drawerHeaderText}>Rewards</Text>
+            </View>
+
+            <ScrollView contentContainerStyle={styles.drawerList} showsVerticalScrollIndicator={false}>
+              <View style={styles.drawerRow}>
+                <View style={styles.rankBadgeGold}>
+                  <Text style={styles.rankBadgeValue}>1</Text>
+                </View>
+                <View style={styles.rewardRow}>
+                  <Image source={coinImage} style={styles.drawerCoin} />
+                  <Text style={styles.drawerRewardValue}>180</Text>
+                  <Text style={styles.rewardPlus}>+</Text>
+                  <Pressable onPress={() => setTitleVisible(true)}>
+                    <Image source={titleBadgeImage} style={styles.titleBadge} />
+                  </Pressable>
+                </View>
+              </View>
+
+              <View style={styles.drawerRow}>
+                <View style={styles.rankBadgeSilver}>
+                  <Text style={styles.rankBadgeValue}>2</Text>
+                </View>
+                <View style={styles.rewardRow}>
+                  <Image source={coinImage} style={styles.drawerCoin} />
+                  <Text style={styles.drawerRewardValue}>180</Text>
+                  <Text style={styles.rewardPlus}>+</Text>
+                  <Pressable onPress={() => setTitleVisible(true)}>
+                    <Image source={titleBadgeImage} style={styles.titleBadge} />
+                  </Pressable>
+                </View>
+              </View>
+
+              <View style={styles.drawerRow}>
+                <View style={styles.rankBadgeBronze}>
+                  <Text style={styles.rankBadgeValue}>3</Text>
+                </View>
+                <View style={styles.rewardRow}>
+                  <Image source={coinImage} style={styles.drawerCoin} />
+                  <Text style={styles.drawerRewardValue}>180</Text>
+                  <Text style={styles.rewardPlus}>+</Text>
+                  <Pressable onPress={() => setTitleVisible(true)}>
+                    <Image source={titleBadgeImage} style={styles.titleBadge} />
+                  </Pressable>
+                </View>
+              </View>
+
+              <View style={styles.drawerRow}>
+                <Text style={styles.rankPercentText}>Top 5.0%</Text>
+                <View style={styles.rewardRow}>
+                  <Image source={coinImage} style={styles.drawerCoin} />
+                  <Text style={styles.drawerRewardValue}>180</Text>
+                </View>
+              </View>
+
+              <View style={styles.drawerRow}>
+                <Text style={styles.rankPercentText}>Top 10.0%</Text>
+                <View style={styles.rewardRow}>
+                  <Image source={coinImage} style={styles.drawerCoin} />
+                  <Text style={styles.drawerRewardValue}>160</Text>
+                </View>
+              </View>
+
+              <View style={styles.drawerRow}>
+                <Text style={styles.rankPercentText}>Top 20.0%</Text>
+                <View style={styles.rewardRow}>
+                  <Image source={coinImage} style={styles.drawerCoin} />
+                  <Text style={styles.drawerRewardValue}>140</Text>
+                </View>
+              </View>
+
+              <View style={styles.drawerRow}>
+                <Text style={styles.rankPercentText}>Top 30.0%</Text>
+                <View style={styles.rewardRow}>
+                  <Image source={coinImage} style={styles.drawerCoin} />
+                  <Text style={styles.drawerRewardValue}>120</Text>
+                </View>
+              </View>
+
+              <View style={styles.drawerRow}>
+                <Text style={styles.rankPercentText}>Top 50.0%</Text>
+                <View style={styles.rewardRow}>
+                  <Image source={coinImage} style={styles.drawerCoin} />
+                  <Text style={styles.drawerRewardValue}>100</Text>
+                </View>
+              </View>
+
+              <View style={styles.drawerRow}>
+                <Text style={styles.rankPercentText}>Top 100.0%</Text>
+                <View style={styles.rewardRow}>
+                  <Image source={coinImage} style={styles.drawerCoin} />
+                  <Text style={styles.drawerRewardValue}>80</Text>
+                </View>
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal transparent animationType="fade" visible={titleVisible}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.titleModalCard}>
+            <Image source={titleCardImage} style={styles.titleCardImage} />
+            <Text style={styles.titleModalHeading}>Requirement:</Text>
+            <Text style={styles.titleModalText}>Top 3 in weekly leaderboard</Text>
+            <Pressable style={styles.titleModalButton} onPress={() => setTitleVisible(false)}>
+              <Text style={styles.titleModalButtonText}>Okay</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -321,6 +464,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 6,
+    marginHorizontal:24,
   },
   backButton: {
     width: 42,
@@ -484,10 +628,6 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 14,
     backgroundColor: Colors.shade[200],
-  },
-  listItemActive: {
-    backgroundColor: "#A8DFFF",
-    borderColor: Colors.blue[300],
   },
   userActiveContainer: {
     borderRadius: 12,
@@ -752,6 +892,223 @@ const styles = StyleSheet.create({
   rewardButtonText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 18,
+    color: Colors.shade[200],
+  },
+  drawerOverlay: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
+  },
+  drawerBackdrop: {
+    flex: 1,
+  },
+  drawerSheet: {
+    backgroundColor: Colors.shade[200],
+    borderTopLeftRadius: 26,
+    borderTopRightRadius: 26,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 24,
+    maxHeight: "88%",
+  },
+  drawerHandle: {
+    alignSelf: "center",
+    width: 80,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.neutral[300],
+    marginBottom: 16,
+  },
+  drawerTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 20,
+    color: Colors.octonary.DEFAULT,
+    textAlign: "center",
+    marginBottom: 16,
+  },
+  drawerUserCard: {
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: Colors.blue[400],
+    backgroundColor: Colors.shade[200],
+    overflow: "hidden",
+    marginBottom: 16,
+  },
+  drawerUserTop: {
+    backgroundColor: "#A8DFFF",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  drawerUserBottom: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  drawerRankText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.blue[600],
+    width: 24,
+  },
+  drawerAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 12,
+  },
+  drawerName: {
+    flex: 1,
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.blue[600],
+  },
+  drawerPoints: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.blue[600],
+  },
+  drawerUserLabel: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.blue[600],
+  },
+  drawerHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+    paddingHorizontal: 6,
+  },
+  drawerHeaderText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.octonary.DEFAULT,
+  },
+  drawerList: {
+    gap: 12,
+    paddingBottom: 20,
+  },
+  drawerRow: {
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: Colors.blue[200],
+    backgroundColor: Colors.shade[200],
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  rankBadgeGold: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: Colors.warning[400],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rankBadgeSilver: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: Colors.neutral[300],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rankBadgeBronze: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "#9A5B32",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rankBadgeValue: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.shade[200],
+  },
+  rankPercentText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.blue[500],
+  },
+  rewardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  drawerCoinRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  drawerCoin: {
+    width: 26,
+    height: 26,
+    resizeMode: "contain",
+  },
+  drawerCoinValue: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+  },
+  drawerRewardValue: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+  },
+  rewardPlus: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+    marginHorizontal: 2,
+  },
+  titleBadge: {
+    height: 28,
+    width: 96,
+    resizeMode: "contain",
+  },
+  titleModalCard: {
+    width: "100%",
+    borderRadius: 12,
+    backgroundColor: Colors.shade[200],
+    paddingHorizontal: 24,
+    paddingVertical: 32,
+    alignItems: "center",
+    gap: 18,
+  },
+  titleCardImage: {
+    height: 34,
+    width: 160,
+    resizeMode: "contain",
+  },
+  titleModalHeading: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+  },
+  titleModalText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 20,
+    color: Colors.octonary.DEFAULT,
+    textAlign: "center",
+  },
+  titleModalButton: {
+    width: 140,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: Colors.senary[300],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  titleModalButtonText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
     color: Colors.shade[200],
   },
 });
