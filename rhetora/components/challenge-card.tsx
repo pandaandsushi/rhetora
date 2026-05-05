@@ -30,7 +30,7 @@ export default function ChallengeCard({
 
   return (
     <View style={[styles.card, claimed && styles.cardClaimed]}>
-      <View style={[styles.contentWrap, claimed && styles.contentMuted]}>
+      <View style={styles.contentWrap}>
         <View style={styles.coinWrap}>
           <View style={styles.coinHalo}>
             <Image source={coinImage} style={styles.coinImage} />
@@ -42,17 +42,15 @@ export default function ChallengeCard({
           <Text style={styles.title}>{title}</Text>
           <View style={styles.progressRow}>
             <ProgressBar progress={progress} />
-            <Text style={styles.count}>{current}/{total}</Text>
+            <Text style={styles.count}>
+              {current}/{total}
+            </Text>
           </View>
         </View>
       </View>
 
       {showGift ? (
-        <Pressable
-          style={styles.giftButton}
-          onPress={onClaim}
-          hitSlop={10}
-        >
+        <Pressable style={styles.giftButton} onPress={onClaim} hitSlop={10}>
           <Ionicons name="gift" size={22} color={Colors.octonary.DEFAULT} />
         </Pressable>
       ) : claimed ? (
@@ -61,9 +59,16 @@ export default function ChallengeCard({
         </View>
       ) : (
         <View style={styles.chevronWrap}>
-          <Ionicons name="chevron-forward" size={20} color={Colors.octonary.DEFAULT} />
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={Colors.octonary.DEFAULT}
+          />
         </View>
       )}
+
+      {/* Black transparent overlay sits on top of everything */}
+      {claimed && <View style={styles.overlay} pointerEvents="none" />}
     </View>
   );
 }
@@ -81,16 +86,20 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   cardClaimed: {
-    backgroundColor: Colors.neutral[300],
+    // Remove the solid background so the background images can show through
+    backgroundColor: "transparent",
+    borderColor: "transparent",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.45)", // The black transparent layer
+    borderRadius: 14, // Match the card's border radius
   },
   contentWrap: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-  },
-  contentMuted: {
-    opacity: 0.55,
   },
   coinWrap: {
     alignItems: "center",

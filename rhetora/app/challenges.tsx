@@ -111,6 +111,14 @@ export default function Challenges() {
     (item) => item.current >= item.total,
   ).length;
 
+    // Combine all challenges to check their status
+    const allChallenges = [...dailyChallenges, ...weeklyChallenges];
+
+    // Check if there's at least one challenge that is finished but not yet claimed
+    const hasClaimable = allChallenges.some(
+    (item) => item.current >= item.total && !claimedIds.includes(item.id)
+    );
+
   return (
     <View style={styles.screen}>
       <Svg style={StyleSheet.absoluteFill} height="100%" width="100%">
@@ -196,12 +204,15 @@ export default function Challenges() {
         </View>
       </ScrollView>
 
-      <View style={styles.claimWrap}>
-        <View style={styles.claimShadow} />
-        <Pressable style={styles.claimButton} onPress={claimAll}>
-          <Text style={styles.claimText}>Claim All</Text>
-        </Pressable>
-      </View>
+      {/* Only render the Claim All button if there are rewards pending */}
+        {hasClaimable && (
+        <View style={styles.claimWrap}>
+            <View style={styles.claimShadow} />
+            <Pressable style={styles.claimButton} onPress={claimAll}>
+            <Text style={styles.claimText}>Claim All</Text>
+            </Pressable>
+        </View>
+        )}
 
       <Modal transparent animationType="fade" visible={rewardVisible}>
         <View style={styles.modalOverlay}>
