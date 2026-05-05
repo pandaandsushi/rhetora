@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Image,
   Modal,
@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import { useRouter } from "expo-router";
-import Svg, { Circle, Defs, LinearGradient, Rect, Stop } from "react-native-svg";
+import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { Ionicons } from "@expo/vector-icons";
 
 import { Colors } from "../constants/colors";
@@ -30,6 +30,7 @@ const avatars = {
 };
 
 const coinImage = require("../assets/images/shop/coin.png");
+const confettiImage = require("../assets/images/confetti.png");
 
 type Leader = {
   id: string;
@@ -85,6 +86,12 @@ export default function Leaderboard() {
   const scrollRef = useRef<ScrollView>(null);
   const [userRowY, setUserRowY] = useState(0);
   const [helpVisible, setHelpVisible] = useState(false);
+  const [rewardStep, setRewardStep] = useState<"congrats" | "collect" | null>(null);
+  const rewardAmount = 160;
+
+  useEffect(() => {
+    setRewardStep("congrats");
+  }, []);
 
   const jumpToUser = () => {
     scrollRef.current?.scrollTo({
@@ -257,6 +264,46 @@ export default function Leaderboard() {
           </View>
         </View>
       </Modal>
+
+      <Modal transparent animationType="fade" visible={rewardStep !== null}>
+        <View style={styles.modalOverlay}>
+          <Image source={confettiImage} style={styles.confetti} pointerEvents="none" />
+          {rewardStep === "congrats" ? (
+            <View style={styles.rewardCard}>
+              <Text style={styles.rewardTitle}>Congrats on your rank this week!</Text>
+              <View style={styles.rewardRankCard}>
+                <View style={styles.rewardRankTop}>
+                  <Text style={styles.rewardRankText}>17</Text>
+                  <Image source={avatars.ready} style={styles.rewardAvatar} />
+                  <Text style={styles.rewardName}>You</Text>
+                  <Text style={styles.rewardPoints}>21 pts</Text>
+                </View>
+                <View style={styles.rewardRankBottom}>
+                  <Text style={styles.rewardRankLabel}>Top 10.0%</Text>
+                  <View style={styles.rewardCoinRow}>
+                    <Image source={coinImage} style={styles.rewardCoin} />
+                    <Text style={styles.rewardCoinValue}>{rewardAmount}</Text>
+                  </View>
+                </View>
+              </View>
+              <Pressable style={styles.rewardButton} onPress={() => setRewardStep("collect")}>
+                <Text style={styles.rewardButtonText}>Okay</Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={styles.rewardCard}>
+              <Text style={styles.rewardTitle}>Here is your reward!</Text>
+              <View style={styles.rewardCoinRowLarge}>
+                <Image source={coinImage} style={styles.rewardCoinLarge} />
+                <Text style={styles.rewardCoinValueLarge}>{rewardAmount}</Text>
+              </View>
+              <Pressable style={styles.rewardButton} onPress={() => setRewardStep(null)}>
+                <Text style={styles.rewardButtonText}>Collect Rewards</Text>
+              </Pressable>
+            </View>
+          )}
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -266,7 +313,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   safeArea: {
-    paddingTop: 10,
+    paddingTop: 40,
     paddingHorizontal: 20,
   },
   headerRow: {
@@ -334,7 +381,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   podiumFirst: {
-    transform: [{ translateY: -14 }],
+    transform: [{ translateY: -34 }],
   },
   podiumSecond: {
     transform: [{ translateY: 6 }],
@@ -353,13 +400,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   podiumAvatarMain: {
-    width: 92,
-    height: 92,
+    width: 80,
+    height: 80,
     borderRadius: 46,
   },
   podiumAvatar: {
-    width: 64,
-    height: 64,
+    width: 74,
+    height: 74,
     borderRadius: 32,
   },
   podiumAvatarLarge: {
@@ -540,6 +587,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 24,
   },
+  confetti: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
   modalCard: {
     width: "100%",
     borderRadius: 12,
@@ -585,6 +642,114 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   modalButtonText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.shade[200],
+  },
+  rewardCard: {
+    width: "100%",
+    borderRadius: 12,
+    backgroundColor: Colors.shade[200],
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+    alignItems: "center",
+    gap: 24,
+  },
+  rewardTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 22,
+    color: Colors.octonary.DEFAULT,
+    textAlign: "center",
+  },
+  rewardRankCard: {
+    width: "100%",
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: Colors.blue[400],
+    backgroundColor: Colors.shade[200],
+    overflow: "hidden",
+  },
+  rewardRankTop: {
+    backgroundColor: "#A8DFFF",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  rewardRankBottom: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  rewardRankText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.blue[600],
+    width: 24,
+  },
+  rewardAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 12,
+  },
+  rewardName: {
+    flex: 1,
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.blue[600],
+  },
+  rewardPoints: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.blue[600],
+  },
+  rewardRankLabel: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.blue[600],
+  },
+  rewardCoinRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  rewardCoin: {
+    width: 26,
+    height: 26,
+    resizeMode: "contain",
+  },
+  rewardCoinValue: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+  },
+  rewardCoinRowLarge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  rewardCoinLarge: {
+    width: 64,
+    height: 64,
+    resizeMode: "contain",
+  },
+  rewardCoinValueLarge: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 26,
+    color: Colors.octonary.DEFAULT,
+  },
+  rewardButton: {
+    width: "100%",
+    height: 54,
+    borderRadius: 12,
+    backgroundColor: Colors.senary[300],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rewardButtonText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 18,
     color: Colors.shade[200],
