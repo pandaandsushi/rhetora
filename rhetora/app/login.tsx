@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   Image,
@@ -82,6 +82,7 @@ export default function Login() {
             isDisabled && styles.buttonDisabled,
             pressed && !isDisabled && styles.buttonPressed,
           ]}
+          onPress={()=> {router.push("/home")}}
         >
           <Text style={styles.buttonText}>Log In</Text>
         </Pressable>
