@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Image,
   Pressable,
@@ -11,6 +11,7 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
+import { Audio } from "expo-av";
 
 import LogoRhetora from "../assets/images/logorhetora.svg";
 
@@ -21,6 +22,89 @@ export default function PracticeSetup() {
   const router = useRouter();
   const [isCameraOn, setIsCameraOn] = useState(false);
   const [permission, requestPermission] = useCameraPermissions();
+  const [isMicOn, setIsMicOn] = useState(true);
+  const [micLevel, setMicLevel] = useState(0);
+  const [micDetected, setMicDetected] = useState(false);
+  const recordingRef = useRef<Audio.Recording | null>(null);
+
+  const micHasSound = micLevel > 0.08;
+  const micStatusText = micDetected ? "Microphone working" : "Listening...";
+
+  const micBars = useMemo(() => {
+    const base = isMicOn ? 6 : 4;
+    const bump = Math.round(micLevel * 12);
+    return [base + bump, base + Math.max(bump - 4, 0), base + Math.max(bump - 8, 0)];
+  }, [isMicOn, micLevel]);
+
+  const stopMicMonitor = async () => {
+    const recording = recordingRef.current;
+    if (!recording) {
+      return;
+    }
+
+    try {
+      await recording.stopAndUnloadAsync();
+    } catch {
+      // ignore stop errors when recording is already stopped
+    }
+    recordingRef.current = null;
+    setMicLevel(0);
+  };
+
+  const startMicMonitor = async () => {
+    const { granted } = await Audio.requestPermissionsAsync();
+    if (!granted) {
+      alert("Microphone permission is required to use this feature.");
+      setIsMicOn(false);
+      return;
+    }
+
+    setIsMicOn(true);
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: true,
+      playsInSilentModeIOS: true,
+    });
+
+    const recording = new Audio.Recording();
+    await recording.prepareToRecordAsync({
+      android: {
+        extension: ".m4a",
+        outputFormat: Audio.AndroidOutputFormat.MPEG_4,
+        audioEncoder: Audio.AndroidAudioEncoder.AAC,
+        sampleRate: 44100,
+        numberOfChannels: 1,
+        bitRate: 64000,
+      },
+      ios: {
+        extension: ".m4a",
+        outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
+        audioQuality: Audio.IOSAudioQuality.MIN,
+        sampleRate: 44100,
+        numberOfChannels: 1,
+        bitRate: 64000,
+        linearPCMBitDepth: 16,
+        linearPCMIsBigEndian: false,
+        linearPCMIsFloat: false,
+      },
+      isMeteringEnabled: true,
+    });
+
+    recording.setOnRecordingStatusUpdate((status) => {
+      if (!status.isRecording || status.metering == null) {
+        return;
+      }
+
+      const normalized = Math.min(Math.max((status.metering + 60) / 60, 0), 1);
+      setMicLevel(normalized);
+      if (normalized > 0.08) {
+        setMicDetected(true);
+      }
+    });
+    recording.setProgressUpdateInterval(200);
+
+    await recording.startAsync();
+    recordingRef.current = recording;
+  };
 
   const toggleCamera = async () => {
     if (!isCameraOn) {
@@ -35,6 +119,13 @@ export default function PracticeSetup() {
     }
     setIsCameraOn(!isCameraOn);
   };
+
+  useEffect(() => {
+    startMicMonitor();
+    return () => {
+      stopMicMonitor();
+    };
+  }, []);
 
   return (
     <View style={styles.screen}>
@@ -68,9 +159,22 @@ export default function PracticeSetup() {
           )}
 
           {/* Top Right Options Button */}
-          <Pressable style={styles.optionsButton}>
-            <Ionicons name="ellipsis-horizontal" size={20} color={Colors.octonary.DEFAULT} />
-          </Pressable>
+          <View style={styles.optionsButton}>
+            <View style={styles.micBars}>
+              {micBars.map((height, index) => (
+                <View
+                  key={`mic-bar-${index}`}
+                  style={[
+                    styles.micBar,
+                    {
+                      height,
+                      backgroundColor: isMicOn ? Colors.senary[300] : Colors.neutral[400],
+                    },
+                  ]}
+                />
+              ))}
+            </View>
+          </View>
 
           {/* Bottom Right Camera Toggle */}
           <Pressable style={styles.toggleButton} onPress={toggleCamera}>
@@ -86,6 +190,8 @@ export default function PracticeSetup() {
           Result will be saved and can be viewed in{" "}
           <Text style={styles.disclaimerBold}>My Recordings</Text>
         </Text>
+
+        
 
         <View style={styles.infoSection}>
           <Text style={styles.infoTitle}>The First Introduction</Text>
@@ -106,7 +212,17 @@ export default function PracticeSetup() {
             Before you begin, make sure your camera and microphone are working properly.
           </Text>
         </View>
-
+        <View style={styles.micStatusRow}>
+          <View
+            style={[
+              styles.micStatusDot,
+              {
+                backgroundColor: micDetected ? Colors.success[400] : Colors.error[400],
+              },
+            ]}
+          />
+          <Text style={styles.micStatusText}>{micStatusText}</Text>
+        </View>
         <View style={styles.actionSection}>
           <Pressable
             style={styles.startButton}
@@ -115,10 +231,6 @@ export default function PracticeSetup() {
             }}
           >
             <Text style={styles.startButtonText}>Start</Text>
-          </Pressable>
-
-          <Pressable onPress={() => {/* Handle Mic Test */}}>
-            <Text style={styles.testMicText}>Test Microphone</Text>
           </Pressable>
         </View>
       </ScrollView>
@@ -184,6 +296,15 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
+  micBars: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: 3,
+  },
+  micBar: {
+    width: 4,
+    borderRadius: 2,
+  },
   toggleButton: {
     position: "absolute",
     bottom: 16,
@@ -206,6 +327,23 @@ const styles = StyleSheet.create({
     color: Colors.octonary.DEFAULT,
     textAlign: "center",
     marginBottom: 32,
+  },
+  micStatusRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: -18,
+    marginBottom: 26,
+  },
+  micStatusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  micStatusText: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 13,
+    color: Colors.octonary.DEFAULT,
   },
   disclaimerBold: {
     fontFamily: "AlbertSans-Bold",
@@ -267,11 +405,5 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 18,
     color: Colors.shade[200],
-  },
-  testMicText: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 16,
-    color: Colors.senary[300],
-    textDecorationLine: "underline",
   },
 });
