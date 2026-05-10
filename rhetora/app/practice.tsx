@@ -94,13 +94,16 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.shade[200],
   },
   background: {
+    width: "100%",
+    height: "100%",
     flex: 1,
-  },
+    },
   safeArea: {
     flex: 1,
   },
   content: {
     paddingHorizontal: 20,
+    paddingTop: 40,
     paddingBottom: 130,
     gap: 18,
   },

@@ -1,5 +1,7 @@
 import {
   Image,
+  ImageBackground,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -7,11 +9,13 @@ import {
   View,
 } from "react-native";
 import { useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 
 import NavBar from "../components/nav-bar";
 import TopHeader from "../components/top-header";
 import { Colors } from "../constants/colors";
 
+const bgImage = require("../assets/images/bg-story.png");
 const chapterOneImage = require("../assets/images/storymode/chapter1.png");
 const chapterTwoImage = require("../assets/images/storymode/chapter2.png");
 
@@ -35,18 +39,30 @@ export default function StoryMode() {
 
   return (
     <View style={styles.screen}>
+    <ImageBackground source={bgImage} style={styles.background} resizeMode="cover">
       <SafeAreaView style={styles.safeArea}>
         <TopHeader title="Story Mode" onBack={() => router.back()} />
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           {chapters.map((chapter) => (
-            <View key={chapter.id} style={styles.chapterCard}>
-              <Image source={chapter.image} style={styles.chapterImage} />
-              <Text style={styles.chapterTitle}>{chapter.title}</Text>
-              <View style={styles.progressPill}>
-                <Text style={styles.progressText}>{chapter.progress}</Text>
-              </View>
-            </View>
+            <Pressable
+              key={chapter.id}
+              style={styles.chapterCard}
+              onPress={() => router.push("/story-episodes")}
+            >
+                <Image source={chapter.image} style={styles.chapterImage} />
+
+                <LinearGradient
+                    colors={["transparent", "rgba(0,0,0,0.75)"]}
+                    style={styles.gradientOverlay}
+                />
+
+                <Text style={styles.chapterTitle}>{chapter.title}</Text>
+
+                <View style={styles.progressPill}>
+                  <Text style={styles.progressText}>{chapter.progress}</Text>
+                </View>
+              </Pressable>
           ))}
         </ScrollView>
       </SafeAreaView>
@@ -54,6 +70,7 @@ export default function StoryMode() {
       <View style={styles.navWrap}>
         <NavBar activeKey="practice" />
       </View>
+      </ImageBackground>
     </View>
   );
 }
@@ -63,12 +80,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.neutral[50],
   },
+  background: {
+    width: "100%",
+    height: "100%",
+    flex: 1,
+    },
   safeArea: {
     flex: 1,
   },
   content: {
     paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingTop: 40,
     paddingBottom: 130,
     gap: 20,
   },
@@ -88,10 +110,11 @@ const styles = StyleSheet.create({
   },
   chapterTitle: {
     position: "absolute",
-    left: 16,
-    bottom: 46,
-    fontFamily: "Quicksand-Bold",
+    left: 0,
+    right: 0,
     textAlign: "center",
+    bottom: 60,
+    fontFamily: "Quicksand-Bold",
     fontSize: 18,
     color: Colors.shade[200],
     textShadowColor: "rgba(0, 0, 0, 0.4)",
@@ -122,4 +145,11 @@ const styles = StyleSheet.create({
     right: 0,
     paddingBottom: 12,
   },
+  gradientOverlay: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 240,
+    },
 });
