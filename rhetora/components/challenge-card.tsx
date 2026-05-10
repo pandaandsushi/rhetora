@@ -41,7 +41,7 @@ export default function ChallengeCard({
         <View style={styles.body}>
           <Text style={styles.title}>{title}</Text>
           <View style={styles.progressRow}>
-            <ProgressBar progress={progress} />
+            <ProgressBar progress={progress} style={{ flex: 1 }} />
             <Text style={styles.count}>
               {current}/{total}
             </Text>

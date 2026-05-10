@@ -91,10 +91,18 @@ export default function Leaderboard() {
   const [rewardStep, setRewardStep] = useState<"congrats" | "collect" | null>(null);
   const [weeklyVisible, setWeeklyVisible] = useState(false);
   const [titleVisible, setTitleVisible] = useState(false);
+  const [tutorialVisible, setTutorialVisible] = useState(false);
   const rewardAmount = 160;
 
   useEffect(() => {
     setRewardStep("congrats");
+  }, []);
+
+  useEffect(() => {
+    setRewardStep("congrats");
+    // Show tutorial after a short delay so it doesn't clash with the reward modal
+    const timer = setTimeout(() => setTutorialVisible(true), 1000);
+    return () => clearTimeout(timer);
   }, []);
 
   const jumpToUser = () => {
@@ -239,7 +247,22 @@ export default function Leaderboard() {
           <Text style={styles.jumpText}>Jump to Position</Text>
         </Pressable>
       </View>
-
+      {/* Tutorial Tooltip Modal */}
+      <Modal transparent visible={tutorialVisible} animationType="fade">
+        <Pressable 
+          style={styles.tutorialOverlay} 
+          onPress={() => setTutorialVisible(false)}
+        >
+          <View style={styles.tooltipContainer}>
+            <View style={styles.tooltipTriangle} />
+            <View style={styles.tooltipCard}>
+              <Text style={styles.tooltipText}>
+                Click here to check possible rewards
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+      </Modal>
       <Modal transparent animationType="fade" visible={helpVisible}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -1110,5 +1133,47 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
     color: Colors.shade[200],
+  },
+  tutorialOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.2)", // Subtle dimming
+  },
+  tooltipContainer: {
+    position: "absolute",
+    top: 90, // Adjust based on your header height
+    right: 20,
+    alignItems: "flex-end",
+  },
+  tooltipTriangle: {
+    width: 0,
+    height: 0,
+    backgroundColor: "transparent",
+    borderStyle: "solid",
+    borderLeftWidth: 10,
+    borderRightWidth: 10,
+    borderBottomWidth: 15,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderBottomColor: "white",
+    marginRight: 20, // Align with the gift icon
+  },
+  tooltipCard: {
+    backgroundColor: "white",
+    paddingHorizontal: 20,
+    paddingVertical: 25,
+    borderRadius: 16,
+    width: 220,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  tooltipText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+    textAlign: "center",
+    lineHeight: 24,
   },
 });
