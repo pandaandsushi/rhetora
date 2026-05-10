@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import {
   Image,
   ImageBackground,
+  Pressable,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -23,6 +24,7 @@ type PracticeCard = {
   description: string;
   image: any;
   tags: Tag[];
+  route: string;
 };
 
 const cards: PracticeCard[] = [
@@ -30,6 +32,7 @@ const cards: PracticeCard[] = [
     title: "Storytelling Practice",
     description: "Tell a short story with a clear\nbeginning, middle, and end.",
     image: require("../assets/images/casualmode/storytelling-practice.png"),
+    route: "/storytelling-practice",
     tags: [
       { label: "Fluency", color: Colors.turquoise[300] },
       { label: "Structure", color: Colors.senary[300] },
@@ -40,6 +43,7 @@ const cards: PracticeCard[] = [
     title: "The Pitch Lab",
     description: "Deliver a short pitch that is\nclear, structured, & persuasive.",
     image: require("../assets/images/casualmode/the-pitch-lab.png"),
+    route: "/the-pitch-lab",
     tags: [
       { label: "Confidence", color: Colors.blue[300] },
       { label: "Structure", color: Colors.senary[300] },
@@ -50,6 +54,7 @@ const cards: PracticeCard[] = [
     title: "Filler-Free",
     description: 'Reduce your use of "um", "uh",\nand other filler words.',
     image: require("../assets/images/casualmode/filler-free.png"),
+    route: "/filler-free",
     tags: [
       { label: "Confidence", color: Colors.blue[300] },
       { label: "Fluency", color: Colors.turquoise[300] },
@@ -77,7 +82,11 @@ export default function CasualMode() {
           showsVerticalScrollIndicator={false}
         >
           {cards.map((card) => (
-            <View key={card.title} style={styles.card}>
+            <Pressable
+              key={card.title}
+              style={styles.card}
+              onPress={() => router.push(card.route as any)}
+            >
               <ImageBackground
                 source={require("../assets/images/casualmode/casual-mode-bg.png")}
                 style={styles.cardBackground}
@@ -91,6 +100,7 @@ export default function CasualMode() {
                 <View style={styles.cardBody}>
                   <Text style={styles.cardTitle}>{card.title}</Text>
                   <Text style={styles.cardDescription}>{card.description}</Text>
+
                   <View style={styles.tagRow}>
                     {card.tags.map((tag) => (
                       <View
@@ -108,7 +118,7 @@ export default function CasualMode() {
                   </View>
                 </View>
               </ImageBackground>
-            </View>
+            </Pressable>
           ))}
         </ScrollView>
 
