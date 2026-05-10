@@ -1,7 +1,7 @@
-import { Image, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, ImageBackground, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
+import TopHeader from "@/components/top-header";
 import { Colors } from "../constants/colors";
 import NavBar from "@/components/nav-bar";
 
@@ -122,12 +122,19 @@ export default function Notifications() {
 
   return (
     <ImageBackground source={bgImage} style={styles.screen} resizeMode="cover">
-      <View style={styles.headerRow}>
+      {/* <View style={styles.headerRow}>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
           <Ionicons name="chevron-back" size={24} color={Colors.shade[200]} />
         </Pressable>
         <Text style={styles.headerTitle}>Notifications</Text>
-      </View>
+      </View> */}
+      <SafeAreaView style={styles.safeArea}>
+              <TopHeader
+                title="Challenges"
+                variant="transparent"
+                onBack={() => router.back()}
+              />
+            </SafeAreaView>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.sectionTitle}>Today</Text>
@@ -162,8 +169,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: Colors.shade[200],
-    paddingHorizontal: 20,
-    paddingTop: 40,
+  },
+  safeArea: {
+    backgroundColor: "transparent",
   },
   headerRow: {
     flexDirection: "row",
@@ -185,6 +193,7 @@ const styles = StyleSheet.create({
     color: Colors.octonary.DEFAULT,
   },
   content: {
+    paddingHorizontal:20,
     paddingBottom: 40,
     gap: 16,
   },
