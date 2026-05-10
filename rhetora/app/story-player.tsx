@@ -71,7 +71,7 @@ export default function StoryPlayer() {
   };
 
 
-  const handleSkip = () => router.push("/practice-session");
+  const handleSkip = () => router.push("/practice-setup");
 
   return (
     <View style={styles.screen}>
@@ -95,7 +95,7 @@ export default function StoryPlayer() {
             <View style={styles.textBox}>
               <Text style={styles.storyText}>{scene.text}</Text>
               {scene.isFinal ? (
-                <Pressable style={styles.startButton} onPress={() => router.push("/practice-session")}>
+                <Pressable style={styles.startButton} onPress={() => router.push("/practice-setup")}>
                   <Text style={styles.startButtonText}>Start</Text>
                 </Pressable>
               ) : (

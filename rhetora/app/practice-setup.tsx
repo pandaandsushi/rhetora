@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useState } from "react";
 import {
-  Image,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -10,122 +9,17 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { CameraView, useCameraPermissions } from "expo-camera";
-import { Audio } from "expo-av";
 
 import LogoRhetora from "../assets/images/logorhetora.svg";
-
+import PracticeCameraPanel from "../components/practice-camera-panel";
 import TopHeader from "../components/top-header";
 import { Colors } from "../constants/colors";
 
 export default function PracticeSetup() {
   const router = useRouter();
-  const [isCameraOn, setIsCameraOn] = useState(false);
-  const [permission, requestPermission] = useCameraPermissions();
-  const [isMicOn, setIsMicOn] = useState(true);
-  const [micLevel, setMicLevel] = useState(0);
-  const [micDetected, setMicDetected] = useState(false);
-  const recordingRef = useRef<Audio.Recording | null>(null);
-
-  const micHasSound = micLevel > 0.08;
-  const micStatusText = micDetected ? "Microphone working" : "Listening...";
-
-  const micBars = useMemo(() => {
-    const base = isMicOn ? 6 : 4;
-    const bump = Math.round(micLevel * 12);
-    return [base + bump, base + Math.max(bump - 4, 0), base + Math.max(bump - 8, 0)];
-  }, [isMicOn, micLevel]);
-
-  const stopMicMonitor = async () => {
-    const recording = recordingRef.current;
-    if (!recording) {
-      return;
-    }
-
-    try {
-      await recording.stopAndUnloadAsync();
-    } catch {
-      // ignore stop errors when recording is already stopped
-    }
-    recordingRef.current = null;
-    setMicLevel(0);
-  };
-
-  const startMicMonitor = async () => {
-    const { granted } = await Audio.requestPermissionsAsync();
-    if (!granted) {
-      alert("Microphone permission is required to use this feature.");
-      setIsMicOn(false);
-      return;
-    }
-
-    setIsMicOn(true);
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: true,
-      playsInSilentModeIOS: true,
-    });
-
-    const recording = new Audio.Recording();
-    await recording.prepareToRecordAsync({
-      android: {
-        extension: ".m4a",
-        outputFormat: Audio.AndroidOutputFormat.MPEG_4,
-        audioEncoder: Audio.AndroidAudioEncoder.AAC,
-        sampleRate: 44100,
-        numberOfChannels: 1,
-        bitRate: 64000,
-      },
-      ios: {
-        extension: ".m4a",
-        outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
-        audioQuality: Audio.IOSAudioQuality.MIN,
-        sampleRate: 44100,
-        numberOfChannels: 1,
-        bitRate: 64000,
-        linearPCMBitDepth: 16,
-        linearPCMIsBigEndian: false,
-        linearPCMIsFloat: false,
-      },
-      isMeteringEnabled: true,
-    });
-
-    recording.setOnRecordingStatusUpdate((status) => {
-      if (!status.isRecording || status.metering == null) {
-        return;
-      }
-
-      const normalized = Math.min(Math.max((status.metering + 60) / 60, 0), 1);
-      setMicLevel(normalized);
-      if (normalized > 0.08) {
-        setMicDetected(true);
-      }
-    });
-    recording.setProgressUpdateInterval(200);
-
-    await recording.startAsync();
-    recordingRef.current = recording;
-  };
-
-  const toggleCamera = async () => {
-    if (!isCameraOn) {
-      // Check and request permissions before turning the camera on
-      if (!permission?.granted) {
-        const { granted } = await requestPermission();
-        if (!granted) {
-          alert("Camera permission is required to use this feature.");
-          return;
-        }
-      }
-    }
-    setIsCameraOn(!isCameraOn);
-  };
-
-  useEffect(() => {
-    startMicMonitor();
-    return () => {
-      stopMicMonitor();
-    };
-  }, []);
+  
+  // <-- NEW: Track if camera was turned on in the setup screen
+  const [isCameraOn, setIsCameraOn] = useState(false); 
 
   return (
     <View style={styles.screen}>
@@ -145,53 +39,17 @@ export default function PracticeSetup() {
       >
         <Text style={styles.mainTitle}>Introduce Yourself!</Text>
 
-        {/* Camera Viewport Container */}
-        <View style={styles.cameraContainer}>
-          {isCameraOn ? (
-            <CameraView 
-              style={styles.cameraFeed} 
-              facing="front" 
-            />
-          ) : (
-            <View style={styles.cameraPlaceholder}>
-              <LogoRhetora width={90} height={90} />
-            </View>
-          )}
-
-          {/* Top Right Options Button */}
-          <View style={styles.optionsButton}>
-            <View style={styles.micBars}>
-              {micBars.map((height, index) => (
-                <View
-                  key={`mic-bar-${index}`}
-                  style={[
-                    styles.micBar,
-                    {
-                      height,
-                      backgroundColor: isMicOn ? Colors.senary[300] : Colors.neutral[400],
-                    },
-                  ]}
-                />
-              ))}
-            </View>
-          </View>
-
-          {/* Bottom Right Camera Toggle */}
-          <Pressable style={styles.toggleButton} onPress={toggleCamera}>
-            <Ionicons
-              name={isCameraOn ? "camera" : "camera-reverse"} 
-              size={24}
-              color={Colors.octonary.DEFAULT}
-            />
-          </Pressable>
-        </View>
+        {/* <-- NEW: Listen for toggle changes */}
+        <PracticeCameraPanel
+          showStatus
+          placeholder={<LogoRhetora width={90} height={90} />}
+          onCameraToggle={setIsCameraOn} 
+        />
 
         <Text style={styles.disclaimerText}>
           Result will be saved and can be viewed in{" "}
           <Text style={styles.disclaimerBold}>My Recordings</Text>
         </Text>
-
-        
 
         <View style={styles.infoSection}>
           <Text style={styles.infoTitle}>The First Introduction</Text>
@@ -212,22 +70,15 @@ export default function PracticeSetup() {
             Before you begin, make sure your camera and microphone are working properly.
           </Text>
         </View>
-        <View style={styles.micStatusRow}>
-          <View
-            style={[
-              styles.micStatusDot,
-              {
-                backgroundColor: micDetected ? Colors.success[400] : Colors.error[400],
-              },
-            ]}
-          />
-          <Text style={styles.micStatusText}>{micStatusText}</Text>
-        </View>
         <View style={styles.actionSection}>
           <Pressable
             style={styles.startButton}
             onPress={() => {
-              // Proceed to actual recording screen
+              // <-- NEW: Pass the camera state as a URL parameter
+              router.push({
+                pathname: "/practice-session",
+                params: { cameraOn: isCameraOn ? "true" : "false" },
+              });
             }}
           >
             <Text style={styles.startButtonText}>Start</Text>
@@ -238,172 +89,23 @@ export default function PracticeSetup() {
   );
 }
 
+// ... Keep your existing styles ...
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: Colors.shade[200],
-  },
-  topSafeArea: {
-    backgroundColor: Colors.senary[300], // Matches TopHeader solid variant
-  },
-  body: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingHorizontal: 24,
-    paddingTop: 30,
-    paddingBottom: 40,
-    alignItems: "center",
-  },
-  mainTitle: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 22,
-    color: Colors.octonary.DEFAULT,
-    marginBottom: 20,
-  },
-  cameraContainer: {
-    width: "100%",
-    aspectRatio: 4 / 3, // Maintains a nice rectangle shape
-    borderRadius: 16,
-    overflow: "hidden",
-    backgroundColor: Colors.neutral[200], // Background color when camera is off
-    marginBottom: 12,
-    position: "relative",
-  },
-  cameraFeed: {
-    flex: 1,
-    width: "100%",
-  },
-  cameraPlaceholder: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#D9D9D9", // Light gray background matching your design
-  },
-  optionsButton: {
-    position: "absolute",
-    top: 16,
-    right: 16,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.shade[200],
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  micBars: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: 3,
-  },
-  micBar: {
-    width: 4,
-    borderRadius: 2,
-  },
-  toggleButton: {
-    position: "absolute",
-    bottom: 16,
-    right: 16,
-    width: 54,
-    height: 40,
-    borderRadius: 8,
-    backgroundColor: Colors.shade[200],
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  disclaimerText: {
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
-    color: Colors.octonary.DEFAULT,
-    textAlign: "center",
-    marginBottom: 32,
-  },
-  micStatusRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: -18,
-    marginBottom: 26,
-  },
-  micStatusDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  micStatusText: {
-    fontFamily: "AlbertSans-SemiBold",
-    fontSize: 13,
-    color: Colors.octonary.DEFAULT,
-  },
-  disclaimerBold: {
-    fontFamily: "AlbertSans-Bold",
-  },
-  infoSection: {
-    alignItems: "center",
-    width: "100%",
-    marginBottom: 32,
-  },
-  infoTitle: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 22,
-    color: Colors.octonary.DEFAULT,
-    marginBottom: 12,
-  },
-  statsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  statItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  statText: {
-    fontFamily: "AlbertSans-SemiBold",
-    fontSize: 14,
-    color: Colors.neutral[600],
-  },
-  statDivider: {
-    width: 2,
-    height: 16,
-    backgroundColor: Colors.neutral[400],
-    marginHorizontal: 12,
-  },
-  instructionText: {
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 15,
-    textAlign: "center",
-    lineHeight: 22,
-    color: Colors.octonary.DEFAULT,
-    paddingHorizontal: 10,
-  },
-  actionSection: {
-    width: "100%",
-    alignItems: "center",
-    gap: 20,
-  },
-  startButton: {
-    width: "100%",
-    height: 54,
-    borderRadius: 14,
-    backgroundColor: Colors.senary[300],
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  startButtonText: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 18,
-    color: Colors.shade[200],
-  },
+  screen: { flex: 1, backgroundColor: Colors.shade[200] },
+  topSafeArea: { backgroundColor: Colors.senary[300] },
+  body: { flex: 1 },
+  contentContainer: { paddingHorizontal: 24, paddingTop: 30, paddingBottom: 40, alignItems: "center" },
+  mainTitle: { fontFamily: "Quicksand-Bold", fontSize: 22, color: Colors.octonary.DEFAULT, marginBottom: 20 },
+  disclaimerText: { fontFamily: "AlbertSans-Regular", fontSize: 12, color: Colors.octonary.DEFAULT, textAlign: "center", marginBottom: 32 },
+  disclaimerBold: { fontFamily: "AlbertSans-Bold" },
+  infoSection: { alignItems: "center", width: "100%", marginBottom: 32 },
+  infoTitle: { fontFamily: "Quicksand-Bold", fontSize: 22, color: Colors.octonary.DEFAULT, marginBottom: 12 },
+  statsRow: { flexDirection: "row", alignItems: "center", marginBottom: 20 },
+  statItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+  statText: { fontFamily: "AlbertSans-SemiBold", fontSize: 14, color: Colors.neutral[600] },
+  statDivider: { width: 2, height: 16, backgroundColor: Colors.neutral[400], marginHorizontal: 12 },
+  instructionText: { fontFamily: "AlbertSans-Regular", fontSize: 15, textAlign: "center", lineHeight: 22, color: Colors.octonary.DEFAULT, paddingHorizontal: 10 },
+  actionSection: { width: "100%", alignItems: "center", gap: 20 },
+  startButton: { width: "100%", height: 54, borderRadius: 14, backgroundColor: Colors.senary[300], alignItems: "center", justifyContent: "center" },
+  startButtonText: { fontFamily: "Quicksand-Bold", fontSize: 18, color: Colors.shade[200] },
 });

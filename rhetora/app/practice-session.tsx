@@ -1,34 +1,81 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
-  Image,
+  Modal,
   Pressable,
   SafeAreaView,
-  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router"; // <-- NEW: Import useLocalSearchParams
 import { Ionicons } from "@expo/vector-icons";
+import Svg, { Circle } from "react-native-svg";
+import LogoRhetora from "../assets/images/logorhetora.svg";
 
-import TopHeader from "../components/top-header";
 import { Colors } from "../constants/colors";
-
-const episodeOneImage = require("../assets/images/storymode/eps1.png");
+import PracticeCameraPanel from "../components/practice-camera-panel";
+import TopHeader from "../components/top-header";
+const TOTAL_SECONDS = 10 * 60;
 
 export default function PracticeSession() {
   const router = useRouter();
-  const [tipsExpanded, setTipsExpanded] = useState(true);
+  
+  // <-- NEW: Retrieve the camera parameter from the router
+  const { cameraOn } = useLocalSearchParams<{ cameraOn: string }>(); 
+  
+  const [remainingSeconds, setRemainingSeconds] = useState(TOTAL_SECONDS);
+  const [isPaused, setIsPaused] = useState(false);
+  const [restartVisible, setRestartVisible] = useState(false);
+  const [finishVisible, setFinishVisible] = useState(false);
+  const [timeUpVisible, setTimeUpVisible] = useState(false);
 
-  const toggleTips = () => {
-    setTipsExpanded(!tipsExpanded);
+  // ... (Keep the rest of your timer logic exactly the same) ...
+
+  const progress = remainingSeconds / TOTAL_SECONDS;
+  const ringSize = 86;
+  const ringStroke = 8;
+  const ringRadius = (ringSize - ringStroke) / 2;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+  const ringOffset = ringCircumference * (1 - progress);
+
+  const formattedTime = useMemo(() => {
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }, [remainingSeconds]);
+
+  useEffect(() => {
+    if (isPaused || timeUpVisible) {
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setRemainingSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setTimeUpVisible(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isPaused, timeUpVisible]);
+
+  const handleRestart = () => {
+    setRemainingSeconds(TOTAL_SECONDS);
+    setIsPaused(false);
+    setRestartVisible(false);
+  };
+
+  const handleFinish = () => {
+    setFinishVisible(false);
+    router.back();
   };
 
   return (
     <View style={styles.screen}>
-      {/* SafeAreaView is styled with the red background so the 
-        status bar area matches the solid TopHeader 
-      */}
       <SafeAreaView style={styles.topSafeArea}>
         <TopHeader
           title="A Fresh Start"
@@ -38,234 +85,148 @@ export default function PracticeSession() {
         />
       </SafeAreaView>
 
-      <ScrollView
-        style={styles.body}
-        contentContainerStyle={styles.contentContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.heroWrapper}>
-          <Image source={episodeOneImage} style={styles.heroImage} />
-        </View>
+      <View style={styles.body}>
+        <Text style={styles.mainTitle}>Introduce Yourself!</Text>
 
-        <View style={styles.textContent}>
-          <Text style={styles.title}>A Fresh Start</Text>
+        <PracticeCameraPanel
+          initialCameraOn={cameraOn === "true"}
+          placeholder={<LogoRhetora width={90} height={90} />}
+        />
 
-          <View style={styles.statsRow}>
-            <View style={styles.statItem}>
-              <Ionicons name="time" size={18} color={Colors.neutral[500]} />
-              <Text style={styles.statText}>10 min(s)</Text>
-            </View>
-            <View style={styles.statDivider} />
-            <View style={styles.statItem}>
-              <Ionicons name="people" size={18} color={Colors.neutral[500]} />
-              <Text style={styles.statText}>10.2k finished</Text>
-            </View>
+        <Text style={styles.disclaimerText}>
+          Result will be saved and can be viewed in{" "}
+          <Text style={styles.disclaimerBold}>My Recordings</Text>
+        </Text>
+
+        {/* ... Keep the rest of the JSX unchanged ... */}
+        
+        <View style={styles.timerRow}>
+          <View style={styles.timerCircle}>
+            <Svg width={ringSize} height={ringSize} style={styles.timerSvg}>
+              <Circle
+                cx={ringSize / 2}
+                cy={ringSize / 2}
+                r={ringRadius}
+                stroke={Colors.warning[100]}
+                strokeWidth={ringStroke}
+                fill="none"
+              />
+              <Circle
+                cx={ringSize / 2}
+                cy={ringSize / 2}
+                r={ringRadius}
+                stroke={Colors.senary[300]}
+                strokeWidth={ringStroke}
+                strokeLinecap="round"
+                strokeDasharray={`${ringCircumference} ${ringCircumference}`}
+                strokeDashoffset={ringOffset}
+                fill="none"
+                rotation="-90"
+                origin={`${ringSize / 2}, ${ringSize / 2}`}
+              />
+            </Svg>
+            <Text style={styles.timerText}>{formattedTime}</Text>
           </View>
 
-          <Text style={styles.paragraph}>
-            This is your first day on college! You are readying yourself in front
-            of a mirror to introduce yourself in front of the others.
-          </Text>
+          <Pressable style={styles.actionButton} onPress={() => setRestartVisible(true)}>
+            <View style={styles.actionIconWrap}>
+              <Ionicons name="refresh" size={22} color={Colors.shade[200]} />
+            </View>
+            <Text style={styles.actionLabel}>Restart</Text>
+          </Pressable>
 
-          <Text style={styles.paragraph}>
-            You want to make a good first impression—but where do you start?
-          </Text>
-
-          <Pressable style={styles.tipsCard} onPress={toggleTips}>
-            <View style={styles.tipsHeader}>
-              <View style={styles.tipsHeaderLeft}>
-                <Ionicons
-                  name="bulb-outline"
-                  size={24}
-                  color={Colors.octonary.DEFAULT}
-                />
-                <Text style={styles.tipsTitle}>Quick Tips</Text>
-              </View>
+          <Pressable
+            style={styles.actionButton}
+            onPress={() => setIsPaused((prev) => !prev)}
+          >
+            <View style={styles.actionIconWrapLight}>
               <Ionicons
-                name={tipsExpanded ? "caret-down" : "caret-forward"}
-                size={20}
+                name={isPaused ? "play" : "pause"}
+                size={22}
                 color={Colors.octonary.DEFAULT}
               />
             </View>
-
-            {tipsExpanded && (
-              <View style={styles.tipsBody}>
-                <View style={styles.bulletRow}>
-                  <Text style={styles.bulletPoint}>•</Text>
-                  <Text style={styles.bulletText}>
-                    Start with your name and something simple about yourself
-                  </Text>
-                </View>
-                <View style={styles.bulletRow}>
-                  <Text style={styles.bulletPoint}>•</Text>
-                  <Text style={styles.bulletText}>
-                    Keep your sentences short and clear
-                  </Text>
-                </View>
-                <View style={styles.bulletRow}>
-                  <Text style={styles.bulletPoint}>•</Text>
-                  <Text style={styles.bulletText}>
-                    Don't worry about being perfect—just be natural!
-                  </Text>
-                </View>
-              </View>
-            )}
+            <Text style={styles.actionLabel}>Pause</Text>
           </Pressable>
         </View>
-      </ScrollView>
 
-      <View style={styles.footer}>
-        <Pressable
-          style={styles.nextButton}
-          onPress={() => {
-            router.push("/practice-setup");}}
-        >
-          <Text style={styles.nextButtonText}>Next</Text>
+        <Pressable style={styles.finishButton} onPress={() => setFinishVisible(true)}>
+          <Text style={styles.finishButtonText}>Finish</Text>
         </Pressable>
-        <Text style={styles.footerText}>
-          Result will be saved and can be viewed in{" "}
-          <Text style={styles.footerTextBold}>My Recordings</Text>
-        </Text>
       </View>
+      
+      {/* ... (Keep your modals exactly the same as before) ... */}
+
+      <Modal transparent animationType="fade" visible={restartVisible}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Are you sure you want to restart this session?</Text>
+            <View style={styles.modalActions}>
+              <Pressable style={styles.modalGhostButton} onPress={() => setRestartVisible(false)}>
+                <Text style={styles.modalGhostText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.modalConfirmButton} onPress={handleRestart}>
+                <Text style={styles.modalConfirmText}>Confirm</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal transparent animationType="fade" visible={finishVisible}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>You still have some time, are you sure you finish this session?</Text>
+            <View style={styles.modalActions}>
+              <Pressable style={styles.modalGhostButton} onPress={() => setFinishVisible(false)}>
+                <Text style={styles.modalGhostText}>Cancel</Text>
+              </Pressable>
+              <Pressable style={styles.modalConfirmButton} onPress={handleFinish}>
+                <Text style={styles.modalConfirmText}>Confirm</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal transparent animationType="fade" visible={timeUpVisible}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Time's up! Great job finishing the session.</Text>
+            <Pressable style={styles.modalConfirmButton} onPress={() => router.back()}>
+              <Text style={styles.modalConfirmText}>Okay</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
 
+// ... Keep your existing styles ...
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    backgroundColor: Colors.shade[200],
-  },
-  topSafeArea: {
-    backgroundColor: Colors.senary[300], // Matches TopHeader solid variant
-  },
-  body: {
-    flex: 1,
-  },
-  contentContainer: {
-    paddingBottom: 40,
-  },
-  heroWrapper: {
-    borderTopWidth: 2,
-    borderBottomWidth: 2,
-    borderColor: Colors.octonary.DEFAULT,
-  },
-  heroImage: {
-    width: "100%",
-    height: 200,
-    resizeMode: "cover",
-  },
-  textContent: {
-    paddingHorizontal: 24,
-    paddingTop: 24,
-  },
-  title: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 24,
-    color: Colors.octonary.DEFAULT,
-    marginBottom: 12,
-  },
-  statsRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  statItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  statText: {
-    fontFamily: "AlbertSans-SemiBold",
-    fontSize: 14,
-    color: Colors.neutral[600],
-  },
-  statDivider: {
-    width: 2,
-    height: 16,
-    backgroundColor: Colors.neutral[400],
-    marginHorizontal: 12,
-  },
-  paragraph: {
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 16,
-    lineHeight: 24,
-    color: Colors.octonary.DEFAULT,
-    marginBottom: 16,
-  },
-  tipsCard: {
-    marginTop: 10,
-    backgroundColor: Colors.warning[200], // Using the yellow shade from constants
-    borderWidth: 2,
-    borderColor: Colors.octonary.DEFAULT,
-    borderRadius: 12,
-    paddingHorizontal: 20,
-    paddingVertical: 18,
-  },
-  tipsHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  tipsHeaderLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  tipsTitle: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 18,
-    color: Colors.octonary.DEFAULT,
-  },
-  tipsBody: {
-    marginTop: 16,
-    gap: 6,
-  },
-  bulletRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
-  },
-  bulletPoint: {
-    fontFamily: "AlbertSans-Bold",
-    fontSize: 16,
-    color: Colors.octonary.DEFAULT,
-    lineHeight: 22,
-  },
-  bulletText: {
-    flex: 1,
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 14,
-    color: Colors.octonary.DEFAULT,
-    lineHeight: 20,
-  },
-  footer: {
-    paddingHorizontal: 24,
-    paddingTop: 16,
-    paddingBottom: 32, // Extra padding for the home indicator
-    backgroundColor: Colors.shade[200],
-  },
-  nextButton: {
-    width: "100%",
-    height: 54,
-    borderRadius: 14,
-    backgroundColor: Colors.senary[300],
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-  nextButtonText: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 18,
-    color: Colors.shade[200],
-  },
-  footerText: {
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
-    textAlign: "center",
-    color: Colors.octonary.DEFAULT,
-  },
-  footerTextBold: {
-    fontFamily: "AlbertSans-Bold",
-  },
+  screen: { flex: 1, backgroundColor: Colors.shade[200] },
+  topSafeArea: { backgroundColor: Colors.senary[300] },
+  body: { flex: 1, paddingHorizontal: 24, paddingTop: 24, paddingBottom: 32, alignItems: "center", gap: 20 },
+  mainTitle: { fontFamily: "Quicksand-Bold", fontSize: 20, color: Colors.octonary.DEFAULT },
+  disclaimerText: { fontFamily: "AlbertSans-Regular", fontSize: 12, color: Colors.octonary.DEFAULT, textAlign: "center" },
+  disclaimerBold: { fontFamily: "AlbertSans-Bold" },
+  timerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%", marginTop: 6 },
+  timerCircle: { width: 86, height: 86, borderRadius: 43, alignItems: "center", justifyContent: "center", backgroundColor: Colors.shade[200] },
+  timerSvg: { position: "absolute", top: 0, left: 0 },
+  timerText: { fontFamily: "Quicksand-Bold", fontSize: 18, color: Colors.octonary.DEFAULT },
+  actionButton: { alignItems: "center", gap: 6, flex: 1 },
+  actionIconWrap: { width: 52, height: 52, borderRadius: 26, backgroundColor: Colors.error[400], alignItems: "center", justifyContent: "center" },
+  actionIconWrapLight: { width: 52, height: 52, borderRadius: 26, backgroundColor: Colors.warning[100], alignItems: "center", justifyContent: "center" },
+  actionLabel: { fontFamily: "AlbertSans-SemiBold", fontSize: 13, color: Colors.octonary.DEFAULT },
+  finishButton: { width: "100%", height: 54, borderRadius: 14, backgroundColor: Colors.senary[300], alignItems: "center", justifyContent: "center", marginTop: 10 },
+  finishButtonText: { fontFamily: "Quicksand-Bold", fontSize: 18, color: Colors.shade[200] },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0, 0, 0, 0.35)", justifyContent: "center", alignItems: "center", paddingHorizontal: 24 },
+  modalCard: { width: "100%", borderRadius: 16, backgroundColor: Colors.shade[200], paddingHorizontal: 24, paddingVertical: 28, alignItems: "center", gap: 20 },
+  modalTitle: { fontFamily: "Quicksand-Bold", fontSize: 18, color: Colors.octonary.DEFAULT, textAlign: "center" },
+  modalActions: { flexDirection: "row", gap: 12 },
+  modalGhostButton: { flex: 1, height: 44, borderRadius: 12, borderWidth: 1.5, borderColor: Colors.octonary.DEFAULT, alignItems: "center", justifyContent: "center" },
+  modalGhostText: { fontFamily: "Quicksand-Bold", fontSize: 14, color: Colors.octonary.DEFAULT },
+  modalConfirmButton: { flex: 1, height: 44, borderRadius: 12, backgroundColor: Colors.senary[300], alignItems: "center", justifyContent: "center" },
+  modalConfirmText: { fontFamily: "Quicksand-Bold", fontSize: 14, color: Colors.shade[200] },
 });
