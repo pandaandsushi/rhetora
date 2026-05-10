@@ -99,7 +99,7 @@ activeBubble: {
   width: 44,
   height: 44,
   borderRadius: 22,
-  backgroundColor: Colors.grey[100],
+  backgroundColor: Colors.shade[200],
   zIndex: 0,
 },
 
