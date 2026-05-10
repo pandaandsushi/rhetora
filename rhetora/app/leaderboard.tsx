@@ -100,7 +100,6 @@ export default function Leaderboard() {
 
   useEffect(() => {
     setRewardStep("congrats");
-    // Show tutorial after a short delay so it doesn't clash with the reward modal
     const timer = setTimeout(() => setTutorialVisible(true), 1000);
     return () => clearTimeout(timer);
   }, []);
@@ -247,7 +246,6 @@ export default function Leaderboard() {
           <Text style={styles.jumpText}>Jump to Position</Text>
         </Pressable>
       </View>
-      {/* Tutorial Tooltip Modal */}
       <Modal transparent visible={tutorialVisible} animationType="fade">
         <Pressable 
           style={styles.tutorialOverlay} 
@@ -660,7 +658,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   listItemActive: {
-    backgroundColor: "#A8DFFF", // Light blue from design
+    backgroundColor: "#A8DFFF",
     borderWidth: 0,
     borderRadius: 0,
   },
@@ -1136,11 +1134,11 @@ const styles = StyleSheet.create({
   },
   tutorialOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.2)", // Subtle dimming
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
   },
   tooltipContainer: {
     position: "absolute",
-    top: 90, // Adjust based on your header height
+    top: 90,
     right: 20,
     alignItems: "flex-end",
   },
@@ -1155,7 +1153,7 @@ const styles = StyleSheet.create({
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
     borderBottomColor: "white",
-    marginRight: 20, // Align with the gift icon
+    marginRight: 20,
   },
   tooltipCard: {
     backgroundColor: "white",

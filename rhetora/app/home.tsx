@@ -504,7 +504,7 @@ const styles = StyleSheet.create({
   },
   shopImage: {
     position: "absolute",
-    bottom: 0, // Anchors the cashier flush to the bottom
+    bottom: 0,
     right: 12,
     width: 140, 
     height: 110,

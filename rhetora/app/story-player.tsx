@@ -54,7 +54,7 @@ const storyScenes = [
     background: require("../assets/images/storymode/bg/bg-classroom.png"),
     character: require("../assets/images/storymode/ch1/mia-classroom-mic.png"),
     text: "Alright! It's your turn now, Mia! Mia walks to the front of the room. Time to introduce herself!",
-    isFinal: true, // Triggers the "Start" button instead of tap-to-continue
+    isFinal: true,
   },
 ];
 
@@ -79,9 +79,8 @@ export default function StoryPlayer() {
         {scene.character && <Image source={scene.character} style={styles.character} />}
 
         <SafeAreaView style={styles.safeArea} pointerEvents="box-none">
-          {/* Using the TopHeader component here */}
           <TopHeader
-            title="" // Keep title empty for the story player
+            title="" 
             variant="transparent"
             onBack={() => router.back()}
             rightElement={
@@ -130,7 +129,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    zIndex: 2, // Ensures UI sits above the character
+    zIndex: 2,
   },
   header: {
     flexDirection: "row",
@@ -160,17 +159,17 @@ const styles = StyleSheet.create({
   tapArea: {
     flex: 1,
     alignItems: "center",
-    paddingTop: 40, // Distance from header
+    paddingTop: 40,
     paddingHorizontal: 24,
   },
   textBox: {
-    backgroundColor: "rgba(255, 255, 255, 0.85)", // Translucent white box
+    backgroundColor: "rgba(255, 255, 255, 0.85)",
     borderRadius: 16,
     paddingHorizontal: 24,
     paddingVertical: 32,
     width: "100%",
     alignItems: "center",
-    gap: 30, // Space between story text and the bottom action
+    gap: 30,
   },
   storyText: {
     fontFamily: "AlbertSans-SemiBold",
@@ -186,7 +185,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   startButton: {
-    backgroundColor: Colors.senary[300], // The red color
+    backgroundColor: Colors.senary[300],
     paddingVertical: 14,
     paddingHorizontal: 48,
     borderRadius: 12,

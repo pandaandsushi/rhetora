@@ -17,8 +17,6 @@ import { Colors } from "../constants/colors";
 
 export default function PracticeSetup() {
   const router = useRouter();
-  
-  // <-- NEW: Track if camera was turned on in the setup screen
   const [isCameraOn, setIsCameraOn] = useState(false); 
 
   return (
@@ -39,7 +37,6 @@ export default function PracticeSetup() {
       >
         <Text style={styles.mainTitle}>Introduce Yourself!</Text>
 
-        {/* <-- NEW: Listen for toggle changes */}
         <PracticeCameraPanel
           showStatus
           placeholder={<LogoRhetora width={90} height={90} />}
@@ -74,7 +71,6 @@ export default function PracticeSetup() {
           <Pressable
             style={styles.startButton}
             onPress={() => {
-              // <-- NEW: Pass the camera state as a URL parameter
               router.push({
                 pathname: "/practice-session",
                 params: { cameraOn: isCameraOn ? "true" : "false" },
@@ -89,7 +85,6 @@ export default function PracticeSetup() {
   );
 }
 
-// ... Keep your existing styles ...
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.shade[200] },
   topSafeArea: { backgroundColor: Colors.senary[300] },

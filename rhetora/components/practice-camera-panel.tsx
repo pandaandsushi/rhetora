@@ -12,16 +12,16 @@ type PracticeCameraPanelProps = {
   showStatus?: boolean;
   placeholder?: React.ReactNode;
   toggleIconName?: React.ComponentProps<typeof Ionicons>["name"];
-  initialCameraOn?: boolean; // <-- NEW
-  onCameraToggle?: (isOn: boolean) => void; // <-- NEW
+  initialCameraOn?: boolean;
+  onCameraToggle?: (isOn: boolean) => void;
 };
 
 export default function PracticeCameraPanel({
   showStatus = false,
   placeholder,
   toggleIconName,
-  initialCameraOn = false, // <-- NEW
-  onCameraToggle, // <-- NEW
+  initialCameraOn = false,
+  onCameraToggle,
 }: PracticeCameraPanelProps) {
   const [isCameraOn, setIsCameraOn] = useState(initialCameraOn);
   const [permission, requestPermission] = useCameraPermissions();
@@ -50,7 +50,6 @@ export default function PracticeCameraPanel({
       try {
         await recording.stopAndUnloadAsync();
       } catch {
-        // Ignore stop errors if already stopped
       }
       recordingRef.current = null;
     }
@@ -127,7 +126,7 @@ export default function PracticeCameraPanel({
     }
     const newState = !isCameraOn;
     setIsCameraOn(newState);
-    onCameraToggle?.(newState); // <-- Let the parent screen know
+    onCameraToggle?.(newState);
   };
 
   useFocusEffect(
@@ -204,7 +203,6 @@ export default function PracticeCameraPanel({
   );
 }
 
-// ... Keep your existing styles ...
 const styles = StyleSheet.create({
   wrapper: { width: "100%" },
   cameraContainer: { width: "100%", aspectRatio: 4 / 3, borderRadius: 16, overflow: "hidden", backgroundColor: Colors.neutral[200], position: "relative" },

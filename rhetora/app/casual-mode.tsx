@@ -21,7 +21,7 @@ type Tag = {
 type PracticeCard = {
   title: string;
   description: string;
-  image: any; // Using 'any' for require() images
+  image: any;
   tags: Tag[];
 };
 
@@ -32,7 +32,7 @@ const cards: PracticeCard[] = [
     image: require("../assets/images/casualmode/storytelling-practice.png"),
     tags: [
       { label: "Fluency", color: Colors.turquoise[300] },
-      { label: "Structure", color: Colors.senary[300] }, // Adjusted to match orange/red
+      { label: "Structure", color: Colors.senary[300] },
       { label: "Critical Thinking", color: Colors.success[500] },
     ],
   },
@@ -63,10 +63,6 @@ export default function CasualMode() {
 
   return (
     <View style={styles.screen}>
-      {/* 
-        This SafeAreaView handles the top notch/status bar area. 
-        It ensures the red background goes all the way up. 
-      */}
       <SafeAreaView style={styles.topSafeArea}>
         <TopHeader 
           title="Casual Mode"
@@ -75,7 +71,6 @@ export default function CasualMode() {
         />
       </SafeAreaView>
 
-      {/* The main body content area */}
       <View style={styles.body}>
         <ScrollView
           contentContainerStyle={styles.content}
@@ -89,12 +84,10 @@ export default function CasualMode() {
                 imageStyle={styles.cardBackgroundImage}
                 resizeMode="cover"
               >
-                {/* Image Anchored to Left Bottom */}
                 <View style={styles.imageContainer}>
                   <Image source={card.image} style={styles.cardImage} />
                 </View>
 
-                {/* Text & Tags Column */}
                 <View style={styles.cardBody}>
                   <Text style={styles.cardTitle}>{card.title}</Text>
                   <Text style={styles.cardDescription}>{card.description}</Text>

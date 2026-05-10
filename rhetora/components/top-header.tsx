@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import React from "react"; // Added React import for React.ReactNode
+import React from "react";
 
 import { Colors } from "../constants/colors";
 
@@ -9,7 +9,7 @@ type TopHeaderProps = {
   description?: string;
   variant?: "solid" | "transparent";
   onBack?: () => void;
-  rightElement?: React.ReactNode; // Added rightElement prop
+  rightElement?: React.ReactNode;
 };
 
 export default function TopHeader({
@@ -17,7 +17,7 @@ export default function TopHeader({
   description,
   variant = "solid",
   onBack,
-  rightElement, // Destructure rightElement
+  rightElement,
 }: TopHeaderProps) {
   const isSolid = variant === "solid";
 
@@ -56,7 +56,6 @@ export default function TopHeader({
         )}
       </View>
 
-      {/* Render the right element if provided */}
       {rightElement && (
         <View style={styles.rightElementContainer}>
           {rightElement}
@@ -71,7 +70,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingTop: 40,
-    paddingBottom: 20, // Reduced bottom padding slightly for the story player
+    paddingBottom: 20,
     paddingHorizontal: 30,
     gap: 16,
   },
@@ -92,7 +91,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.senary[300],
   },
   textContainer: {
-    flex: 1, // Added flex: 1 to push rightElement to the end
+    flex: 1,
     justifyContent: "center",
   },
   headerTitle: {

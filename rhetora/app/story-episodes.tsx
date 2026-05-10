@@ -66,12 +66,10 @@ export default function StoryEpisodes() {
           />
 
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-            {/* The vertical timeline line */}
             <View style={styles.timelineLine} />
 
             {episodes.map((episode) => (
               <View key={episode.id} style={styles.episodeRow}>
-                {/* Timeline Dots */}
                 <View style={styles.dotContainer}>
                   {episode.locked ? (
                     <View style={styles.dotLocked} />
@@ -82,7 +80,6 @@ export default function StoryEpisodes() {
                   )}
                 </View>
 
-                {/* Episode Card */}
                 <View style={styles.cardContainer}>
                   <EpisodeCard
                     title={episode.title}
@@ -103,7 +100,6 @@ export default function StoryEpisodes() {
         </View>
       </ImageBackground>
 
-      {/* Unlock Modal */}
       <Modal transparent animationType="fade" visible={unlockVisible}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -136,7 +132,6 @@ export default function StoryEpisodes() {
               <Pressable
                 style={[styles.modalButton, styles.modalButtonUnlock]}
                 onPress={() => {
-                  // Add unlock logic here
                   setUnlockVisible(false);
                 }}
               >
@@ -170,7 +165,7 @@ const styles = StyleSheet.create({
   },
   timelineLine: {
     position: "absolute",
-    left: 35, // Aligns perfectly with the center of the dots
+    left: 35,
     top: 60,
     bottom: 180,
     width: 2,

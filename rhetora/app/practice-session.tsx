@@ -7,7 +7,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router"; // <-- NEW: Import useLocalSearchParams
+import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Circle } from "react-native-svg";
 import LogoRhetora from "../assets/images/logorhetora.svg";
@@ -20,7 +20,6 @@ const TOTAL_SECONDS = 10 * 60;
 export default function PracticeSession() {
   const router = useRouter();
   
-  // <-- NEW: Retrieve the camera parameter from the router
   const { cameraOn } = useLocalSearchParams<{ cameraOn: string }>(); 
   
   const [remainingSeconds, setRemainingSeconds] = useState(TOTAL_SECONDS);
@@ -29,7 +28,6 @@ export default function PracticeSession() {
   const [finishVisible, setFinishVisible] = useState(false);
   const [timeUpVisible, setTimeUpVisible] = useState(false);
 
-  // ... (Keep the rest of your timer logic exactly the same) ...
 
   const progress = remainingSeconds / TOTAL_SECONDS;
   const ringSize = 86;
@@ -97,8 +95,6 @@ export default function PracticeSession() {
           Result will be saved and can be viewed in{" "}
           <Text style={styles.disclaimerBold}>My Recordings</Text>
         </Text>
-
-        {/* ... Keep the rest of the JSX unchanged ... */}
         
         <View style={styles.timerRow}>
           <View style={styles.timerCircle}>
@@ -155,7 +151,6 @@ export default function PracticeSession() {
         </Pressable>
       </View>
       
-      {/* ... (Keep your modals exactly the same as before) ... */}
 
       <Modal transparent animationType="fade" visible={restartVisible}>
         <View style={styles.modalOverlay}>
@@ -203,7 +198,6 @@ export default function PracticeSession() {
   );
 }
 
-// ... Keep your existing styles ...
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.shade[200] },
   topSafeArea: { backgroundColor: Colors.senary[300] },

@@ -64,13 +64,11 @@ export default function Onboarding() {
         <Text style={styles.skipText}>Skip</Text>
       </Pressable>
 
-      {/* Image container takes up remaining space to center the illustration */}
       <View style={styles.imageContainer}>
         <Image source={step.image} style={styles.heroImage} />
       </View>
 
       <View style={styles.card}>
-        {/* Text group handles the 4px gap for title, subtitle, and dots */}
         <View style={styles.textGroup}>
           <Text style={styles.title}>{step.title}</Text>
           <Text style={styles.subtitle}>{step.description}</Text>
@@ -122,18 +120,17 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   card: {
-    backgroundColor: Colors.warning[50], // Updated to warning[50]
+    backgroundColor: Colors.warning[50],
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     paddingHorizontal: 24,
     paddingTop: 32,
     paddingBottom: 40,
     alignItems: "center",
-    // flex: 1 removed to make the card shorter and hug contents
   },
   textGroup: {
     alignItems: "center",
-    gap: 4, // 4px auto layout space for internal items
+    gap: 4,
   },
   title: {
     fontFamily: "Quicksand-Bold",
@@ -164,7 +161,7 @@ const styles = StyleSheet.create({
   },
   button: {
     width: "100%",
-    marginTop: 44, // 44px gap exactly before the button
+    marginTop: 44,
     backgroundColor: Colors.senary[300],
     borderRadius: 28,
     paddingVertical: 14,

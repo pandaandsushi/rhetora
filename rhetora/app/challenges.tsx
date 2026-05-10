@@ -111,10 +111,8 @@ export default function Challenges() {
     (item) => item.current >= item.total,
   ).length;
 
-    // Combine all challenges to check their status
     const allChallenges = [...dailyChallenges, ...weeklyChallenges];
 
-    // Check if there's at least one challenge that is finished but not yet claimed
     const hasClaimable = allChallenges.some(
     (item) => item.current >= item.total && !claimedIds.includes(item.id)
     );
@@ -204,7 +202,6 @@ export default function Challenges() {
         </View>
       </ScrollView>
 
-      {/* Only render the Claim All button if there are rewards pending */}
         {hasClaimable && (
         <View style={styles.claimWrap}>
             <View style={styles.claimShadow} />

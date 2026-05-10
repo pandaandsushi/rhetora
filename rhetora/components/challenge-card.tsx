@@ -67,7 +67,6 @@ export default function ChallengeCard({
         </View>
       )}
 
-      {/* Black transparent overlay sits on top of everything */}
       {claimed && <View style={styles.overlay} pointerEvents="none" />}
     </View>
   );
@@ -86,14 +85,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   cardClaimed: {
-    // Remove the solid background so the background images can show through
     backgroundColor: "transparent",
     borderColor: "transparent",
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0, 0, 0, 0.45)", // The black transparent layer
-    borderRadius: 14, // Match the card's border radius
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
+    borderRadius: 14,
   },
   contentWrap: {
     flex: 1,

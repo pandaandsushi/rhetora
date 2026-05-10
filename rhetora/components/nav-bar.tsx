@@ -123,9 +123,9 @@ pill: {
   justifyContent: "space-between",
   paddingHorizontal: 18,
 
-  backgroundColor: Colors.senary[300], // solid
+  backgroundColor: Colors.senary[300],
   borderWidth: 1,
-  borderColor: "#D3C2F3", // stroke
+  borderColor: "#D3C2F3",
 
   elevation: 8,
   shadowColor: "#000",
