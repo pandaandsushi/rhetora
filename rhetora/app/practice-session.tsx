@@ -118,8 +118,7 @@ export default function PracticeSession() {
         <Pressable
           style={styles.nextButton}
           onPress={() => {
-            // Add navigation logic to the actual recording/practice screen
-          }}
+            router.push("/practice-setup");}}
         >
           <Text style={styles.nextButtonText}>Next</Text>
         </Pressable>
