@@ -43,7 +43,7 @@ const cards: PracticeCard[] = [
     title: "The Pitch Lab",
     description: "Deliver a short pitch that is\nclear, structured, & persuasive.",
     image: require("../assets/images/casualmode/the-pitch-lab.png"),
-    route: "/the-pitch-lab",
+    route: "/pitch-lab",
     tags: [
       { label: "Confidence", color: Colors.blue[300] },
       { label: "Structure", color: Colors.senary[300] },
