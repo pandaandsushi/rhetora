@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -26,12 +27,12 @@ const tutorialSteps = [
 ];
 
 const genres = [
-  { key: "horror", label: "Horror 👻", icon: "ghost" },
-  { key: "fantasy", label: "Fantasy 🔮", icon: "crystal-ball" },
-  { key: "scifi", label: "Sci-Fi 🧪", icon: "test-tube" },
-  { key: "mystery", label: "Mystery 🔎", icon: "magnifying-glass" },
-  { key: "romance", label: "Romance 💖", icon: "two-hearts" },
-  { key: "slice", label: "Slice of Life 🎈", icon: "cherries" },
+  { key: "horror", label: "Horror 👻", color: Colors.neutral[600] },
+  { key: "fantasy", label: "Fantasy 🔮", color: Colors.additional.purple },
+  { key: "scifi", label: "Sci-Fi 🧪", color: Colors.turquoise[300] },
+  { key: "mystery", label: "Mystery 🔎", color: Colors.warning[700] },
+  { key: "romance", label: "Romance 💖", color: Colors.pink[300] },
+  { key: "slice", label: "Slice of Life 🎈", color: Colors.warning[500] },
 ];
 
 export default function StorytellingPractice() {
@@ -42,7 +43,15 @@ export default function StorytellingPractice() {
   const [selectedGenre, setSelectedGenre] = useState("fantasy");
   const [skipTutorial, setSkipTutorial] = useState(false);
 
+  const [hours, setHours] = useState("00");
+  const [minutes, setMinutes] = useState("10");
+  const [seconds, setSeconds] = useState("00");
+
   const activeStep = useMemo(() => tutorialSteps[tutorialIndex], [tutorialIndex]);
+
+  const activeGenreColor = useMemo(() => 
+    genres.find(g => g.key === selectedGenre)?.color || Colors.additional.purple, 
+  [selectedGenre]);
 
   const handleNextTutorial = () => {
     if (tutorialIndex >= tutorialSteps.length - 1) {
@@ -50,6 +59,25 @@ export default function StorytellingPractice() {
       return;
     }
     setTutorialIndex((prev) => prev + 1);
+  };
+
+  const handleDefaultTime = () => {
+    setHours("00");
+    setMinutes("10");
+    setSeconds("00");
+  };
+
+  const handleStart = () => {
+    router.push({
+      pathname: "/storytelling-session",
+      params: {
+        genre: selectedGenre,
+        hours: hours,
+        minutes: minutes,
+        seconds: seconds,
+        totalDuration: `${hours}:${minutes}:${seconds}`
+      },
+    });
   };
 
   return (
@@ -72,11 +100,9 @@ export default function StorytellingPractice() {
       />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-
         <View style={styles.heroRow}>
           <Text style={styles.heroText}>
-            Tell a short story with a clear beginning,
-            middle, and end.
+            Tell a short story with a clear beginning, middle, and end.
           </Text>
         </View>
 
@@ -98,22 +124,18 @@ export default function StorytellingPractice() {
             <View style={styles.tutorialBody}>
               <View style={styles.tutorialBulletRow}>
                 <Text style={styles.tutorialBullet}>•</Text>
+                <Text style={styles.tutorialText}>We'll start the story for you</Text>
+              </View>
+              <View style={styles.tutorialBulletRow}>
+                <Text style={styles.tutorialBullet}>•</Text>
                 <Text style={styles.tutorialText}>
-                  We'll start the story for you
+                  Take a moment to read it, then continue the story in your own words
                 </Text>
               </View>
               <View style={styles.tutorialBulletRow}>
                 <Text style={styles.tutorialBullet}>•</Text>
                 <Text style={styles.tutorialText}>
-                  Take a moment to read it, then continue the
-                  story in your own words
-                </Text>
-              </View>
-              <View style={styles.tutorialBulletRow}>
-                <Text style={styles.tutorialBullet}>•</Text>
-                <Text style={styles.tutorialText}>
-                  Try to build the story until the timer's
-                  running out.
+                  Try to build the story until the timer's running out.
                 </Text>
               </View>
             </View>
@@ -122,25 +144,53 @@ export default function StorytellingPractice() {
 
         <View style={styles.timerRow}>
           <Text style={styles.timerLabel}>Speaking Time</Text>
-          <View style={styles.timerDefault}>
+          <Pressable style={styles.timerDefault} onPress={handleDefaultTime}>
             <Ionicons name="refresh" size={16} color={Colors.octonary.DEFAULT} />
             <Text style={styles.timerDefaultText}>Default</Text>
-          </View>
+          </Pressable>
         </View>
 
         <View style={styles.timeInputs}>
-          {[
-            { label: "00", key: "hours" },
-            { label: "10", key: "minutes" },
-            { label: "00", key: "seconds" },
-          ].map((item, index) => (
-            <View key={item.key} style={styles.timeBoxWrap}>
-              <View style={styles.timeBox}>
-                <Text style={styles.timeValue}>{item.label}</Text>
-              </View>
-              {index < 2 && <Text style={styles.timeDivider}>:</Text>}
+          <View style={styles.timeBoxWrap}>
+            <View style={styles.timeBox}>
+              <TextInput
+                style={styles.timeValue}
+                value={hours}
+                onChangeText={setHours}
+                keyboardType="numeric"
+                maxLength={2}
+                selectTextOnFocus
+              />
             </View>
-          ))}
+            <Text style={styles.timeDivider}>:</Text>
+          </View>
+
+          <View style={styles.timeBoxWrap}>
+            <View style={styles.timeBox}>
+              <TextInput
+                style={styles.timeValue}
+                value={minutes}
+                onChangeText={setMinutes}
+                keyboardType="numeric"
+                maxLength={2}
+                selectTextOnFocus
+              />
+            </View>
+            <Text style={styles.timeDivider}>:</Text>
+          </View>
+
+          <View style={styles.timeBoxWrap}>
+            <View style={styles.timeBox}>
+              <TextInput
+                style={styles.timeValue}
+                value={seconds}
+                onChangeText={setSeconds}
+                keyboardType="numeric"
+                maxLength={2}
+                selectTextOnFocus
+              />
+            </View>
+          </View>
         </View>
 
         <Text style={styles.genreLabel}>Select Genre</Text>
@@ -150,7 +200,10 @@ export default function StorytellingPractice() {
             return (
               <Pressable
                 key={genre.key}
-                style={[styles.genreChip, isActive && styles.genreChipActive]}
+                style={[
+                  styles.genreChip, 
+                  isActive && { backgroundColor: genre.color, borderColor: genre.color }
+                ]}
                 onPress={() => setSelectedGenre(genre.key)}
               >
                 <Text style={[styles.genreText, isActive && styles.genreTextActive]}>
@@ -161,10 +214,10 @@ export default function StorytellingPractice() {
           })}
         </View>
 
-        <Pressable style={styles.startButton}>
+        <Pressable style={styles.startButton} onPress={handleStart}>
           <Text style={styles.startButtonText}>Start</Text>
         </Pressable>
-
+        
         <Text style={styles.disclaimerText}>
           Result will be saved and can be viewed in{" "}
           <Text style={styles.disclaimerBold}>My Recordings</Text>
@@ -228,25 +281,6 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     gap: 18,
   },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  backButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: Colors.senary[300],
-  },
-  headerTitle: {
-    flex: 1,
-    fontFamily: "Quicksand-Bold",
-    fontSize: 20,
-    color: Colors.octonary.DEFAULT,
-  },
   infoButton: {
     width: 34,
     height: 34,
@@ -259,25 +293,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 16,
   },
-  heroImage: {
-    width: 72,
-    height: 72,
-    resizeMode: "contain",
-  },
   heroText: {
     fontFamily: "AlbertSans-SemiBold",
     fontSize: 15,
     color: Colors.octonary.DEFAULT,
     textAlign: "center",
     lineHeight: 22,
-  },
-  micPlaceholder: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: Colors.warning[100],
-    alignItems: "center",
-    justifyContent: "center",
   },
   tutorialCard: {
     borderRadius: 14,
@@ -341,7 +362,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
   },
   timeBoxWrap: {
     flexDirection: "row",
@@ -362,11 +382,14 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 22,
     color: Colors.senary[300],
+    textAlign: "center",
+    width: "100%",
   },
   timeDivider: {
     fontFamily: "Quicksand-Bold",
     fontSize: 22,
     color: Colors.senary[300],
+    marginHorizontal: 4,
   },
   genreLabel: {
     fontFamily: "Quicksand-Bold",
@@ -386,10 +409,6 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: Colors.quinary[300],
     backgroundColor: Colors.shade[200],
-  },
-  genreChipActive: {
-    backgroundColor: Colors.additional.purple,
-    borderColor: Colors.additional.purple,
   },
   genreText: {
     fontFamily: "Quicksand-Bold",
@@ -428,6 +447,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 20,
+    zIndex: 10,
   },
   tutorialModal: {
     width: "100%",
