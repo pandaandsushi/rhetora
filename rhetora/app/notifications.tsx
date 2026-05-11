@@ -122,19 +122,13 @@ export default function Notifications() {
 
   return (
     <ImageBackground source={bgImage} style={styles.screen} resizeMode="cover">
-      {/* <View style={styles.headerRow}>
-        <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Ionicons name="chevron-back" size={24} color={Colors.shade[200]} />
-        </Pressable>
-        <Text style={styles.headerTitle}>Notifications</Text>
-      </View> */}
       <SafeAreaView style={styles.safeArea}>
-              <TopHeader
-                title="Challenges"
-                variant="transparent"
-                onBack={() => router.back()}
-              />
-            </SafeAreaView>
+        <TopHeader
+          title="Notifications"
+          variant="transparent"
+          onBack={() => router.back()}
+        />
+      </SafeAreaView>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.sectionTitle}>Today</Text>
