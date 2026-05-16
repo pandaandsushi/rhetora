@@ -14,7 +14,6 @@ import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { Ionicons } from "@expo/vector-icons";
 
 import { Colors } from "../constants/colors";
-
 const avatars = {
   ready: require("../assets/images/avatar/av-ready.png"),
   bookworm: require("../assets/images/avatar/av-bookworm.png"),
@@ -28,6 +27,9 @@ const avatars = {
   sport: require("../assets/images/avatar/av-sport.png"),
   child: require("../assets/images/avatar/av-child.png"),
 };
+const goldCrown = require("../assets/images/leaderboard/gold.png");
+const silverCrown = require("../assets/images/leaderboard/silver.png");
+const bronzeCrown = require("../assets/images/leaderboard/bronze.png");
 
 const coinImage = require("../assets/images/shop/coin.png");
 const confettiImage = require("../assets/images/confetti.png");
@@ -64,21 +66,21 @@ const podiumLeaders: Leader[] = [
 
 const leaderboard: Leader[] = [
   { id: "rank-4", name: "Alicia", points: 36, avatar: avatars.kitties },
-  { id: "rank-5", name: "Alicia", points: 35, avatar: avatars.bookworm },
-  { id: "rank-6", name: "Alicia", points: 34, avatar: avatars.coffe },
-  { id: "rank-7", name: "Alicia", points: 33, avatar: avatars.sing },
-  { id: "rank-8", name: "Alicia", points: 32, avatar: avatars.child },
-  { id: "rank-9", name: "Alicia", points: 31, avatar: avatars.doggo },
-  { id: "rank-10", name: "Alicia", points: 30, avatar: avatars.naughty },
-  { id: "rank-11", name: "Alicia", points: 29, avatar: avatars.ready },
-  { id: "rank-12", name: "Alicia", points: 28, avatar: avatars.bookworm },
-  { id: "rank-13", name: "Alicia", points: 25, avatar: avatars.coffe },
-  { id: "rank-14", name: "Alicia", points: 24, avatar: avatars.child },
-  { id: "rank-15", name: "Alicia", points: 23, avatar: avatars.doggo },
-  { id: "rank-16", name: "Alicia", points: 22, avatar: avatars.naughty },
+  { id: "rank-5", name: "Alex", points: 35, avatar: avatars.bookworm },
+  { id: "rank-6", name: "Jane", points: 34, avatar: avatars.coffe },
+  { id: "rank-7", name: "Alline", points: 33, avatar: avatars.sing },
+  { id: "rank-8", name: "Lisa", points: 32, avatar: avatars.child },
+  { id: "rank-9", name: "Rey", points: 31, avatar: avatars.doggo },
+  { id: "rank-10", name: "Kate", points: 30, avatar: avatars.naughty },
+  { id: "rank-11", name: "Mary", points: 29, avatar: avatars.ready },
+  { id: "rank-12", name: "Aaron", points: 28, avatar: avatars.bookworm },
+  { id: "rank-13", name: "George", points: 25, avatar: avatars.coffe },
+  { id: "rank-14", name: "Jill", points: 24, avatar: avatars.child },
+  { id: "rank-15", name: "Jack", points: 23, avatar: avatars.doggo },
+  { id: "rank-16", name: "Jen", points: 22, avatar: avatars.naughty },
   { id: "rank-17", name: "You", points: 21, avatar: avatars.ready },
-  { id: "rank-18", name: "Alicia", points: 20, avatar: avatars.sing },
-  { id: "rank-19", name: "Alicia", points: 19, avatar: avatars.kitties },
+  { id: "rank-18", name: "Daniel", points: 20, avatar: avatars.sing },
+  { id: "rank-19", name: "Gabriel", points: 19, avatar: avatars.kitties },
 ];
 
 const userRankId = "rank-17";
@@ -149,7 +151,7 @@ export default function Leaderboard() {
           <View style={styles.podiumArc} />
           <View style={styles.podiumRow}>
             <View style={[styles.podiumCard, styles.podiumSecond]}>
-              <Ionicons name="crown" size={26} color="#B7BBC3" />
+              <Image source={silverCrown} style={styles.crownImage} />
               <View style={styles.podiumAvatarWrap}>
                 <Image source={podiumLeaders[0].avatar} style={styles.podiumAvatar} />
               </View>
@@ -163,7 +165,7 @@ export default function Leaderboard() {
             </View>
 
             <View style={[styles.podiumCard, styles.podiumFirst]}>
-              <Ionicons name="crown" size={30} color="#F7B633" />
+              <Image source={goldCrown} style={styles.crownImage} />
               <View style={[styles.podiumAvatarWrap, styles.podiumAvatarMain]}>
                 <Image source={podiumLeaders[1].avatar} style={styles.podiumAvatarLarge} />
               </View>
@@ -177,7 +179,7 @@ export default function Leaderboard() {
             </View>
 
             <View style={[styles.podiumCard, styles.podiumThird]}>
-              <Ionicons name="crown" size={26} color="#8B5E3C" />
+              <Image source={bronzeCrown} style={styles.crownImage} />
               <View style={styles.podiumAvatarWrap}>
                 <Image source={podiumLeaders[2].avatar} style={styles.podiumAvatar} />
               </View>
@@ -665,11 +667,11 @@ const styles = StyleSheet.create({
   rankText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
-    color: Colors.blue[500],
+    color: Colors.shade[100],
     width: 24,
   },
   rankTextActive: {
-    color: Colors.blue[600],
+    color: Colors.shade[100],
   },
   listAvatar: {
     width: 30,
@@ -680,18 +682,18 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
-    color: Colors.blue[500],
+    color: Colors.shade[100],
   },
   nameTextActive: {
-    color: Colors.blue[600],
+    color: Colors.shade[100],
   },
   pointsRight: {
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
-    color: Colors.blue[500],
+    color: Colors.shade[100],
   },
   pointsRightActive: {
-    color: Colors.blue[600],
+    color: Colors.shade[100],
   },
   userStats: {
     paddingVertical: 12,
@@ -703,7 +705,7 @@ const styles = StyleSheet.create({
   userStatsText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
-    color: Colors.blue[500],
+    color: Colors.shade[100],
   },
   userStatsRight: {
     flexDirection: "row",
@@ -818,7 +820,7 @@ const styles = StyleSheet.create({
   },
   rewardTitle: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 22,
+    fontSize: 18,
     color: Colors.octonary.DEFAULT,
     textAlign: "center",
   },
@@ -848,7 +850,7 @@ const styles = StyleSheet.create({
   rewardRankText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
-    color: Colors.blue[600],
+    color: Colors.shade[100],
     width: 24,
   },
   rewardAvatar: {
@@ -860,17 +862,17 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
-    color: Colors.blue[600],
+    color: Colors.shade[100],
   },
   rewardPoints: {
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
-    color: Colors.blue[600],
+    color: Colors.shade[100],
   },
   rewardRankLabel: {
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
-    color: Colors.blue[600],
+    color: Colors.shade[100],
   },
   rewardCoinRow: {
     flexDirection: "row",
@@ -973,7 +975,7 @@ const styles = StyleSheet.create({
   drawerRankText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
-    color: Colors.blue[600],
+    color: Colors.shade[100],
     width: 24,
   },
   drawerAvatar: {
@@ -985,17 +987,17 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
-    color: Colors.blue[600],
+    color: Colors.shade[100],
   },
   drawerPoints: {
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
-    color: Colors.blue[600],
+    color: Colors.shade[100],
   },
   drawerUserLabel: {
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
-    color: Colors.blue[600],
+    color: Colors.shade[100],
   },
   drawerHeaderRow: {
     flexDirection: "row",
@@ -1056,7 +1058,7 @@ const styles = StyleSheet.create({
   rankPercentText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
-    color: Colors.blue[500],
+    color: Colors.shade[100],
   },
   rewardRow: {
     flexDirection: "row",
@@ -1173,5 +1175,11 @@ const styles = StyleSheet.create({
     color: Colors.octonary.DEFAULT,
     textAlign: "center",
     lineHeight: 24,
+  },
+  crownImage: {
+    width: 34,
+    height: 34,
+    resizeMode: "contain",
+    marginBottom: -22,
   },
 });

@@ -96,11 +96,11 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 22,
+    fontSize: 18,
   },
   headerDescription: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 16,
+    fontSize: 14,
     marginTop: 2,
   },
   textSolid: {

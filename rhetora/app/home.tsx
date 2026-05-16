@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 20,
+    fontSize: 16,
     color: Colors.octonary.DEFAULT,
   },
   badgeDot: {
@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 14,
+    fontSize: 12,
     color: Colors.octonary.DEFAULT,
   },
   inlineCoin: {
@@ -466,12 +466,12 @@ const styles = StyleSheet.create({
   challengeTitle: {
     flex: 1,
     fontFamily: "AlbertSans-SemiBold",
-    fontSize: 13,
+    fontSize: 10,
     color: Colors.octonary.DEFAULT,
   },
   challengeCount: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 13,
+    fontSize: 10,
     color: Colors.octonary.DEFAULT,
   },
   shopCardWrapper: {
@@ -493,13 +493,13 @@ const styles = StyleSheet.create({
   },
   shopTitle: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 20,
+    fontSize: 18,
     color: Colors.octonary.DEFAULT,
   },
   shopSubtitle: {
     fontFamily: "AlbertSans-Medium",
-    fontSize: 13,
-    lineHeight: 18,
+    fontSize: 10,
+    lineHeight: 14,
     color: Colors.octonary.DEFAULT,
   },
   shopImage: {
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
     fontFamily: "Quicksand-Bold",
-    fontSize: 16,
+    fontSize: 14,
     color: Colors.shade[100],
     textAlign: "left",
   },

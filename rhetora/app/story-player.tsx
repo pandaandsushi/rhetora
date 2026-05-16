@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   },
   skipText: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 22,
+    fontSize: 18,
     color: Colors.octonary.DEFAULT,
   },
   tapArea: {
