@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import NavBar from "../components/nav-bar";
 import TopHeader from "../components/top-header";
-import TitlePill, { titleList } from "../components/title-pill";
+import TitlePill from "../components/title-pill";
 import { Colors } from "../constants/colors";
 import {
   badgeList,
@@ -22,6 +22,7 @@ import {
   setSelectedBadgeIds,
   subscribeToBadgeSelection,
 } from "../constants/badges";
+import { titleList } from "../constants/titles";
 
 const bgImage = require("../assets/images/homepage/bg-home.png");
 const coinImage = require("../assets/images/shop/coin.png");
@@ -34,6 +35,11 @@ export default function Profile() {
   const [selectedBadgeIds, setSelectedBadgeIdsState] = useState(getSelectedBadgeIds());
   const [editVisible, setEditVisible] = useState(false);
   const [draftIds, setDraftIds] = useState<string[]>(getSelectedBadgeIds());
+  const [titleEditVisible, setTitleEditVisible] = useState(false);
+  const [titleSort, setTitleSort] = useState<"recent" | "obtained">("recent");
+  const [sortOpen, setSortOpen] = useState(false);
+  const [equippedTitleId, setEquippedTitleId] = useState(titleList[0]?.id ?? "");
+  const [titleDetailId, setTitleDetailId] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = subscribeToBadgeSelection(() => {
@@ -48,6 +54,49 @@ export default function Profile() {
       .map((id) => badgeList.find((badge) => badge.id === id))
       .filter(Boolean);
   }, [selectedBadgeIds]);
+
+  const titleMeta = useMemo(() => {
+    return new Map<string, { obtained: boolean; obtainedAt?: number }>([
+      [titleList[0]?.id ?? "", { obtained: true, obtainedAt: 8 }],
+      [titleList[1]?.id ?? "", { obtained: true, obtainedAt: 7 }],
+      [titleList[2]?.id ?? "", { obtained: true, obtainedAt: 6 }],
+      [titleList[3]?.id ?? "", { obtained: true, obtainedAt: 5 }],
+      [titleList[4]?.id ?? "", { obtained: true, obtainedAt: 4 }],
+      [titleList[5]?.id ?? "", { obtained: true, obtainedAt: 3 }],
+      [titleList[6]?.id ?? "", { obtained: false }],
+      [titleList[7]?.id ?? "", { obtained: false }],
+    ].filter(([id]) => id));
+  }, []);
+
+  const sortedTitles = useMemo(() => {
+    const list = [...titleList];
+    const getMeta = (id: string) => titleMeta.get(id) ?? { obtained: false };
+
+    return list.sort((a, b) => {
+      const metaA = getMeta(a.id);
+      const metaB = getMeta(b.id);
+
+      if (titleSort === "recent") {
+        const dateA = metaA.obtainedAt ?? -1;
+        const dateB = metaB.obtainedAt ?? -1;
+        if (dateA !== dateB) {
+          return dateB - dateA;
+        }
+      }
+
+      if (titleSort === "obtained") {
+        if (metaA.obtained !== metaB.obtained) {
+          return metaA.obtained ? -1 : 1;
+        }
+      }
+
+      if (metaA.obtained !== metaB.obtained) {
+        return metaA.obtained ? -1 : 1;
+      }
+
+      return a.label.localeCompare(b.label);
+    });
+  }, [titleMeta, titleSort]);
 
   const selectionOrder = useMemo(() => {
     const orderMap = new Map<string, number>();
@@ -110,8 +159,11 @@ export default function Profile() {
               <Text style={styles.profileName}>John Doe</Text>
 
               <View style={styles.titleRow}>
-                <TitlePill title={titleList[0]} size="md" />
-                <Pressable style={styles.titleEdit}>
+                <TitlePill
+                  title={titleList.find((item) => item.id === equippedTitleId) ?? titleList[0]}
+                  size="md"
+                />
+                <Pressable style={styles.titleEdit} onPress={() => setTitleEditVisible(true)}>
                   <Ionicons name="pencil" size={16} color={Colors.octonary.DEFAULT} />
                 </Pressable>
               </View>
@@ -215,6 +267,118 @@ export default function Profile() {
               <Text style={styles.editSaveButtonText}>Save</Text>
             </Pressable>
           </SafeAreaView>
+        </View>
+      )}
+
+      {titleEditVisible && (
+        <View style={styles.editOverlay}>
+          <Pressable
+            style={styles.editBackdrop}
+            onPress={() => {
+              setTitleEditVisible(false);
+              setSortOpen(false);
+            }}
+          />
+          <SafeAreaView style={styles.titleSheet}>
+            <View style={styles.editHandle} />
+            <View style={styles.titleHeaderRow}>
+              <Text style={styles.titleSheetTitle}>My Titles</Text>
+              <View style={styles.sortWrap}>
+                <Pressable
+                  style={styles.sortButton}
+                  onPress={() => setSortOpen((prev) => !prev)}
+                >
+                  <Text style={styles.sortButtonText}>
+                    {titleSort === "recent" ? "Recent" : "Obtained"}
+                  </Text>
+                  <Ionicons name="chevron-down" size={16} color={Colors.octonary.DEFAULT} />
+                </Pressable>
+                {sortOpen && (
+                  <View style={styles.sortMenu}>
+                    {[
+                      { label: "Recent", value: "recent" },
+                      { label: "Obtained", value: "obtained" },
+                    ].map((option) => (
+                      <Pressable
+                        key={option.value}
+                        style={styles.sortOption}
+                        onPress={() => {
+                          setTitleSort(option.value as "recent" | "obtained");
+                          setSortOpen(false);
+                        }}
+                      >
+                        <Text style={styles.sortOptionText}>{option.label}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                )}
+              </View>
+            </View>
+
+            <ScrollView
+              contentContainerStyle={styles.titleGrid}
+              showsVerticalScrollIndicator={false}
+            >
+              {sortedTitles.map((title) => {
+                const meta = titleMeta.get(title.id);
+                const isObtained = meta?.obtained ?? false;
+                const isEquipped = equippedTitleId === title.id;
+
+                return (
+                  <Pressable
+                    key={title.id}
+                    style={[styles.titleItem, !isObtained && styles.titleItemLocked]}
+                    onPress={() => {
+                      setTitleDetailId(title.id);
+                    }}
+                  >
+                    <TitlePill title={title} />
+                    {isEquipped && (
+                      <View style={styles.titleEquipped}>
+                        <Ionicons name="checkmark" size={12} color={Colors.shade[200]} />
+                      </View>
+                    )}
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+          </SafeAreaView>
+        </View>
+      )}
+
+      {titleDetailId && (
+        <View style={styles.editOverlay}>
+          <Pressable
+            style={styles.editBackdrop}
+            onPress={() => setTitleDetailId(null)}
+          />
+          <View style={styles.titleDetailCard}>
+            <TitlePill
+              title={titleList.find((item) => item.id === titleDetailId) ?? titleList[0]}
+              size="md"
+            />
+            <Text style={styles.titleDetailHeading}>Requirement:</Text>
+            <Text style={styles.titleDetailText}>Obtain 5 badges</Text>
+            <View style={styles.titleDetailActions}>
+              <Pressable
+                style={[styles.titleDetailButton, styles.titleDetailCancel]}
+                onPress={() => setTitleDetailId(null)}
+              >
+                <Text style={styles.titleDetailCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.titleDetailButton, styles.titleDetailEquip]}
+                onPress={() => {
+                  setEquippedTitleId(titleDetailId);
+                  setTitleDetailId(null);
+                }}
+              >
+                <Text style={styles.titleDetailEquipText}>
+                  {equippedTitleId === titleDetailId ? "Equipped" : "Equip"}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
         </View>
       )}
     </View>
@@ -355,9 +519,9 @@ const styles = StyleSheet.create({
   badgeCard: {
     borderRadius: 14,
     borderWidth: 2,
-    borderColor: Colors.additional.blue,
+    borderColor: Colors.blue[300],
     padding: 16,
-    backgroundColor: Colors.shade[200],
+    backgroundColor: Colors.blue[50],
     gap: 12,
   },
   badgeHeader: {
@@ -388,8 +552,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   badgeImage: {
-    width: 48,
-    height: 48,
+    width: 60,
+    height: 60,
     resizeMode: "contain",
   },
   menuCard: {
@@ -531,6 +695,151 @@ const styles = StyleSheet.create({
   editSaveButtonText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
+    color: Colors.shade[200],
+  },
+  titleSheet: {
+    marginTop: 100,
+    backgroundColor: Colors.shade[200],
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 20,
+    flex: 1,
+  },
+  titleHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  titleSheetTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 20,
+    color: Colors.octonary.DEFAULT,
+  },
+  sortWrap: {
+    alignItems: "flex-end",
+    position: "relative",
+  },
+  sortButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    borderWidth: 2,
+    borderColor: Colors.octonary.DEFAULT,
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    backgroundColor: Colors.shade[200],
+  },
+  sortButtonText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+  },
+  sortMenu: {
+    position: "absolute",
+    top: 52,
+    right: 0,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: Colors.neutral[200],
+    backgroundColor: Colors.shade[200],
+    overflow: "hidden",
+    zIndex: 2,
+    elevation: 2,
+  },
+  sortOption: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  sortOptionText: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+  },
+  titleGrid: {
+    paddingBottom: 30,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 14,
+  },
+  titleItem: {
+    width: "47%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 6,
+  },
+  titleItemLocked: {
+    opacity: 0.35,
+  },
+  titleEquipped: {
+    position: "absolute",
+    top: -6,
+    right: 8,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: "#3DBE8B",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: Colors.octonary.DEFAULT,
+  },
+  titleDetailCard: {
+    position: "absolute",
+    left: 20,
+    right: 20,
+    top: "45%",
+    transform: [{ translateY: -120 }],
+    borderRadius: 16,
+    backgroundColor: Colors.shade[200],
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    alignItems: "center",
+    gap: 12,
+  },
+  titleDetailHeading: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.octonary.DEFAULT,
+  },
+  titleDetailText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 20,
+    color: Colors.octonary.DEFAULT,
+    textAlign: "center",
+  },
+  titleDetailActions: {
+    flexDirection: "row",
+    gap: 12,
+    width: "100%",
+    marginTop: 8,
+  },
+  titleDetailButton: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  titleDetailCancel: {
+    backgroundColor: Colors.shade[200],
+    borderWidth: 1.5,
+    borderColor: Colors.neutral[300],
+  },
+  titleDetailEquip: {
+    backgroundColor: Colors.senary[300],
+  },
+  titleDetailCancelText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+  },
+  titleDetailEquipText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 14,
     color: Colors.shade[200],
   },
 });

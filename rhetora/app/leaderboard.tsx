@@ -12,8 +12,9 @@ import {
 import { useRouter } from "expo-router";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { Ionicons } from "@expo/vector-icons";
-import TitlePill, { titleList } from "../components/title-pill";
+import TitlePill from "../components/title-pill";
 import { Colors } from "../constants/colors";
+import { titleList } from "../constants/titles";
 const avatars = {
   ready: require("../assets/images/avatar/av-ready.png"),
   bookworm: require("../assets/images/avatar/av-bookworm.png"),
