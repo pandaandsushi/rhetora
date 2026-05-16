@@ -16,7 +16,6 @@ import { Ionicons } from "@expo/vector-icons";
 import NavBar from "../components/nav-bar";
 import TopHeader from "../components/top-header";
 import { Colors } from "../constants/colors";
-
 const bgImage = require("../assets/images/homepage/bg-home.png");
 const coinImage = require("../assets/images/shop/coin.png");
 
@@ -44,7 +43,16 @@ export default function NotificationSettings() {
   const [smartReminders, setSmartReminders] = useState(true);
   const [frequencyOpen, setFrequencyOpen] = useState(false);
   const [frequency, setFrequency] = useState(frequencyOptions[0]);
-
+    const handleSave = () => {
+      router.push({
+        pathname: "/profile",
+        params: {
+          showToast: "true",
+          toastMessage: "Notifications settings updated successfully",
+          toastVariant: "success",
+        },
+      });
+    };
   return (
     <View style={styles.screen}>
         <SafeAreaView style={styles.safeArea}>
@@ -138,7 +146,7 @@ export default function NotificationSettings() {
               <Pressable style={[styles.actionButton, styles.cancelButton]} onPress={() => router.back()}>
                 <Text style={styles.cancelText}>Cancel</Text>
               </Pressable>
-              <Pressable style={[styles.actionButton, styles.saveButton]}>
+              <Pressable style={[styles.actionButton, styles.saveButton]} onPress={handleSave}>
                 <Text style={styles.saveText}>Save</Text>
               </Pressable>
             </View>

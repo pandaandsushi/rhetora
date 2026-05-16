@@ -9,13 +9,14 @@ import {
   Text,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import NavBar from "../components/nav-bar";
 import TopHeader from "../components/top-header";
 import ProfileMediaCard from "../components/profile-media-card";
 import TitlePill from "../components/title-pill";
+import Toast from "../components/toast";
 import { Colors } from "../constants/colors";
 import {
   badgeList,
@@ -60,6 +61,29 @@ export default function Profile() {
 
     return unsubscribe;
   }, []);
+  
+  const { showToast, toastMessage, toastVariant } = useLocalSearchParams();
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastText, setToastText] = useState("");
+  const [toastType, setToastType] = useState<"success" | "error" | "info">("success");
+
+  useEffect(() => {
+    if (showToast === "true") {
+      setToastText(typeof toastMessage === "string" ? toastMessage : "Updated successfully");
+      setToastType(
+        toastVariant === "error" || toastVariant === "info" || toastVariant === "success"
+          ? toastVariant
+          : "success"
+      );
+      setToastVisible(true);
+
+      const timer = setTimeout(() => {
+        setToastVisible(false);
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [showToast]);
 
   const selectedBadges = useMemo(() => {
     return selectedBadgeIds
@@ -579,6 +603,11 @@ export default function Profile() {
           </View>
         </View>
       )}
+              <Toast
+                visible={toastVisible}
+                message={toastText}
+                variant={toastType}
+              />
     </View>
   );
 }

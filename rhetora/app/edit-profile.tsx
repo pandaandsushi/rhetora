@@ -88,7 +88,19 @@ export default function EditProfile() {
               <Pressable style={[styles.actionButton, styles.cancelButton]} onPress={() => router.back()}>
                 <Text style={styles.cancelText}>Cancel</Text>
               </Pressable>
-              <Pressable style={[styles.actionButton, styles.saveButton]} onPress={() => router.back()}>
+              <Pressable
+                style={[styles.actionButton, styles.saveButton]}
+                onPress={() =>
+                  router.push({
+                    pathname: "/profile",
+                    params: {
+                      showToast: "true",
+                      toastMessage: "Profile updated successfully",
+                      toastVariant: "success",
+                    },
+                  })
+                }
+              >
                 <Text style={styles.saveText}>Save</Text>
               </Pressable>
             </View>
