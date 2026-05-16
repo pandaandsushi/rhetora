@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 
 import NavBar from "../components/nav-bar";
 import TopHeader from "../components/top-header";
+import ProfileMediaCard from "../components/profile-media-card";
 import TitlePill from "../components/title-pill";
 import { Colors } from "../constants/colors";
 import {
@@ -22,11 +23,12 @@ import {
   setSelectedBadgeIds,
   subscribeToBadgeSelection,
 } from "../constants/badges";
+import { avatarList } from "../constants/avatars";
+import { frameList } from "../constants/frames";
 import { titleList } from "../constants/titles";
 
 const bgImage = require("../assets/images/homepage/bg-home.png");
 const coinImage = require("../assets/images/shop/coin.png");
-const avatarImage = require("../assets/images/avatar/av-doggo.png");
 const streakImage = require("../assets/images/homepage/il-streak.png");
 const leaderboardImage = require("../assets/images/homepage/il-leaderboard.png");
 
@@ -40,6 +42,14 @@ export default function Profile() {
   const [sortOpen, setSortOpen] = useState(false);
   const [equippedTitleId, setEquippedTitleId] = useState(titleList[0]?.id ?? "");
   const [titleDetailId, setTitleDetailId] = useState<string | null>(null);
+  const [avatarFrameVisible, setAvatarFrameVisible] = useState(false);
+  const [avatarFrameTab, setAvatarFrameTab] = useState<"avatar" | "frame">("avatar");
+  const [equippedAvatarId, setEquippedAvatarId] = useState(avatarList[0]?.id ?? "");
+  const [equippedFrameId, setEquippedFrameId] = useState(frameList[0]?.id ?? "");
+  const [mediaDetail, setMediaDetail] = useState<{
+    type: "avatar" | "frame";
+    id: string;
+  } | null>(null);
 
   useEffect(() => {
     const unsubscribe = subscribeToBadgeSelection(() => {
@@ -128,6 +138,9 @@ export default function Profile() {
     setEditVisible(false);
   };
 
+  const equippedAvatar = avatarList.find((item) => item.id === equippedAvatarId) ?? avatarList[0];
+  const equippedFrame = frameList.find((item) => item.id === equippedFrameId) ?? frameList[0];
+
   return (
     <View style={styles.screen}>
       <ImageBackground
@@ -151,8 +164,17 @@ export default function Profile() {
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
             <View style={styles.profileCard}>
               <View style={styles.avatarWrap}>
-                <Image source={avatarImage} style={styles.avatarImage} />
-                <Pressable style={styles.avatarEdit}>
+                <Image source={equippedAvatar?.image} style={styles.avatarImage} />
+                {equippedFrame && (
+                  <Image source={equippedFrame.image} style={styles.avatarFrame} />
+                )}
+                <Pressable
+                  style={styles.avatarEdit}
+                  onPress={() => {
+                    setAvatarFrameTab("avatar");
+                    setAvatarFrameVisible(true);
+                  }}
+                >
                   <Ionicons name="pencil" size={16} color={Colors.octonary.DEFAULT} />
                 </Pressable>
               </View>
@@ -335,7 +357,7 @@ export default function Profile() {
                     <TitlePill title={title} />
                     {isEquipped && (
                       <View style={styles.titleEquipped}>
-                        <Ionicons name="checkmark" size={12} color={Colors.shade[200]} />
+                        <Ionicons name="checkmark" size={15} color={Colors.shade[100]} />
                       </View>
                     )}
                   </Pressable>
@@ -375,6 +397,144 @@ export default function Profile() {
               >
                 <Text style={styles.titleDetailEquipText}>
                   {equippedTitleId === titleDetailId ? "Equipped" : "Equip"}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {avatarFrameVisible && (
+        <View style={styles.editOverlay}>
+          <Pressable
+            style={styles.editBackdrop}
+            onPress={() => setAvatarFrameVisible(false)}
+          />
+          <SafeAreaView style={styles.avatarSheet}>
+            <View style={styles.editHandle} />
+            <View style={styles.avatarTabs}>
+              <Pressable
+                style={[styles.avatarTab, avatarFrameTab === "avatar" && styles.avatarTabActive]}
+                onPress={() => setAvatarFrameTab("avatar")}
+              >
+                <Text
+                  style={[
+                    styles.avatarTabText,
+                    avatarFrameTab === "avatar" && styles.avatarTabTextActive,
+                  ]}
+                >
+                  Avatar
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[styles.avatarTab, avatarFrameTab === "frame" && styles.avatarTabActive]}
+                onPress={() => setAvatarFrameTab("frame")}
+              >
+                <Text
+                  style={[
+                    styles.avatarTabText,
+                    avatarFrameTab === "frame" && styles.avatarTabTextActive,
+                  ]}
+                >
+                  Frames
+                </Text>
+              </Pressable>
+            </View>
+
+            <ScrollView
+              contentContainerStyle={styles.avatarGrid}
+              showsVerticalScrollIndicator={false}
+            >
+              {avatarFrameTab === "avatar"
+                ? avatarList.map((item) => (
+                    <Pressable
+                      key={item.id}
+                      style={styles.avatarGridItem}
+                      onPress={() => setMediaDetail({ type: "avatar", id: item.id })}
+                    >
+                      <ProfileMediaCard
+                        title={item.title}
+                        image={item.image}
+                        equipped={item.id === equippedAvatarId}
+                        variant="avatar"
+                      />
+                    </Pressable>
+                  ))
+                : frameList.map((item) => (
+                    <Pressable
+                      key={item.id}
+                      style={styles.avatarGridItem}
+                      onPress={() => setMediaDetail({ type: "frame", id: item.id })}
+                    >
+                      <ProfileMediaCard
+                        title={item.title}
+                        image={item.image}
+                        equipped={item.id === equippedFrameId}
+                        variant="frame"
+                        avatarImage={equippedAvatar?.image}
+                      />
+                    </Pressable>
+                  ))}
+            </ScrollView>
+          </SafeAreaView>
+        </View>
+      )}
+
+      {mediaDetail && (
+        <View style={styles.editOverlay}>
+          <Pressable style={styles.editBackdrop} onPress={() => setMediaDetail(null)} />
+          <View style={styles.mediaDetailCard}>
+            <ProfileMediaCard
+              title={
+                mediaDetail.type === "avatar"
+                  ? (avatarList.find((item) => item.id === mediaDetail.id)?.title ?? "")
+                  : (frameList.find((item) => item.id === mediaDetail.id)?.title ?? "")
+              }
+              image={
+                mediaDetail.type === "avatar"
+                  ? (avatarList.find((item) => item.id === mediaDetail.id)?.image ?? null)
+                  : (frameList.find((item) => item.id === mediaDetail.id)?.image ?? null)
+              }
+              equipped={
+                mediaDetail.type === "avatar"
+                  ? mediaDetail.id === equippedAvatarId
+                  : mediaDetail.id === equippedFrameId
+              }
+              variant={mediaDetail.type}
+              size="lg"
+              avatarImage={equippedAvatar?.image}
+            />
+            <Text style={styles.mediaDetailText}>
+              {mediaDetail.type === "avatar"
+                ? (avatarList.find((item) => item.id === mediaDetail.id)?.description ?? "")
+                : (frameList.find((item) => item.id === mediaDetail.id)?.description ?? "")}
+            </Text>
+            <View style={styles.mediaDetailActions}>
+              <Pressable
+                style={[styles.mediaDetailButton, styles.mediaDetailCancel]}
+                onPress={() => setMediaDetail(null)}
+              >
+                <Text style={styles.mediaDetailCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.mediaDetailButton, styles.mediaDetailEquip]}
+                onPress={() => {
+                  if (mediaDetail.type === "avatar") {
+                    setEquippedAvatarId(mediaDetail.id);
+                  } else {
+                    setEquippedFrameId(mediaDetail.id);
+                  }
+                  setMediaDetail(null);
+                }}
+              >
+                <Text style={styles.mediaDetailEquipText}>
+                  {mediaDetail.type === "avatar"
+                    ? mediaDetail.id === equippedAvatarId
+                      ? "Equipped"
+                      : "Equip"
+                    : mediaDetail.id === equippedFrameId
+                      ? "Equipped"
+                      : "Equip"}
                 </Text>
               </Pressable>
             </View>
@@ -443,6 +603,12 @@ const styles = StyleSheet.create({
     width: 126,
     height: 126,
     borderRadius: 63,
+  },
+  avatarFrame: {
+    position: "absolute",
+    width: 150,
+    height: 150,
+    resizeMode: "contain",
   },
   avatarEdit: {
     position: "absolute",
@@ -744,7 +910,7 @@ const styles = StyleSheet.create({
     right: 0,
     borderRadius: 10,
     borderWidth: 1.5,
-    borderColor: Colors.neutral[200],
+    borderColor: Colors.neutral[500],
     backgroundColor: Colors.shade[200],
     overflow: "hidden",
     zIndex: 2,
@@ -763,7 +929,8 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 14,
+    gap: 20,
+    paddingHorizontal: 8,
   },
   titleItem: {
     width: "47%",
@@ -781,7 +948,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderRadius: 10,
-    backgroundColor: "#3DBE8B",
+    backgroundColor: "#afe1cd",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1.5,
@@ -838,6 +1005,103 @@ const styles = StyleSheet.create({
     color: Colors.octonary.DEFAULT,
   },
   titleDetailEquipText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 14,
+    color: Colors.shade[200],
+  },
+  avatarSheet: {
+    marginTop: 90,
+    backgroundColor: Colors.shade[200],
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 20,
+    flex: 1,
+  },
+  avatarTabs: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 16,
+    marginBottom: 18,
+  },
+  avatarTab: {
+    flex: 1,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.octonary.DEFAULT,
+    paddingVertical: 10,
+    alignItems: "center",
+    backgroundColor: Colors.shade[200],
+  },
+  avatarTabActive: {
+    backgroundColor: Colors.senary[300],
+    borderColor: Colors.senary[300],
+  },
+  avatarTabText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.octonary.DEFAULT,
+  },
+  avatarTabTextActive: {
+    color: Colors.shade[200],
+  },
+  avatarGrid: {
+    paddingBottom: 30,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 14,
+  },
+  avatarGridItem: {
+    width: "47%",
+  },
+  mediaDetailCard: {
+    position: "absolute",
+    left: 20,
+    right: 20,
+    top: "45%",
+    transform: [{ translateY: -160 }],
+    borderRadius: 16,
+    backgroundColor: Colors.shade[200],
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+    alignItems: "center",
+    gap: 12,
+  },
+  mediaDetailText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+    textAlign: "center",
+  },
+  mediaDetailActions: {
+    flexDirection: "row",
+    gap: 12,
+    width: "100%",
+    marginTop: 8,
+  },
+  mediaDetailButton: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mediaDetailCancel: {
+    backgroundColor: Colors.shade[200],
+    borderWidth: 1.5,
+    borderColor: Colors.neutral[300],
+  },
+  mediaDetailEquip: {
+    backgroundColor: Colors.senary[300],
+  },
+  mediaDetailCancelText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+  },
+  mediaDetailEquipText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 14,
     color: Colors.shade[200],

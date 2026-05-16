@@ -66,6 +66,8 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: "Quicksand-Bold",
+    textAlign: "center",
+    bottom: 4,
   },
   sm: {
     wrapper: {
