@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import LogoRhetora from "../assets/images/logorhetora.svg";
 
 import PracticeCameraPanel from "../components/practice-camera-panel";
 import TopHeader from "../components/top-header";
@@ -20,7 +19,7 @@ import { Colors } from "../constants/colors";
 
 const bgImage = require("../assets/images/bg-motif.png");
 const heroImage = require("../assets/images/casualmode/filler-free.png");
-
+const logoRhetora = require("../assets/images/logorhetora.png");
 const tutorialSteps = [
   "After setting up your camera and microphone, start the session and you’ll be given a simple topic to talk about.",
   "As you speak, focus on reducing filler words such as “um”, “uh”, or “like”. Instead of filling silence, try pausing briefly to collect your thoughts.",
@@ -95,7 +94,14 @@ export default function FillerFree() {
           </Text>
         </View>
 
-        <PracticeCameraPanel showStatus placeholder={<LogoRhetora width={90} height={90} />} />
+        <PracticeCameraPanel showStatus placeholder={
+          <Image
+            source={logoRhetora}
+            style={{ width: 90, height: 90 }}
+            resizeMode="contain"
+          />
+          } 
+        />
 
         <Pressable
           style={styles.tutorialCard}

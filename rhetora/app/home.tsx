@@ -308,12 +308,12 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 14,
+    fontSize: 12,
     color: Colors.octonary.DEFAULT,
   },
   name: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 18,
+    fontSize: 16,
     color: Colors.octonary.DEFAULT,
   },
   headerActions: {
@@ -384,12 +384,12 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 18,
+    fontSize: 16,
     color: Colors.octonary.DEFAULT,
   },
   statLabel: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 14,
+    fontSize: 11,
     color: Colors.octonary.DEFAULT,
   },
   statImage: {

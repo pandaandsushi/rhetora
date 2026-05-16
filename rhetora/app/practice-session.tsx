@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  Image,
   Modal,
   Pressable,
   SafeAreaView,
@@ -10,13 +11,12 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Circle } from "react-native-svg";
-import LogoRhetora from "../assets/images/logorhetora.svg";
 
 import { Colors } from "../constants/colors";
 import PracticeCameraPanel from "../components/practice-camera-panel";
 import TopHeader from "../components/top-header";
 const TOTAL_SECONDS = 10 * 60;
-
+const logoRhetora = require("../assets/images/logorhetora.png");
 export default function PracticeSession() {
   const router = useRouter();
   
@@ -88,7 +88,13 @@ export default function PracticeSession() {
 
         <PracticeCameraPanel
           initialCameraOn={cameraOn === "true"}
-          placeholder={<LogoRhetora width={90} height={90} />}
+          placeholder={
+            <Image
+              source={logoRhetora}
+              style={{ width: 90, height: 90 }}
+              resizeMode="contain"
+            />
+          }
         />
 
         <Text style={styles.disclaimerText}>

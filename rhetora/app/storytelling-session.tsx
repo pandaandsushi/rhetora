@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  Image,
   Modal,
   Pressable,
   SafeAreaView,
@@ -12,10 +13,10 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Circle } from "react-native-svg";
 
-import LogoRhetora from "../assets/images/logorhetora.svg";
 import { Colors } from "../constants/colors";
 import PracticeCameraPanel from "../components/practice-camera-panel";
 import TopHeader from "../components/top-header";
+const logoRhetora = require("../assets/images/logorhetora.png");
 
 export default function StorytellingSession() {
   const router = useRouter();
@@ -100,9 +101,15 @@ export default function StorytellingSession() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.cameraWrapper}>
           <PracticeCameraPanel
-            initialCameraOn={cameraOn === "true"}
-            placeholder={<LogoRhetora width={90} height={90} />}
-          />
+          initialCameraOn={cameraOn === "true"}
+          placeholder={
+            <Image
+              source={logoRhetora}
+              style={{ width: 90, height: 90 }}
+              resizeMode="contain"
+            />
+          }
+        />
         </View>
 
         <View style={styles.controlsRow}>

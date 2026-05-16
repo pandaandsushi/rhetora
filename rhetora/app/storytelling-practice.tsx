@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import LogoRhetora from "../assets/images/logorhetora.svg";
 import TopHeader from "../components/top-header";
 
 import PracticeCameraPanel from "../components/practice-camera-panel";
@@ -19,6 +18,7 @@ import { Colors } from "../constants/colors";
 
 const bgImage = require("../assets/images/bg-motif.png");
 const heroImage = require("../assets/images/casualmode/storytelling-practice.png");
+const logoRhetora = require("../assets/images/logorhetora.png");
 
 const tutorialSteps = [
   "Once you're ready, start the session and the AI will provide the opening of a story. Take your time to read it and understand the context.",
@@ -106,7 +106,13 @@ export default function StorytellingPractice() {
           </Text>
         </View>
 
-        <PracticeCameraPanel showStatus placeholder={<LogoRhetora width={90} height={90} />} />
+        <PracticeCameraPanel showStatus placeholder={
+          <Image
+            source={logoRhetora}
+            style={{ width: 90, height: 90 }}
+            resizeMode="contain"
+          />
+        } />
 
         <Pressable
           style={styles.tutorialCard}

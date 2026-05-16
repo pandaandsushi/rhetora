@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  Image,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -10,10 +11,10 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-import LogoRhetora from "../assets/images/logorhetora.svg";
 import PracticeCameraPanel from "../components/practice-camera-panel";
 import TopHeader from "../components/top-header";
 import { Colors } from "../constants/colors";
+const logoRhetora = require("../assets/images/logorhetora.png");
 
 export default function PracticeSetup() {
   const router = useRouter();
@@ -39,7 +40,13 @@ export default function PracticeSetup() {
 
         <PracticeCameraPanel
           showStatus
-          placeholder={<LogoRhetora width={90} height={90} />}
+          placeholder={
+            <Image
+              source={logoRhetora}
+              style={{ width: 90, height: 90 }}
+              resizeMode="contain"
+            />
+          }
           onCameraToggle={setIsCameraOn} 
         />
 

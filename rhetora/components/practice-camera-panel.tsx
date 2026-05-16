@@ -1,12 +1,12 @@
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { Audio } from "expo-av";
 import { useFocusEffect } from "expo-router";
 
-import LogoRhetora from "../assets/images/logorhetora.svg";
 import { Colors } from "../constants/colors";
+const logoRhetora = require("../assets/images/logorhetora.png");
 
 type PracticeCameraPanelProps = {
   showStatus?: boolean;
@@ -154,7 +154,13 @@ export default function PracticeCameraPanel({
           <CameraView style={styles.cameraFeed} facing="front" />
         ) : (
           <View style={styles.cameraPlaceholder}>
-            {placeholder ?? <LogoRhetora width={90} height={90} />}
+            {placeholder ?? (
+              <Image
+                source={logoRhetora}
+                style={{ width: 90, height: 90 }}
+                resizeMode="contain"
+              />
+            )}
           </View>
         )}
 

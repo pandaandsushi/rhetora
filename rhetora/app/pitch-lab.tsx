@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import LogoRhetora from "../assets/images/logorhetora.svg";
 
 import PracticeCameraPanel from "../components/practice-camera-panel";
 import TopHeader from "../components/top-header";
@@ -18,7 +17,7 @@ import { Colors } from "../constants/colors";
 
 const bgImage = require("../assets/images/bg-motif.png");
 const heroImage = require("../assets/images/casualmode/the-pitch-lab.png");
-
+const logoRhetora = require("../assets/images/logorhetora.png");
 const tutorialSteps = [
   "You'll be given a scenario or idea to present.",
   "Take a moment to think about your main message--what you're presenting, why it matters, and what makes it valuable.",
@@ -76,8 +75,16 @@ export default function PitchLab() {
           </Text>
         </View>
 
-        <PracticeCameraPanel showStatus placeholder={<LogoRhetora width={90} height={90} />} />
-
+        <PracticeCameraPanel
+          showStatus
+          placeholder={
+            <Image
+              source={logoRhetora}
+              style={{ width: 90, height: 90 }}
+              resizeMode="contain"
+            />
+          }
+        />
         <Pressable
           style={styles.tutorialCard}
           onPress={() => setTutorialCollapsed((prev) => !prev)}

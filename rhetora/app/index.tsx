@@ -1,12 +1,11 @@
 import { useEffect } from "react";
-import { Text, View } from "react-native";
+import { Text, View, Image } from "react-native";
 import { useRouter } from "expo-router";
-
-import BgMotif from "../assets/images/bg-motif.svg";
-import LogoRhetora from "../assets/images/logorhetora.svg";
 
 export default function Index() {
   const router = useRouter();
+
+  const logoRhetora = require("../assets/images/logorhetora.png");
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -27,7 +26,12 @@ export default function Index() {
       }}
     >
       <View style={{ alignItems: "center" }}>
-        <LogoRhetora width={220} height={220} />
+        <Image
+          source={logoRhetora}
+          style={{ width: 220, height: 220 }}
+          resizeMode="contain"
+        />
+
         <Text
           style={{
             fontFamily: "AlbertSans-Regular",
