@@ -199,13 +199,16 @@ export default function Profile() {
                 </View>
                 <Image source={streakImage} style={styles.statImage} />
               </View>
-              <View style={[styles.statCard, styles.statCardAlt]}>
+              <Pressable
+                style={[styles.statCard, styles.statCardAlt]}
+                onPress={() => router.push("/leaderboard")}
+              >
                 <View style={styles.statTextWrap}>
                   <Text style={styles.statValue}>#10</Text>
                   <Text style={styles.statLabel}>Leaderboard</Text>
                 </View>
                 <Image source={leaderboardImage} style={styles.statImage} />
-              </View>
+              </Pressable>
             </View>
 
             <View style={styles.badgeCard}>
