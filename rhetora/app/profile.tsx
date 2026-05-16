@@ -235,10 +235,10 @@ export default function Profile() {
               </Pressable>
               <Pressable
                 style={styles.menuRow}
-                onPress={() => router.push("/notifications")}
+                onPress={() => router.push("/notifications-settings")}
               >
                 <Text style={[styles.menuText, { color: Colors.octonary.DEFAULT }]}>
-                  Notifications
+                  Notifications Settings
                 </Text>
                 <Ionicons name="chevron-forward" size={20} color={Colors.octonary.DEFAULT} />
               </Pressable>
