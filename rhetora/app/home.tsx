@@ -600,6 +600,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingBottom: 12,
+    paddingBottom: 10,
   },
 });
