@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 20,
+    fontSize: 16,
     color: Colors.octonary.DEFAULT,
   },
   eventCard: {

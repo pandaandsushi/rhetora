@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 20,
+    fontSize: 18,
     color: Colors.octonary.DEFAULT,
   },
   timerWrap: {
