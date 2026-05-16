@@ -12,7 +12,7 @@ import {
 import { useRouter } from "expo-router";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { Ionicons } from "@expo/vector-icons";
-
+import TitlePill, { titleList } from "../components/title-pill";
 import { Colors } from "../constants/colors";
 const avatars = {
   ready: require("../assets/images/avatar/av-ready.png"),
@@ -34,7 +34,6 @@ const bronzeCrown = require("../assets/images/leaderboard/bronze.png");
 const coinImage = require("../assets/images/shop/coin.png");
 const confettiImage = require("../assets/images/confetti.png");
 const titleBadgeImage = require("../assets/images/title/title.png");
-const titleCardImage = require("../assets/images/title/ttitle-1.png");
 
 type Leader = {
   id: string;
@@ -95,7 +94,7 @@ export default function Leaderboard() {
   const [titleVisible, setTitleVisible] = useState(false);
   const [tutorialVisible, setTutorialVisible] = useState(false);
   const rewardAmount = 160;
-
+  const selectedTitle = titleList[1];
   useEffect(() => {
     setRewardStep("congrats");
   }, []);
@@ -461,7 +460,7 @@ export default function Leaderboard() {
       <Modal transparent animationType="fade" visible={titleVisible}>
         <View style={styles.modalOverlay}>
           <View style={styles.titleModalCard}>
-            <Image source={titleCardImage} style={styles.titleCardImage} />
+            <TitlePill title={selectedTitle} size="md" />
             <Text style={styles.titleModalHeading}>Requirement:</Text>
             <Text style={styles.titleModalText}>Top 3 in weekly leaderboard</Text>
             <Pressable style={styles.titleModalButton} onPress={() => setTitleVisible(false)}>
