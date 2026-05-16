@@ -29,6 +29,7 @@ import { titleList } from "../constants/titles";
 
 const bgImage = require("../assets/images/homepage/bg-home.png");
 const coinImage = require("../assets/images/shop/coin.png");
+const logoutImage = require("../assets/images/auth/thinking.png");
 const streakImage = require("../assets/images/homepage/il-streak.png");
 const leaderboardImage = require("../assets/images/homepage/il-leaderboard.png");
 
@@ -50,6 +51,7 @@ export default function Profile() {
     type: "avatar" | "frame";
     id: string;
   } | null>(null);
+  const [logoutVisible, setLogoutVisible] = useState(false);
 
   useEffect(() => {
     const unsubscribe = subscribeToBadgeSelection(() => {
@@ -143,12 +145,6 @@ export default function Profile() {
 
   return (
     <View style={styles.screen}>
-      <ImageBackground
-        source={bgImage}
-        style={styles.background}
-        imageStyle={{ opacity: 0.35 }}
-        resizeMode="cover"
-      >
         <SafeAreaView style={styles.safeArea}>
           <TopHeader
             title="Profile"
@@ -175,7 +171,7 @@ export default function Profile() {
                     setAvatarFrameVisible(true);
                   }}
                 >
-                  <Ionicons name="pencil" size={16} color={Colors.octonary.DEFAULT} />
+                  <Ionicons name="pencil" size={20} color={Colors.octonary.DEFAULT} />
                 </Pressable>
               </View>
               <Text style={styles.profileName}>John Doe</Text>
@@ -186,7 +182,7 @@ export default function Profile() {
                   size="md"
                 />
                 <Pressable style={styles.titleEdit} onPress={() => setTitleEditVisible(true)}>
-                  <Ionicons name="pencil" size={16} color={Colors.octonary.DEFAULT} />
+                  <Ionicons name="pencil" size={20} color={Colors.octonary.DEFAULT} />
                 </Pressable>
               </View>
             </View>
@@ -228,21 +224,34 @@ export default function Profile() {
             </View>
 
             <View style={styles.menuCard}>
-              {[
-                { label: "Edit Profile", color: Colors.octonary.DEFAULT },
-                { label: "Notifications", color: Colors.octonary.DEFAULT },
-                { label: "My Recordings", color: Colors.octonary.DEFAULT },
-                { label: "Log out", color: Colors.error[500], isLogout: true },
-              ].map((item) => (
-                <Pressable key={item.label} style={styles.menuRow}>
-                  <Text style={[styles.menuText, { color: item.color }]}>{item.label}</Text>
-                  <Ionicons
-                    name={item.isLogout ? "log-out-outline" : "chevron-forward"}
-                    size={20}
-                    color={item.color}
-                  />
-                </Pressable>
-              ))}
+              <Pressable
+                style={styles.menuRow}
+                onPress={() => router.push("/edit-profile")}
+              >
+                <Text style={[styles.menuText, { color: Colors.octonary.DEFAULT }]}>
+                  Edit Profile
+                </Text>
+                <Ionicons name="chevron-forward" size={20} color={Colors.octonary.DEFAULT} />
+              </Pressable>
+              <Pressable
+                style={styles.menuRow}
+                onPress={() => router.push("/notifications")}
+              >
+                <Text style={[styles.menuText, { color: Colors.octonary.DEFAULT }]}>
+                  Notifications
+                </Text>
+                <Ionicons name="chevron-forward" size={20} color={Colors.octonary.DEFAULT} />
+              </Pressable>
+              <Pressable style={styles.menuRow}>
+                <Text style={[styles.menuText, { color: Colors.octonary.DEFAULT }]}>
+                  My Recordings
+                </Text>
+                <Ionicons name="chevron-forward" size={20} color={Colors.octonary.DEFAULT} />
+              </Pressable>
+              <Pressable style={styles.menuRow} onPress={() => setLogoutVisible(true)}>
+                <Text style={[styles.menuText, { color: Colors.error[500] }]}>Log out</Text>
+                <Ionicons name="log-out-outline" size={20} color={Colors.error[500]} />
+              </Pressable>
             </View>
           </ScrollView>
         </SafeAreaView>
@@ -250,7 +259,6 @@ export default function Profile() {
         <View style={styles.navWrap}>
           <NavBar activeKey="profile" />
         </View>
-      </ImageBackground>
 
       {editVisible && (
         <View style={styles.editOverlay}>
@@ -544,6 +552,33 @@ export default function Profile() {
           </View>
         </View>
       )}
+
+      {logoutVisible && (
+        <View style={styles.editOverlay}>
+          <Pressable style={styles.editBackdrop} onPress={() => setLogoutVisible(false)} />
+          <View style={styles.logoutCard}>
+            <Image source={logoutImage} style={styles.logoutImage} />
+            <Text style={styles.logoutTitle}>Log out from this account?</Text>
+            <View style={styles.logoutActions}>
+              <Pressable
+                style={[styles.logoutButton, styles.logoutCancel]}
+                onPress={() => setLogoutVisible(false)}
+              >
+                <Text style={styles.logoutCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.logoutButton, styles.logoutConfirm]}
+                onPress={() => {
+                  setLogoutVisible(false);
+                  router.replace("/login");
+                }}
+              >
+                <Text style={styles.logoutConfirmText}>Confirm</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -635,6 +670,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
+    left: 24,
   },
   titleEdit: {
     width: 32,
@@ -700,7 +736,7 @@ const styles = StyleSheet.create({
   },
   badgeTitle: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 18,
+    fontSize: 16,
     color: Colors.octonary.DEFAULT,
   },
   badgeRow: {
@@ -1105,6 +1141,60 @@ const styles = StyleSheet.create({
     color: Colors.octonary.DEFAULT,
   },
   mediaDetailEquipText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 14,
+    color: Colors.shade[200],
+  },
+  logoutCard: {
+    position: "absolute",
+    left: 20,
+    right: 20,
+    top: "45%",
+    transform: [{ translateY: -160 }],
+    borderRadius: 16,
+    backgroundColor: Colors.shade[200],
+    paddingHorizontal: 20,
+    paddingBottom: 24,
+    alignItems: "center",
+    gap: 16,
+  },
+  logoutImage: {
+    width: 270,
+    height: 270,
+    resizeMode: "contain",
+  },
+  logoutTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+    textAlign: "center",
+  },
+  logoutActions: {
+    flexDirection: "row",
+    gap: 12,
+    width: "100%",
+  },
+  logoutButton: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  logoutCancel: {
+    backgroundColor: Colors.shade[200],
+    borderWidth: 1.5,
+    borderColor: Colors.neutral[300],
+  },
+  logoutConfirm: {
+    backgroundColor: Colors.senary[300],
+  },
+  logoutCancelText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+  },
+  logoutConfirmText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 14,
     color: Colors.shade[200],
