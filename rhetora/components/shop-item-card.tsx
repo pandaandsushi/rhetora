@@ -27,7 +27,7 @@ export default function ShopItemCard({
   onPress,
 }: ShopItemCardProps) {
   return (
-    <Pressable style={[styles.card, dimmed && styles.cardDimmed]} onPress={onPress}>
+    <Pressable style={[styles.card]} onPress={onPress}>
       <View style={styles.previewWrap}>
         {variant === "frame" && avatarImage ? (
           <View style={styles.framePreview}>
@@ -54,6 +54,7 @@ export default function ShopItemCard({
           </View>
         )}
       </View>
+        {dimmed && <View style={styles.dimOverlay} pointerEvents="none" />}
     </Pressable>
   );
 }
@@ -155,7 +156,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.octonary.DEFAULT,
   },
-  cardDimmed: {
-    opacity: 0.5,
+  dimOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 16,
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
   },
 });
