@@ -862,6 +862,8 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     flexDirection: "row",
     flexWrap: "wrap",
+    paddingHorizontal: 8,
+    paddingTop: 8,
     gap: 14,
   },
   editBadgeCard: {
