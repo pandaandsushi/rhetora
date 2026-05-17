@@ -314,7 +314,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.shade[200],
   },
-  // Modal Styles (Kept consistent with practice-session.tsx)
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.35)",

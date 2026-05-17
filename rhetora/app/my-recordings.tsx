@@ -84,20 +84,17 @@ export default function MyRecordings() {
   const list = recordings.length > 0 ? recordings : [];
 
   return list.filter((recording) => {
-    // Search filter (skip if empty)
     if (normalized) {
       const combined = `${recording.title} ${recording.mode} ${recording.dateLabel}`.toLowerCase();
       if (!combined.includes(normalized)) return false;
     }
 
-    // Mode filter
     const modeKey = recording.mode.toLowerCase().includes("story")
       ? "Story"
-      : "Casual"; // "Impromptu Sprint" and anything else → "Casual"
+      : "Casual";
     const matchesMode = selectedModes.length === 0 || selectedModes.includes(modeKey);
     if (!matchesMode) return false;
 
-    // Date filter
     const matchesDate = matchesDateRange(recording.dateLabel, selectedDateRange);
     if (!matchesDate) return false;
 
