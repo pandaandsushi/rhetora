@@ -31,6 +31,8 @@ type FeedbackPost = {
   titleId: string;
   message: string;
   tag: "storymode" | "fillerfree" | "pitchlab" | "storytellingpractice";
+  dateLabel: string;
+  feedbackVisible: boolean;
   isMine?: boolean;
 };
 
@@ -44,6 +46,8 @@ const posts: FeedbackPost[] = [
     titleId: "sweet-victory",
     message: "Hi, this is my result for practicing Filler-Free today! What do you guys think?",
     tag: "fillerfree",
+    dateLabel: "May 17, 2026",
+    feedbackVisible: true,
   },
   {
     id: "post-2",
@@ -54,6 +58,8 @@ const posts: FeedbackPost[] = [
     titleId: "sweet-victory",
     message: "Practicing story mode. Feedback is welcome!",
     tag: "storymode",
+    dateLabel: "May 16, 2026",
+    feedbackVisible: true,
   },
   {
     id: "post-3",
@@ -64,6 +70,8 @@ const posts: FeedbackPost[] = [
     titleId: "sweet-victory",
     message: "Hi everyone! This is my first time trying story mode. Feel free to give me feedback. Please be kind and thank you!",
     tag: "storymode",
+    dateLabel: "May 15, 2026",
+    feedbackVisible: false,
     isMine: true,
   },
 ];
@@ -94,6 +102,8 @@ export default function Feedback() {
   const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPostId, setMenuPostId] = useState<string | null>(null);
+  const [showAspectDetails, setShowAspectDetails] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
 
   useEffect(() => {
     const unsubscribe = subscribeToMockUser((next) => {
@@ -199,6 +209,7 @@ export default function Feedback() {
               titleLabel={title.label}
               message={post.message}
               tag={tagLabels[post.tag]}
+              dateLabel={post.dateLabel}
               avgRating={getAverageRating(post.id)}
               commentCount={commentCount}
               showGiveFeedback={!post.isMine}
@@ -284,6 +295,26 @@ export default function Feedback() {
               multiline
               style={styles.commentInput}
             />
+            <Pressable
+              style={styles.tipToggle}
+              onPress={() => setShowGuide((prev) => !prev)}
+            >
+              <Text style={styles.tipTitle}>How to give good feedback?</Text>
+              <Ionicons
+                name={showGuide ? "chevron-up" : "chevron-down"}
+                size={18}
+                color={Colors.octonary.DEFAULT}
+              />
+            </Pressable>
+            {showGuide && (
+              <View style={styles.tipList}>
+                <Text style={styles.tipText}>- Structure: clear flow and logical order.</Text>
+                <Text style={styles.tipText}>- Fluency: smooth delivery and minimal pauses.</Text>
+                <Text style={styles.tipText}>- Conciseness: focused and avoids unnecessary words.</Text>
+                <Text style={styles.tipText}>- Critical Thinking: depth of ideas and reasoning.</Text>
+                <Text style={styles.tipText}>- Confidence: steady voice and assured tone.</Text>
+              </View>
+            )}
 
             <View style={styles.modalActions}>
               <Pressable
@@ -337,23 +368,57 @@ export default function Feedback() {
           <View style={styles.commentSheet}>
             <View style={styles.commentSheetHandle} />
             <Text style={styles.commentSheetTitle}>Feedback</Text>
-            <ScrollView contentContainerStyle={styles.commentList} showsVerticalScrollIndicator={false}>
-              {(commentsPostId ? getEntriesForPost(commentsPostId) : []).map((entry) => {
-                const authorAvatar = avatarList.find((item) => item.id === entry.authorAvatarId) ?? avatarList[0];
-                return (
-                  <View key={entry.id} style={styles.commentRow}>
-                    <Image source={authorAvatar.image} style={styles.commentAvatar} />
-                    <View style={styles.commentBody}>
-                      <View style={styles.commentHeaderRow}>
-                        <Text style={styles.commentName}>{entry.authorName}</Text>
-                        <Text style={styles.commentTime}>{formatTimeAgo(entry.createdAt)}</Text>
-                      </View>
-                      <Text style={styles.commentText}>{entry.comment}</Text>
-                      <View style={styles.commentRatingRow}>
-                        <Text style={styles.commentRatingText}>
-                          {getEntryAverage(entry).toFixed(1)}
-                        </Text>
-                        <Ionicons name="star" size={14} color="#F59E0B" />
+            {commentsPostId && !isFeedbackVisible(commentsPostId) ? (
+              <View style={styles.commentEmptyWrap}>
+                <Text style={styles.commentEmptyText}>Feedback is private for this post.</Text>
+              </View>
+            ) : (
+              <ScrollView contentContainerStyle={styles.commentList} showsVerticalScrollIndicator={false}>
+                {(commentsPostId ? getEntriesForPost(commentsPostId) : []).map((entry) => {
+                  const authorAvatar = avatarList.find((item) => item.id === entry.authorAvatarId) ?? avatarList[0];
+                  const aspects = getAspectRows(entry);
+                  return (
+                    <View key={entry.id} style={styles.commentRow}>
+                      <Image source={authorAvatar.image} style={styles.commentAvatar} />
+                      <View style={styles.commentBody}>
+                        <View style={styles.commentHeaderRow}>
+                          <Text style={styles.commentName}>{entry.authorName}</Text>
+                          <Text style={styles.commentTime}>{formatTimeAgo(entry.createdAt)}</Text>
+                        </View>
+                        <Text style={styles.commentText}>{entry.comment}</Text>
+                        <Pressable
+                          style={styles.detailsToggle}
+                          onPress={() => setShowAspectDetails((prev) => !prev)}
+                        >
+                          <Text style={styles.detailsToggleText}>
+                            {showAspectDetails ? "Hide details" : "Show details"}
+                          </Text>
+                          <Ionicons
+                            name={showAspectDetails ? "chevron-up" : "chevron-down"}
+                            size={16}
+                            color={Colors.octonary.DEFAULT}
+                          />
+                        </Pressable>
+                        {showAspectDetails ? (
+                          <View style={styles.aspectGrid}>
+                            {aspects.map((aspect) => (
+                              <View key={aspect.label} style={styles.aspectItem}>
+                                <Text style={styles.aspectLabel}>{aspect.label}</Text>
+                                <View style={styles.aspectValueRow}>
+                                  <Text style={styles.aspectValue}>{aspect.value}</Text>
+                                  <Ionicons name="star" size={12} color="#F59E0B" />
+                                </View>
+                              </View>
+                            ))}
+                          </View>
+                        ) : (
+                          <View style={styles.commentRatingRow}>
+                            <Text style={styles.commentRatingText}>
+                              {getEntryAverage(entry).toFixed(1)}
+                            </Text>
+                            <Ionicons name="star" size={14} color="#F59E0B" />
+                          </View>
+                        )}
                         <View style={styles.commentReactionRow}>
                           <View style={styles.commentReactionItem}>
                             <Ionicons name="thumbs-up" size={16} color={Colors.octonary.DEFAULT} />
@@ -366,10 +431,10 @@ export default function Feedback() {
                         </View>
                       </View>
                     </View>
-                  </View>
-                );
-              })}
-            </ScrollView>
+                  );
+                })}
+              </ScrollView>
+            )}
           </View>
         </View>
       )}
@@ -423,6 +488,19 @@ const getEntryAverage = (entry: PeerFeedbackEntry) => {
     entry.ratings.criticalThinking +
     entry.ratings.confidence;
   return sum / 5;
+};
+
+const getAspectRows = (entry: PeerFeedbackEntry) => [
+  { label: "Structure", value: entry.ratings.structure },
+  { label: "Fluency", value: entry.ratings.fluency },
+  { label: "Conciseness", value: entry.ratings.conciseness },
+  { label: "Critical Thinking", value: entry.ratings.criticalThinking },
+  { label: "Confidence", value: entry.ratings.confidence },
+];
+
+const isFeedbackVisible = (postId: string) => {
+  const post = posts.find((item) => item.id === postId);
+  return post?.feedbackVisible ?? true;
 };
 
 const formatTimeAgo = (iso: string) => {
@@ -597,6 +675,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.shade[200],
   },
+  tipToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  tipTitle: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+  },
+  tipList: {
+    gap: 6,
+  },
+  tipText: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.neutral[600],
+    lineHeight: 18,
+  },
   modalBackdrop: {
     ...StyleSheet.absoluteFillObject,
   },
@@ -630,6 +727,15 @@ const styles = StyleSheet.create({
   commentList: {
     gap: 16,
     paddingBottom: 10,
+  },
+  commentEmptyWrap: {
+    paddingVertical: 20,
+    alignItems: "center",
+  },
+  commentEmptyText: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 14,
+    color: Colors.neutral[500],
   },
   commentRow: {
     flexDirection: "row",
@@ -668,6 +774,40 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+  },
+  aspectGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  aspectItem: {
+    width: "48%",
+    gap: 4,
+  },
+  aspectLabel: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.neutral[500],
+  },
+  aspectValueRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  aspectValue: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 12,
+    color: Colors.octonary.DEFAULT,
+  },
+  detailsToggle: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  detailsToggleText: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 12,
+    color: Colors.octonary.DEFAULT,
   },
   commentRatingText: {
     fontFamily: "AlbertSans-SemiBold",

@@ -11,6 +11,7 @@ type PeerFeedbackCardProps = {
   titleLabel: string;
   message: string;
   tag: string;
+  dateLabel: string;
   avgRating: number;
   commentCount: number;
   onGiveFeedback?: () => void;
@@ -28,6 +29,7 @@ export default function PeerFeedbackCard({
   titleLabel,
   message,
   tag,
+  dateLabel,
   avgRating,
   commentCount,
   onGiveFeedback,
@@ -58,6 +60,8 @@ export default function PeerFeedbackCard({
       </View>
 
       <Text style={styles.message}>{message}</Text>
+
+      <Text style={styles.dateText}>{dateLabel}</Text>
 
       <View style={styles.videoWrap}>
         <Image source={videoImage} style={styles.videoThumb} />
@@ -161,6 +165,11 @@ const styles = StyleSheet.create({
     fontFamily: "AlbertSans-Regular",
     fontSize: 14,
     color: Colors.octonary.DEFAULT,
+  },
+  dateText: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.neutral[500],
   },
   videoWrap: {
     borderRadius: 14,
