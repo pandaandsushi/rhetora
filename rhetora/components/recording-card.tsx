@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 
 import { Colors } from "../constants/colors";
 
@@ -10,6 +10,8 @@ type RecordingCardProps = {
   dateLabel: string;
   thumbnail?: any;
   hasVideo?: boolean;
+  selected?: boolean;
+  onPress?: () => void;
 };
 
 export default function RecordingCard({
@@ -18,11 +20,16 @@ export default function RecordingCard({
   dateLabel,
   thumbnail,
   hasVideo = true,
+  selected = false,
+  onPress,
 }: RecordingCardProps) {
   const thumbSource = hasVideo ? thumbnail ?? fallbackThumb : fallbackThumb;
 
   return (
-    <View style={styles.card}>
+    <Pressable
+      style={[styles.card, selected && styles.cardSelected]}
+      onPress={onPress}
+    >
       <View style={styles.thumbWrap}>
         <Image
           source={thumbSource}
@@ -35,7 +42,7 @@ export default function RecordingCard({
         <Text style={styles.subtitle}>{mode}</Text>
         <Text style={styles.meta}>{dateLabel}</Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -50,6 +57,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 12,
     gap: 14,
+  },
+  cardSelected: {
+    borderColor: Colors.senary[300],
   },
   thumbWrap: {
     width: 76,

@@ -10,7 +10,7 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 
 import { Colors } from "../constants/colors";
@@ -21,18 +21,21 @@ import {
   subscribeToMockUser,
   type Recording,
 } from "../data/mock-user";
-import { parse } from "react-native-svg";
 
 const bgImage = require("../assets/images/bg-motif.png");
 const emptyImage = require("../assets/images/no-recording.png");
 
 export default function MyRecordings() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ select?: string; recordingId?: string }>();
   const [search, setSearch] = useState("");
   const [recordings, setRecordings] = useState<Recording[]>(getMockUserData().recordings);
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedModes, setSelectedModes] = useState<string[]>(["Story", "Casual"]);
   const [selectedDateRange, setSelectedDateRange] = useState<string | null>("Today");
+  const selectMode = params.select === "true";
+  const selectedRecordingId =
+    typeof params.recordingId === "string" ? params.recordingId : null;
 
   useEffect(() => {
     const unsubscribe = subscribeToMockUser((next) => {
@@ -65,7 +68,6 @@ export default function MyRecordings() {
     lastMonthStart.setDate(todayStart.getDate() - 29);
 
     if (range === "Today") {
-        console.log("Comparing", parsed, "with", todayStart);
       return parsed == todayStart;
     }
     if (range === "Yesterday") {
@@ -168,6 +170,16 @@ export default function MyRecordings() {
                   mode={recording.mode}
                   thumbnail={recording.thumbnail}
                   hasVideo={recording.hasVideo}
+                  selected={recording.id === selectedRecordingId}
+                  onPress={
+                    selectMode
+                      ? () =>
+                          router.push({
+                            pathname: "/feedback-share",
+                            params: { recordingId: recording.id },
+                          })
+                      : undefined
+                  }
                 />
               ))}
             </View>

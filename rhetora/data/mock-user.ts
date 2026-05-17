@@ -7,6 +7,20 @@ export type Recording = {
   hasVideo?: boolean;
 };
 
+export type PeerFeedbackPost = {
+  id: string;
+  avatarId: string;
+  frameId?: string;
+  name: string;
+  hideName?: boolean;
+  titleId: string;
+  message: string;
+  tag: "storymode" | "fillerfree" | "pitchlab" | "storytellingpractice";
+  dateLabel: string;
+  feedbackVisible: boolean;
+  isMine?: boolean;
+};
+
 type MockUserProfile = {
   fullName: string;
   email: string;
@@ -28,6 +42,7 @@ export type MockUserData = {
   recordings: Recording[];
   episodesCompleted: string[];
   badgesObtained: string[];
+  peerFeedbackPosts: PeerFeedbackPost[];
   peerFeedbackEntries: PeerFeedbackEntry[];
 };
 
@@ -82,6 +97,46 @@ const mockRecordings: Recording[] = [
   },
 ];
 
+const mockFeedbackPosts: PeerFeedbackPost[] = [
+  {
+    id: "post-1",
+    avatarId: "hmph",
+    frameId: "little-puppy",
+    name: "Jesse Doe",
+    hideName: true,
+    titleId: "sweet-victory",
+    message: "Hi, this is my result for practicing Filler-Free today! What do you guys think?",
+    tag: "fillerfree",
+    dateLabel: "May 17, 2026",
+    feedbackVisible: true,
+  },
+  {
+    id: "post-2",
+    avatarId: "sad-doggo",
+    frameId: "happy-holiday",
+    name: "Jenna Rose",
+    hideName: true,
+    titleId: "sweet-victory",
+    message: "Practicing story mode. Feedback is welcome!",
+    tag: "storymode",
+    dateLabel: "May 16, 2026",
+    feedbackVisible: true,
+  },
+  {
+    id: "post-3",
+    avatarId: "sad-doggo",
+    frameId: "little-puppy",
+    name: "You",
+    hideName: false,
+    titleId: "sweet-victory",
+    message: "Hi everyone! This is my first time trying story mode. Feel free to give me feedback. Please be kind and thank you!",
+    tag: "storymode",
+    dateLabel: "May 15, 2026",
+    feedbackVisible: false,
+    isMine: true,
+  },
+];
+
 let mockUserData: MockUserData = {
   profile: {
     fullName: "John Doe",
@@ -101,6 +156,7 @@ let mockUserData: MockUserData = {
   recordings: mockRecordings,
   episodesCompleted: ["ep-1"],
   badgesObtained: ["badge-1", "badge-3", "badge-4", "badge-6"],
+  peerFeedbackPosts: mockFeedbackPosts,
   peerFeedbackEntries: [
     {
       id: "feedback-1",

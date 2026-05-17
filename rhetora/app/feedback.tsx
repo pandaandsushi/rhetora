@@ -15,6 +15,7 @@ import {
   getMockUserData,
   subscribeToMockUser,
   updateMockUserData,
+  type PeerFeedbackPost,
   type PeerFeedbackEntry,
 } from "../data/mock-user";
 
@@ -22,61 +23,7 @@ const bgImage = require("../assets/images/bg-motif.png");
 
 const postVideoImage = require("../assets/images/storymode/ch1/first-day.png");
 
-type FeedbackPost = {
-  id: string;
-  avatarId: string;
-  frameId?: string;
-  name: string;
-  hideName?: boolean;
-  titleId: string;
-  message: string;
-  tag: "storymode" | "fillerfree" | "pitchlab" | "storytellingpractice";
-  dateLabel: string;
-  feedbackVisible: boolean;
-  isMine?: boolean;
-};
-
-const posts: FeedbackPost[] = [
-  {
-    id: "post-1",
-    avatarId: "hmph",
-    frameId: "little-puppy",
-    name: "Jesse Doe",
-    hideName: true,
-    titleId: "sweet-victory",
-    message: "Hi, this is my result for practicing Filler-Free today! What do you guys think?",
-    tag: "fillerfree",
-    dateLabel: "May 17, 2026",
-    feedbackVisible: true,
-  },
-  {
-    id: "post-2",
-    avatarId: "sad-doggo",
-    frameId: "happy-holiday",
-    name: "Jenna Rose",
-    hideName: true,
-    titleId: "sweet-victory",
-    message: "Practicing story mode. Feedback is welcome!",
-    tag: "storymode",
-    dateLabel: "May 16, 2026",
-    feedbackVisible: true,
-  },
-  {
-    id: "post-3",
-    avatarId: "sad-doggo",
-    frameId: "little-puppy",
-    name: "You",
-    hideName: false,
-    titleId: "sweet-victory",
-    message: "Hi everyone! This is my first time trying story mode. Feel free to give me feedback. Please be kind and thank you!",
-    tag: "storymode",
-    dateLabel: "May 15, 2026",
-    feedbackVisible: false,
-    isMine: true,
-  },
-];
-
-const tagLabels: Record<FeedbackPost["tag"], string> = {
+const tagLabels: Record<PeerFeedbackPost["tag"], string> = {
   storymode: "Story Mode",
   fillerfree: "FillerFree",
   pitchlab: "PitchLab",
@@ -114,11 +61,11 @@ export default function Feedback() {
   }, []);
 
   const maskedPosts = useMemo(() => {
-    return posts.map((post) => ({
+    return userData.peerFeedbackPosts.map((post) => ({
       ...post,
       displayName: post.hideName ? maskName(post.name) : post.name,
     }));
-  }, []);
+  }, [userData.peerFeedbackPosts]);
 
   const visiblePosts = useMemo(() => {
     if (activeTab === "my-posts") {
@@ -129,6 +76,11 @@ export default function Feedback() {
 
   const getEntriesForPost = (postId: string) => {
     return userData.peerFeedbackEntries.filter((entry) => entry.postId === postId);
+  };
+
+  const isFeedbackVisible = (postId: string) => {
+    const post = userData.peerFeedbackPosts.find((item) => item.id === postId);
+    return post?.feedbackVisible ?? true;
   };
 
   const getAverageRating = (postId: string) => {
@@ -157,7 +109,7 @@ export default function Feedback() {
           variant="transparent"
           onBack={() => router.back()}
           rightElement={
-            <Pressable style={styles.addButton}>
+            <Pressable style={styles.addButton} onPress={() => router.push("/feedback-share")}>
               <Ionicons name="add" size={22} color={Colors.shade[200]} />
             </Pressable>
           }
@@ -173,10 +125,10 @@ export default function Feedback() {
             </Text>
           </Pressable>
           <Pressable
-            style={[styles.tabButton, activeTab === "my-posts" && styles.tabButtonActiveLight]}
+            style={[styles.tabButton, activeTab === "my-posts" && styles.tabButtonActive]}
             onPress={() => setActiveTab("my-posts")}
           >
-            <Text style={[styles.tabText, activeTab === "my-posts" && styles.tabTextDark]}>
+            <Text style={[styles.tabText, activeTab === "my-posts" && styles.tabTextActive]}>
               My Posts
             </Text>
           </Pressable>
@@ -497,11 +449,6 @@ const getAspectRows = (entry: PeerFeedbackEntry) => [
   { label: "Critical Thinking", value: entry.ratings.criticalThinking },
   { label: "Confidence", value: entry.ratings.confidence },
 ];
-
-const isFeedbackVisible = (postId: string) => {
-  const post = posts.find((item) => item.id === postId);
-  return post?.feedbackVisible ?? true;
-};
 
 const formatTimeAgo = (iso: string) => {
   const timestamp = new Date(iso).getTime();
