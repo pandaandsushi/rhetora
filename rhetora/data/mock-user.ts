@@ -28,6 +28,25 @@ export type MockUserData = {
   recordings: Recording[];
   episodesCompleted: string[];
   badgesObtained: string[];
+  peerFeedbackEntries: PeerFeedbackEntry[];
+};
+
+export type PeerFeedbackEntry = {
+  id: string;
+  postId: string;
+  authorName: string;
+  authorAvatarId: string;
+  ratings: {
+    structure: number;
+    fluency: number;
+    conciseness: number;
+    criticalThinking: number;
+    confidence: number;
+  };
+  comment: string;
+  likes: number;
+  dislikes: number;
+  createdAt: string;
 };
 
 const mockRecordings: Recording[] = [
@@ -82,6 +101,42 @@ let mockUserData: MockUserData = {
   recordings: mockRecordings,
   episodesCompleted: ["ep-1"],
   badgesObtained: ["badge-1", "badge-3", "badge-4", "badge-6"],
+  peerFeedbackEntries: [
+    {
+      id: "feedback-1",
+      postId: "post-1",
+      authorName: "Jane Doe",
+      authorAvatarId: "daydream",
+      ratings: {
+        structure: 5,
+        fluency: 4,
+        conciseness: 4,
+        criticalThinking: 5,
+        confidence: 5,
+      },
+      comment: "Looks good to me, need to work on your fluency and conciseness though.",
+      likes: 5,
+      dislikes: 0,
+      createdAt: "2026-05-17T08:20:00.000Z",
+    },
+    {
+      id: "feedback-2",
+      postId: "post-1",
+      authorName: "Jill Doe",
+      authorAvatarId: "hmph",
+      ratings: {
+        structure: 5,
+        fluency: 5,
+        conciseness: 5,
+        criticalThinking: 5,
+        confidence: 5,
+      },
+      comment: "Good work!",
+      likes: 3,
+      dislikes: 0,
+      createdAt: "2026-05-17T07:10:00.000Z",
+    },
+  ],
 };
 
 const listeners = new Set<(data: MockUserData) => void>();

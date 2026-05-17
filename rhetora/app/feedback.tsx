@@ -1,0 +1,716 @@
+import { Image, ImageBackground, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
+
+import NavBar from "../components/nav-bar";
+import PeerFeedbackCard from "../components/peer-feedback-card";
+import TopHeader from "../components/top-header";
+import Toast from "../components/toast";
+import { Colors } from "../constants/colors";
+import { avatarList } from "../constants/avatars";
+import { frameList } from "../constants/frames";
+import { titleList } from "../constants/titles";
+import {
+  getMockUserData,
+  subscribeToMockUser,
+  updateMockUserData,
+  type PeerFeedbackEntry,
+} from "../data/mock-user";
+
+const bgImage = require("../assets/images/bg-motif.png");
+
+const postVideoImage = require("../assets/images/storymode/ch1/first-day.png");
+
+type FeedbackPost = {
+  id: string;
+  avatarId: string;
+  frameId?: string;
+  name: string;
+  hideName?: boolean;
+  titleId: string;
+  message: string;
+  tag: "storymode" | "fillerfree" | "pitchlab" | "storytellingpractice";
+  isMine?: boolean;
+};
+
+const posts: FeedbackPost[] = [
+  {
+    id: "post-1",
+    avatarId: "hmph",
+    frameId: "little-puppy",
+    name: "Jesse Doe",
+    hideName: true,
+    titleId: "sweet-victory",
+    message: "Hi, this is my result for practicing Filler-Free today! What do you guys think?",
+    tag: "fillerfree",
+  },
+  {
+    id: "post-2",
+    avatarId: "sad-doggo",
+    frameId: "happy-holiday",
+    name: "Jenna Rose",
+    hideName: true,
+    titleId: "sweet-victory",
+    message: "Practicing story mode. Feedback is welcome!",
+    tag: "storymode",
+  },
+  {
+    id: "post-3",
+    avatarId: "sad-doggo",
+    frameId: "little-puppy",
+    name: "You",
+    hideName: false,
+    titleId: "sweet-victory",
+    message: "Hi everyone! This is my first time trying story mode. Feel free to give me feedback. Please be kind and thank you!",
+    tag: "storymode",
+    isMine: true,
+  },
+];
+
+const tagLabels: Record<FeedbackPost["tag"], string> = {
+  storymode: "Story Mode",
+  fillerfree: "FillerFree",
+  pitchlab: "PitchLab",
+  storytellingpractice: "StorytellingPractice",
+};
+
+export default function Feedback() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"explore" | "my-posts">("explore");
+  const [userData, setUserData] = useState(getMockUserData());
+  const [ratingOpen, setRatingOpen] = useState(false);
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+  const [ratings, setRatings] = useState({
+    structure: 0,
+    fluency: 0,
+    conciseness: 0,
+    criticalThinking: 0,
+    confidence: 0,
+  });
+  const [comment, setComment] = useState("");
+  const [toastVisible, setToastVisible] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPostId, setMenuPostId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToMockUser((next) => {
+      setUserData(next);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const maskedPosts = useMemo(() => {
+    return posts.map((post) => ({
+      ...post,
+      displayName: post.hideName ? maskName(post.name) : post.name,
+    }));
+  }, []);
+
+  const visiblePosts = useMemo(() => {
+    if (activeTab === "my-posts") {
+      return maskedPosts.filter((post) => post.isMine);
+    }
+    return maskedPosts;
+  }, [activeTab, maskedPosts]);
+
+  const getEntriesForPost = (postId: string) => {
+    return userData.peerFeedbackEntries.filter((entry) => entry.postId === postId);
+  };
+
+  const getAverageRating = (postId: string) => {
+    const entries = getEntriesForPost(postId);
+    if (entries.length === 0) {
+      return 0;
+    }
+    const totals = entries.map((entry) => {
+      const sum =
+        entry.ratings.structure +
+        entry.ratings.fluency +
+        entry.ratings.conciseness +
+        entry.ratings.criticalThinking +
+        entry.ratings.confidence;
+      return sum / 5;
+    });
+    const avg = totals.reduce((sum, value) => sum + value, 0) / totals.length;
+    return avg;
+  };
+
+  return (
+    <ImageBackground source={bgImage} style={styles.screen} resizeMode="cover">
+      <SafeAreaView style={styles.safeArea}>
+        <TopHeader
+          title="Peer Feedback"
+          variant="transparent"
+          onBack={() => router.back()}
+          rightElement={
+            <Pressable style={styles.addButton}>
+              <Ionicons name="add" size={22} color={Colors.shade[200]} />
+            </Pressable>
+          }
+        />
+
+        <View style={styles.tabRow}>
+          <Pressable
+            style={[styles.tabButton, activeTab === "explore" && styles.tabButtonActive]}
+            onPress={() => setActiveTab("explore")}
+          >
+            <Text style={[styles.tabText, activeTab === "explore" && styles.tabTextActive]}>
+              Explore
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[styles.tabButton, activeTab === "my-posts" && styles.tabButtonActiveLight]}
+            onPress={() => setActiveTab("my-posts")}
+          >
+            <Text style={[styles.tabText, activeTab === "my-posts" && styles.tabTextDark]}>
+              My Posts
+            </Text>
+          </Pressable>
+          <Pressable style={styles.filterButton}>
+            <Ionicons name="options-outline" size={20} color={Colors.octonary.DEFAULT} />
+          </Pressable>
+        </View>
+      </SafeAreaView>
+
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {visiblePosts.map((post) => {
+          const avatar = post.isMine
+            ? avatarList.find((item) => item.id === userData.equippedAvatarId)
+            : avatarList.find((item) => item.id === post.avatarId);
+          const frame = post.isMine
+            ? frameList.find((item) => item.id === userData.equippedFrameId)
+            : post.frameId
+              ? frameList.find((item) => item.id === post.frameId)
+              : null;
+          const title = titleList.find((item) => item.id === post.titleId) ?? titleList[0];
+          const commentCount = getEntriesForPost(post.id).length;
+
+          return (
+            <PeerFeedbackCard
+              key={post.id}
+              avatarImage={(avatar ?? avatarList[0]).image}
+              frameImage={frame?.image}
+              videoImage={postVideoImage}
+              name={post.isMine ? "You" : post.displayName}
+              titleLabel={title.label}
+              message={post.message}
+              tag={tagLabels[post.tag]}
+              avgRating={getAverageRating(post.id)}
+              commentCount={commentCount}
+              showGiveFeedback={!post.isMine}
+              showMenu={!!post.isMine}
+              onMenuPress={() => {
+                setMenuPostId(post.id);
+                setMenuOpen(true);
+              }}
+              onCommentsPress={() => {
+                setCommentsPostId(post.id);
+                setCommentsOpen(true);
+              }}
+              onGiveFeedback={() => {
+                setSelectedPostId(post.id);
+                setRatings({
+                  structure: 0,
+                  fluency: 0,
+                  conciseness: 0,
+                  criticalThinking: 0,
+                  confidence: 0,
+                });
+                setComment("");
+                setRatingOpen(true);
+              }}
+            />
+          );
+        })}
+      </ScrollView>
+
+      <View style={styles.navWrap}>
+        <NavBar activeKey="feedback" />
+      </View>
+
+      {ratingOpen && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Give Feedback</Text>
+              <Pressable onPress={() => setRatingOpen(false)}>
+                <Ionicons name="close" size={22} color={Colors.octonary.DEFAULT} />
+              </Pressable>
+            </View>
+
+            {(
+              [
+                { key: "structure", label: "Structure" },
+                { key: "fluency", label: "Fluency" },
+                { key: "conciseness", label: "Conciseness" },
+                { key: "criticalThinking", label: "Critical Thinking" },
+                { key: "confidence", label: "Confidence" },
+              ] as const
+            ).map((row) => (
+              <View key={row.key} style={styles.ratingRow}>
+                <Text style={styles.ratingLabel}>{row.label}</Text>
+                <View style={styles.starRow}>
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <Pressable
+                      key={`${row.key}-${value}`}
+                      onPress={() =>
+                        setRatings((prev) => ({
+                          ...prev,
+                          [row.key]: value,
+                        }))
+                      }
+                    >
+                      <Ionicons
+                        name={ratings[row.key] >= value ? "star" : "star-outline"}
+                        size={26}
+                        color={ratings[row.key] >= value ? "#F59E0B" : Colors.neutral[500]}
+                      />
+                    </Pressable>
+                  ))}
+                </View>
+              </View>
+            ))}
+
+            <Text style={styles.commentLabel}>What do you think of this video?</Text>
+            <TextInput
+              value={comment}
+              onChangeText={setComment}
+              placeholder="Add feedback"
+              placeholderTextColor={Colors.neutral[400]}
+              multiline
+              style={styles.commentInput}
+            />
+
+            <View style={styles.modalActions}>
+              <Pressable
+                style={[styles.modalButton, styles.modalButtonGhost]}
+                onPress={() => setRatingOpen(false)}
+              >
+                <Text style={styles.modalGhostText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.modalButton, styles.modalButtonConfirm]}
+                onPress={() => {
+                  if (!selectedPostId) {
+                    return;
+                  }
+                  const currentUser = getMockUserData();
+                  const nextEntry = {
+                    id: `feedback-${Date.now()}`,
+                    postId: selectedPostId,
+                    authorName: userData.profile.fullName,
+                    authorAvatarId: userData.equippedAvatarId,
+                    ratings: {
+                      structure: ratings.structure,
+                      fluency: ratings.fluency,
+                      conciseness: ratings.conciseness,
+                      criticalThinking: ratings.criticalThinking,
+                      confidence: ratings.confidence,
+                    },
+                    comment,
+                    likes: 0,
+                    dislikes: 0,
+                    createdAt: new Date().toISOString(),
+                  };
+                  updateMockUserData({
+                    peerFeedbackEntries: [...currentUser.peerFeedbackEntries, nextEntry],
+                  });
+                  setRatingOpen(false);
+                  setToastVisible(true);
+                  setTimeout(() => setToastVisible(false), 2000);
+                }}
+              >
+                <Text style={styles.modalConfirmText}>Submit</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      )}
+
+      {commentsOpen && (
+        <View style={styles.modalOverlay}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setCommentsOpen(false)} />
+          <View style={styles.commentSheet}>
+            <View style={styles.commentSheetHandle} />
+            <Text style={styles.commentSheetTitle}>Feedback</Text>
+            <ScrollView contentContainerStyle={styles.commentList} showsVerticalScrollIndicator={false}>
+              {(commentsPostId ? getEntriesForPost(commentsPostId) : []).map((entry) => {
+                const authorAvatar = avatarList.find((item) => item.id === entry.authorAvatarId) ?? avatarList[0];
+                return (
+                  <View key={entry.id} style={styles.commentRow}>
+                    <Image source={authorAvatar.image} style={styles.commentAvatar} />
+                    <View style={styles.commentBody}>
+                      <View style={styles.commentHeaderRow}>
+                        <Text style={styles.commentName}>{entry.authorName}</Text>
+                        <Text style={styles.commentTime}>{formatTimeAgo(entry.createdAt)}</Text>
+                      </View>
+                      <Text style={styles.commentText}>{entry.comment}</Text>
+                      <View style={styles.commentRatingRow}>
+                        <Text style={styles.commentRatingText}>
+                          {getEntryAverage(entry).toFixed(1)}
+                        </Text>
+                        <Ionicons name="star" size={14} color="#F59E0B" />
+                        <View style={styles.commentReactionRow}>
+                          <View style={styles.commentReactionItem}>
+                            <Ionicons name="thumbs-up" size={16} color={Colors.octonary.DEFAULT} />
+                            <Text style={styles.commentReactionText}>{entry.likes}</Text>
+                          </View>
+                          <View style={styles.commentReactionItem}>
+                            <Ionicons name="thumbs-down" size={16} color={Colors.octonary.DEFAULT} />
+                            <Text style={styles.commentReactionText}>{entry.dislikes}</Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </View>
+      )}
+
+      {menuOpen && (
+        <View style={styles.modalOverlay}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setMenuOpen(false)} />
+          <View style={styles.menuSheet}>
+            <Pressable style={styles.menuItem}>
+              <Text style={styles.menuText}>Edit Post</Text>
+            </Pressable>
+            <Pressable style={styles.menuItem}>
+              <Text style={styles.menuTextDanger}>Delete Post</Text>
+            </Pressable>
+            <Pressable style={styles.menuItem} onPress={() => setMenuOpen(false)}>
+              <Text style={styles.menuText}>Cancel</Text>
+            </Pressable>
+          </View>
+        </View>
+      )}
+
+      <Toast
+        visible={toastVisible}
+        message="Successfully uploaded feedback"
+        variant="success"
+      />
+    </ImageBackground>
+  );
+}
+
+const maskName = (name: string) => {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 0) {
+    return name;
+  }
+  if (parts.length === 1) {
+    return `${parts[0][0] ?? ""}***`;
+  }
+  const first = parts[0];
+  const last = parts[parts.length - 1];
+  const maskedFirst = `${first[0] ?? ""}***`;
+  const maskedLast = `${last[0] ?? ""}**${last[last.length - 1] ?? ""}`;
+  return `${maskedFirst} ${maskedLast}`;
+};
+
+const getEntryAverage = (entry: PeerFeedbackEntry) => {
+  const sum =
+    entry.ratings.structure +
+    entry.ratings.fluency +
+    entry.ratings.conciseness +
+    entry.ratings.criticalThinking +
+    entry.ratings.confidence;
+  return sum / 5;
+};
+
+const formatTimeAgo = (iso: string) => {
+  const timestamp = new Date(iso).getTime();
+  if (Number.isNaN(timestamp)) {
+    return "";
+  }
+  const diff = Date.now() - timestamp;
+  const minutes = Math.floor(diff / 60000);
+  if (minutes < 60) {
+    return `${Math.max(minutes, 1)}m ago`;
+  }
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return `${hours}h ago`;
+  }
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+};
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: Colors.shade[200],
+  },
+  safeArea: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    gap: 14,
+  },
+  addButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: Colors.senary[300],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  tabButton: {
+    flex: 1,
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: Colors.senary[300],
+    paddingVertical: 8,
+    alignItems: "center",
+    backgroundColor: Colors.shade[200],
+  },
+  tabButtonActive: {
+    backgroundColor: Colors.senary[300],
+    borderColor: Colors.senary[300],
+  },
+  tabButtonActiveLight: {
+    backgroundColor: Colors.shade[200],
+  },
+  tabText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 14,
+    color: Colors.senary[300],
+  },
+  tabTextActive: {
+    color: Colors.shade[200],
+  },
+  tabTextDark: {
+    color: Colors.octonary.DEFAULT,
+  },
+  filterButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.septenary[100],
+  },
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 140,
+    gap: 16,
+  },
+  navWrap: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingBottom: 10,
+  },
+  modalOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    width: "100%",
+    borderRadius: 20,
+    backgroundColor: Colors.shade[200],
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    gap: 16,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  modalTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 20,
+    color: Colors.octonary.DEFAULT,
+  },
+  ratingRow: {
+    gap: 8,
+  },
+  ratingLabel: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 16,
+    color: Colors.octonary.DEFAULT,
+  },
+  starRow: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  commentLabel: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 16,
+    color: Colors.octonary.DEFAULT,
+  },
+  commentInput: {
+    borderWidth: 1.5,
+    borderColor: Colors.neutral[200],
+    borderRadius: 14,
+    minHeight: 120,
+    paddingHorizontal: 14,
+    paddingTop: 12,
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+    textAlignVertical: "top",
+  },
+  modalActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  modalButton: {
+    flex: 1,
+    height: 46,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalButtonGhost: {
+    borderWidth: 2,
+    borderColor: Colors.senary[300],
+    backgroundColor: Colors.shade[200],
+  },
+  modalButtonConfirm: {
+    backgroundColor: Colors.senary[300],
+  },
+  modalGhostText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.senary[300],
+  },
+  modalConfirmText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.shade[200],
+  },
+  modalBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  commentSheet: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: Colors.shade[200],
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 24,
+    gap: 12,
+    maxHeight: "70%",
+  },
+  commentSheetHandle: {
+    width: 48,
+    height: 6,
+    borderRadius: 999,
+    backgroundColor: Colors.neutral[200],
+    alignSelf: "center",
+  },
+  commentSheetTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+    textAlign: "center",
+  },
+  commentList: {
+    gap: 16,
+    paddingBottom: 10,
+  },
+  commentRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  commentAvatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+  },
+  commentBody: {
+    flex: 1,
+    gap: 6,
+  },
+  commentHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  commentName: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+  },
+  commentTime: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.neutral[500],
+  },
+  commentText: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+  },
+  commentRatingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  commentRatingText: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 12,
+    color: Colors.octonary.DEFAULT,
+  },
+  commentReactionRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginLeft: 6,
+  },
+  commentReactionItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  commentReactionText: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 12,
+    color: Colors.octonary.DEFAULT,
+  },
+  menuSheet: {
+    position: "absolute",
+    left: 20,
+    right: 20,
+    bottom: 20,
+    backgroundColor: Colors.shade[200],
+    borderRadius: 18,
+    paddingVertical: 8,
+  },
+  menuItem: {
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+  },
+  menuText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.octonary.DEFAULT,
+  },
+  menuTextDanger: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.error[500],
+  },
+});
