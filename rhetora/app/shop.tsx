@@ -124,10 +124,16 @@ export default function Shop() {
 
   const activeItems = useMemo(() => {
     const list = activeTab === "avatar" ? avatarItems : activeTab === "frame" ? frameItems : unlockItems;
-    if (!showObtainedOnly) {
-      return list;
-    }
-    return list.filter((item) => isObtained(item));
+    const filtered = showObtainedOnly ? list.filter((item) => isObtained(item)) : list;
+
+    return [...filtered].sort((a, b) => {
+      const aObtained = isObtained(a);
+      const bObtained = isObtained(b);
+      if (aObtained === bObtained) {
+        return 0;
+      }
+      return aObtained ? 1 : -1;
+    });
   }, [activeTab, avatarItems, frameItems, unlockItems, showObtainedOnly, userData]);
 
   const handlePurchase = () => {
@@ -254,6 +260,7 @@ export default function Shop() {
                 image={item.image}
                 price={item.price}
                 obtained={isObtained(item)}
+                dimmed={isObtained(item)}
                 variant={item.type === "frame" ? "frame" : "unlock"}
                 avatarImage={item.type === "frame" ? equippedAvatar?.image : undefined}
                 onPress={() => openConfirm(item)}
@@ -340,12 +347,13 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
-    paddingBottom: 40,
+    paddingVertical: 40,
     gap: 18,
   },
   panel: {
     backgroundColor: Colors.shade[200],
     borderRadius: 18,
+    minHeight: 560,
     paddingHorizontal: 16,
     paddingVertical: 16,
     gap: 16,

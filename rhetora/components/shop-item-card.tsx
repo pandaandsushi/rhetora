@@ -12,6 +12,7 @@ type ShopItemCardProps = {
   variant?: "avatar" | "frame" | "unlock";
   price: number;
   obtained?: boolean;
+  dimmed?: boolean;
   onPress?: () => void;
 };
 
@@ -22,10 +23,11 @@ export default function ShopItemCard({
   variant = "avatar",
   price,
   obtained = false,
+  dimmed = false,
   onPress,
 }: ShopItemCardProps) {
   return (
-    <Pressable style={styles.card} onPress={onPress}>
+    <Pressable style={[styles.card, dimmed && styles.cardDimmed]} onPress={onPress}>
       <View style={styles.previewWrap}>
         {variant === "frame" && avatarImage ? (
           <View style={styles.framePreview}>
@@ -152,5 +154,8 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 14,
     color: Colors.octonary.DEFAULT,
+  },
+  cardDimmed: {
+    opacity: 0.5,
   },
 });
