@@ -24,10 +24,10 @@ const bgImage = require("../assets/images/bg-motif.png");
 const postVideoImage = require("../assets/images/storymode/ch1/first-day.png");
 
 const tagLabels: Record<PeerFeedbackPost["tag"], string> = {
-  storymode: "Story Mode",
-  fillerfree: "FillerFree",
-  pitchlab: "PitchLab",
-  storytellingpractice: "StorytellingPractice",
+  storymode: "Story",
+  fillerfree: "Filler-Free",
+  pitchlab: "The Pitch Lab",
+  storytellingpractice: "Storytelling Practice",
 };
 
 export default function Feedback() {
@@ -52,6 +52,18 @@ export default function Feedback() {
   const [showAspectDetails, setShowAspectDetails] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
 
+  const [filterOpen, setFilterOpen] = useState(false);
+
+  const [selectedModes, setSelectedModes] = useState<string[]>(([
+    "Story",
+    "Storytelling Practice",
+    "The Pitch Lab",
+    "Filler-Free",
+  ]));
+
+  const [sortMode, setSortMode] = useState<"popular" | "recent">(
+    "popular",
+  );
   useEffect(() => {
     const unsubscribe = subscribeToMockUser((next) => {
       setUserData(next);
@@ -67,16 +79,50 @@ export default function Feedback() {
     }));
   }, [userData.peerFeedbackPosts]);
 
-  const visiblePosts = useMemo(() => {
-    if (activeTab === "my-posts") {
-      return maskedPosts.filter((post) => post.isMine);
-    }
-    return maskedPosts;
-  }, [activeTab, maskedPosts]);
-
   const getEntriesForPost = (postId: string) => {
     return userData.peerFeedbackEntries.filter((entry) => entry.postId === postId);
   };
+  
+  const visiblePosts = useMemo(() => {
+    const basePosts =
+      activeTab === "my-posts"
+        ? maskedPosts.filter((post) => post.isMine)
+        : maskedPosts;
+
+    const filtered = basePosts.filter((post) => {
+      const modeLabel = tagLabels[post.tag];
+
+      return (
+        selectedModes.length === 0 ||
+        selectedModes.includes(modeLabel)
+      );
+    });
+
+    const sorted = [...filtered];
+
+    if (sortMode === "popular") {
+      sorted.sort(
+        (a, b) =>
+          getEntriesForPost(b.id).length -
+          getEntriesForPost(a.id).length,
+      );
+    } else {
+      sorted.sort(
+        (a, b) =>
+          new Date(b.createdAt ?? b.dateLabel).getTime() -
+          new Date(a.createdAt ?? a.dateLabel).getTime(),
+      );
+    }
+
+    return sorted;
+  }, [
+    activeTab,
+    maskedPosts,
+    selectedModes,
+    sortMode,
+  ]);
+
+
 
   const isFeedbackVisible = (postId: string) => {
     const post = userData.peerFeedbackPosts.find((item) => item.id === postId);
@@ -99,6 +145,14 @@ export default function Feedback() {
     });
     const avg = totals.reduce((sum, value) => sum + value, 0) / totals.length;
     return avg;
+  };
+
+  const toggleMode = (value: string) => {
+    setSelectedModes((prev) =>
+      prev.includes(value)
+        ? prev.filter((item) => item !== value)
+        : [...prev, value],
+    );
   };
 
   return (
@@ -132,7 +186,7 @@ export default function Feedback() {
               My Posts
             </Text>
           </Pressable>
-          <Pressable style={styles.filterButton}>
+          <Pressable style={styles.filterButton} onPress={() => setFilterOpen(true)}>
             <Ionicons name="options-outline" size={20} color={Colors.octonary.DEFAULT} />
           </Pressable>
         </View>
@@ -407,7 +461,137 @@ export default function Feedback() {
           </View>
         </View>
       )}
+      {filterOpen && (
+        <View style={styles.filterOverlay}>
+          <Pressable
+            style={styles.filterBackdrop}
+            onPress={() => setFilterOpen(false)}
+          />
 
+          <View style={styles.filterCard}>
+            <Text style={styles.filterHeading}>Mode</Text>
+
+            <View style={styles.filterList}>
+              {[
+                "Story",
+                "Storytelling Practice",
+                "The Pitch Lab",
+                "Filler-Free",
+              ].map((mode) => {
+                const checked = selectedModes.includes(mode);
+
+                return (
+                  <Pressable
+                    key={mode}
+                    style={styles.filterRow}
+                    onPress={() => toggleMode(mode)}
+                  >
+                    <View
+                      style={[
+                        styles.checkBox,
+                        checked && styles.checkBoxActive,
+                      ]}
+                    >
+                      {checked && (
+                        <Ionicons
+                          name="checkmark"
+                          size={14}
+                          color={Colors.octonary.DEFAULT}
+                        />
+                      )}
+                    </View>
+
+                    <Text style={styles.filterLabel}>
+                      {mode}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <Text
+              style={[
+                styles.filterHeading,
+                styles.filterHeadingSpacing,
+              ]}
+            >
+              Show
+            </Text>
+
+            <View style={styles.filterList}>
+              {[
+                { key: "popular", label: "Popular" },
+                { key: "recent", label: "Recent" },
+              ].map((item) => {
+                const checked = sortMode === item.key;
+
+                return (
+                  <Pressable
+                    key={item.key}
+                    style={styles.filterRow}
+                    onPress={() =>
+                      setSortMode(
+                        item.key as "popular" | "recent",
+                      )
+                    }
+                  >
+                    <View
+                      style={[
+                        styles.radioOuter,
+                        checked &&
+                          styles.radioOuterActive,
+                      ]}
+                    >
+                      {checked && (
+                        <View style={styles.radioInner} />
+                      )}
+                    </View>
+
+                    <Text style={styles.filterLabel}>
+                      {item.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+
+            <View style={styles.filterActions}>
+              <Pressable
+                style={[
+                  styles.filterButtonAction,
+                  styles.filterReset,
+                ]}
+                onPress={() => {
+                  setSelectedModes([
+                    "Story",
+                    "Storytelling Practice",
+                    "The Pitch Lab",
+                    "Filler-Free",
+                  ]);
+
+                  setSortMode("popular");
+                }}
+              >
+                <Text style={styles.filterResetText}>
+                  Reset
+                </Text>
+              </Pressable>
+
+              <Pressable
+                style={[
+                  styles.filterButtonAction,
+                  styles.filterConfirm,
+                ]}
+                onPress={() => setFilterOpen(false)}
+              >
+                <Text style={styles.filterConfirmText}>
+                  Confirm
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      )}
       <Toast
         visible={toastVisible}
         message="Successfully uploaded feedback"
@@ -799,5 +983,124 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
     color: Colors.error[500],
+  },
+  filterOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.15)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+
+  filterBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+
+  filterCard: {
+    width: "100%",
+    borderRadius: 20,
+    borderWidth: 2,
+    borderColor: Colors.senary[300],
+    backgroundColor: Colors.shade[200],
+    paddingHorizontal: 20,
+    paddingVertical: 22,
+    gap: 14,
+  },
+
+  filterHeading: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+  },
+
+  filterHeadingSpacing: {
+    marginTop: 6,
+  },
+
+  filterList: {
+    gap: 12,
+  },
+
+  filterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+
+  checkBox: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: Colors.quinary[300],
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.shade[200],
+  },
+
+  checkBoxActive: {
+    backgroundColor: Colors.quinary[100],
+  },
+
+  radioOuter: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
+    borderColor: Colors.neutral[400],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  radioOuterActive: {
+    borderColor: Colors.senary[300],
+  },
+
+  radioInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: Colors.senary[300],
+  },
+
+  filterLabel: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 16,
+    color: Colors.octonary.DEFAULT,
+  },
+
+  filterActions: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 10,
+  },
+
+  filterButtonAction: {
+    flex: 1,
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  filterReset: {
+    borderWidth: 2,
+    borderColor: Colors.senary[300],
+  },
+
+  filterConfirm: {
+    backgroundColor: Colors.senary[300],
+  },
+
+  filterResetText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.senary[300],
+  },
+
+  filterConfirmText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.shade[200],
   },
 });
