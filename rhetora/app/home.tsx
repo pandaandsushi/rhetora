@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Image,
   ImageBackground,
@@ -15,11 +15,11 @@ import { Ionicons } from "@expo/vector-icons";
 import NavBar from "../components/nav-bar";
 import ProgressBar from "../components/progress-bar";
 import { Colors } from "../constants/colors";
-import { opacity } from "react-native-reanimated/lib/typescript/Colors";
+import { avatarList } from "../constants/avatars";
+import { getMockUserData, subscribeToMockUser } from "../data/mock-user";
 
 const bgImage = require("../assets/images/homepage/bg-home.png");
 const coinImage = require("../assets/images/shop/coin.png");
-const avatarImage = require("../assets/images/avatar/av-ready.png");
 const streakImage = require("../assets/images/homepage/il-streak.png");
 const leaderboardImage = require("../assets/images/homepage/il-leaderboard.png");
 const shopBgImage = require("../assets/images/bg-shoptiny.png");
@@ -54,6 +54,18 @@ export default function Home() {
   const router = useRouter();
   const hasUnclaimedChallenges = true;
   const hasNewNotifications = true;
+  const [userData, setUserData] = useState(getMockUserData());
+
+  useEffect(() => {
+    const unsubscribe = subscribeToMockUser((next) => {
+      setUserData(next);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const equippedAvatar =
+    avatarList.find((item) => item.id === userData.equippedAvatarId) ?? avatarList[0];
 
   const completedCount = useMemo(() => {
     return challengePreview.filter((item) => item.current >= item.total).length;
@@ -74,17 +86,17 @@ export default function Home() {
           >
             <View style={styles.headerRow}>
               <View style={styles.profileRow}>
-                <Image source={avatarImage} style={styles.avatar} />
+                <Image source={equippedAvatar?.image} style={styles.avatar} />
                 <View>
                   <Text style={styles.greeting}>Good Morning!</Text>
-                  <Text style={styles.name}>John Doe</Text>
+                  <Text style={styles.name}>{userData.profile.fullName}</Text>
                 </View>
               </View>
 
               <View style={styles.headerActions}>
                 <View style={styles.coinPill}>
                   <Image source={coinImage} style={styles.coinIcon} />
-                  <Text style={styles.coinText}>100</Text>
+                  <Text style={styles.coinText}>{userData.coins}</Text>
                 </View>
                 <Pressable
                   style={styles.notificationButton}
@@ -103,7 +115,7 @@ export default function Home() {
             <View style={styles.statsRow}>
               <Pressable style={styles.statCard} onPress={() => {}}>
                 <View style={styles.statTextWrap}>
-                  <Text style={styles.statValue}>9 days</Text>
+                  <Text style={styles.statValue}>{userData.streakDays} days</Text>
                   <Text style={styles.statLabel}>Streak</Text>
                 </View>
                 <Image source={streakImage} style={styles.statImage} />
@@ -114,7 +126,7 @@ export default function Home() {
                 onPress={() => router.push("/leaderboard")}
               >
                 <View style={styles.statTextWrap}>
-                  <Text style={styles.statValue}>#10</Text>
+                  <Text style={styles.statValue}>#{userData.leaderboardRank}</Text>
                   <Text style={styles.statLabel}>Leaderboard</Text>
                 </View>
                 <Image source={leaderboardImage} style={styles.statImage} />

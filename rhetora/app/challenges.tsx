@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import ChallengeCard from "../components/challenge-card";
 import TopHeader from "../components/top-header";
 import { Colors } from "../constants/colors";
+import { getMockUserData, updateMockUserData } from "../data/mock-user";
 
 const backgroundImage = require("../assets/images/challenge-bg.png");
 const coinImage = require("../assets/images/shop/coin.png");
@@ -87,6 +88,8 @@ export default function Challenges() {
     setClaimedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
     setRewardAmount(coinValue);
     setRewardVisible(true);
+    const currentUser = getMockUserData();
+    updateMockUserData({ coins: currentUser.coins + coinValue });
   };
 
   const claimAll = () => {
@@ -105,6 +108,8 @@ export default function Challenges() {
     setClaimedIds((prev) => [...prev, ...updatedClaimedIds]);
     setRewardAmount(totalReward);
     setRewardVisible(true);
+    const currentUser = getMockUserData();
+    updateMockUserData({ coins: currentUser.coins + totalReward });
   };
 
   const dailyClaimableCount = dailyChallenges.filter(

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Image,
   ImageBackground,
@@ -15,17 +15,37 @@ import { useRouter } from "expo-router";
 import NavBar from "../components/nav-bar";
 import TopHeader from "../components/top-header";
 import { Colors } from "../constants/colors";
+import { avatarList } from "../constants/avatars";
+import { frameList } from "../constants/frames";
+import {
+  getMockUserData,
+  subscribeToMockUser,
+  updateMockUserData,
+} from "../data/mock-user";
 
 const bgImage = require("../assets/images/homepage/bg-home.png");
 const coinImage = require("../assets/images/shop/coin.png");
-const avatarImage = require("../assets/images/avatar/av-doggo.png");
-const frameImage = require("../assets/images/frame/frame-7.png");
 
 export default function EditProfile() {
   const router = useRouter();
-  const [fullName, setFullName] = useState("John Doe");
-  const [email, setEmail] = useState("john@rhetora.com");
-  const [password, setPassword] = useState("password");
+  const initialUser = getMockUserData();
+  const [userData, setUserData] = useState(initialUser);
+  const [fullName, setFullName] = useState(initialUser.profile.fullName);
+  const [email, setEmail] = useState(initialUser.profile.email);
+  const [password, setPassword] = useState(initialUser.profile.password);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToMockUser((next) => {
+      setUserData(next);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const equippedAvatar =
+    avatarList.find((item) => item.id === userData.equippedAvatarId) ?? avatarList[0];
+  const equippedFrame =
+    frameList.find((item) => item.id === userData.equippedFrameId) ?? frameList[0];
 
   return (
     <View style={styles.screen}>
@@ -37,15 +57,17 @@ export default function EditProfile() {
             rightElement={
               <View style={styles.coinPill}>
                 <Image source={coinImage} style={styles.coinIcon} />
-                <Text style={styles.coinText}>100</Text>
+                <Text style={styles.coinText}>{userData.coins}</Text>
               </View>
             }
           />
 
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
             <View style={styles.avatarWrap}>
-              <Image source={avatarImage} style={styles.avatarImage} />
-              <Image source={frameImage} style={styles.avatarFrame} />
+              <Image source={equippedAvatar?.image} style={styles.avatarImage} />
+              {equippedFrame && (
+                <Image source={equippedFrame.image} style={styles.avatarFrame} />
+              )}
             </View>
 
             <View style={styles.fieldGroup}>
@@ -90,7 +112,14 @@ export default function EditProfile() {
               </Pressable>
               <Pressable
                 style={[styles.actionButton, styles.saveButton]}
-                onPress={() =>
+                onPress={() => {
+                  updateMockUserData({
+                    profile: {
+                      fullName,
+                      email,
+                      password,
+                    },
+                  });
                   router.push({
                     pathname: "/profile",
                     params: {
@@ -98,8 +127,8 @@ export default function EditProfile() {
                       toastMessage: "Profile updated successfully",
                       toastVariant: "success",
                     },
-                  })
-                }
+                  });
+                }}
               >
                 <Text style={styles.saveText}>Save</Text>
               </Pressable>

@@ -27,6 +27,11 @@ import {
 import { avatarList } from "../constants/avatars";
 import { frameList } from "../constants/frames";
 import { titleList } from "../constants/titles";
+import {
+  getMockUserData,
+  subscribeToMockUser,
+  updateMockUserData,
+} from "../data/mock-user";
 
 const bgImage = require("../assets/images/homepage/bg-home.png");
 const coinImage = require("../assets/images/shop/coin.png");
@@ -36,18 +41,16 @@ const leaderboardImage = require("../assets/images/homepage/il-leaderboard.png")
 
 export default function Profile() {
   const router = useRouter();
+  const [userData, setUserData] = useState(getMockUserData());
   const [selectedBadgeIds, setSelectedBadgeIdsState] = useState(getSelectedBadgeIds());
   const [editVisible, setEditVisible] = useState(false);
   const [draftIds, setDraftIds] = useState<string[]>(getSelectedBadgeIds());
   const [titleEditVisible, setTitleEditVisible] = useState(false);
   const [titleSort, setTitleSort] = useState<"recent" | "obtained">("recent");
   const [sortOpen, setSortOpen] = useState(false);
-  const [equippedTitleId, setEquippedTitleId] = useState(titleList[0]?.id ?? "");
   const [titleDetailId, setTitleDetailId] = useState<string | null>(null);
   const [avatarFrameVisible, setAvatarFrameVisible] = useState(false);
   const [avatarFrameTab, setAvatarFrameTab] = useState<"avatar" | "frame">("avatar");
-  const [equippedAvatarId, setEquippedAvatarId] = useState(avatarList[0]?.id ?? "");
-  const [equippedFrameId, setEquippedFrameId] = useState(frameList[0]?.id ?? "");
   const [mediaDetail, setMediaDetail] = useState<{
     type: "avatar" | "frame";
     id: string;
@@ -57,6 +60,14 @@ export default function Profile() {
   useEffect(() => {
     const unsubscribe = subscribeToBadgeSelection(() => {
       setSelectedBadgeIdsState(getSelectedBadgeIds());
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = subscribeToMockUser((next) => {
+      setUserData(next);
     });
 
     return unsubscribe;
@@ -164,6 +175,9 @@ export default function Profile() {
     setEditVisible(false);
   };
 
+  const equippedTitleId = userData.equippedTitleId || titleList[0]?.id || "";
+  const equippedAvatarId = userData.equippedAvatarId || avatarList[0]?.id || "";
+  const equippedFrameId = userData.equippedFrameId || frameList[0]?.id || "";
   const equippedAvatar = avatarList.find((item) => item.id === equippedAvatarId) ?? avatarList[0];
   const equippedFrame = frameList.find((item) => item.id === equippedFrameId) ?? frameList[0];
 
@@ -177,7 +191,7 @@ export default function Profile() {
             rightElement={
               <View style={styles.coinPill}>
                 <Image source={coinImage} style={styles.coinIcon} />
-                <Text style={styles.coinText}>100</Text>
+                <Text style={styles.coinText}>{userData.coins}</Text>
               </View>
             }
           />
@@ -198,7 +212,7 @@ export default function Profile() {
                   <Ionicons name="pencil" size={20} color={Colors.octonary.DEFAULT} />
                 </Pressable>
               </View>
-              <Text style={styles.profileName}>John Doe</Text>
+              <Text style={styles.profileName}>{userData.profile.fullName}</Text>
 
               <View style={styles.titleRow}>
                 <TitlePill
@@ -214,7 +228,7 @@ export default function Profile() {
             <View style={styles.statsRow}>
               <View style={styles.statCard}>
                 <View style={styles.statTextWrap}>
-                  <Text style={styles.statValue}>9 days</Text>
+                  <Text style={styles.statValue}>{userData.streakDays} days</Text>
                   <Text style={styles.statLabel}>Streak</Text>
                 </View>
                 <Image source={streakImage} style={styles.statImage} />
@@ -224,7 +238,7 @@ export default function Profile() {
                 onPress={() => router.push("/leaderboard")}
               >
                 <View style={styles.statTextWrap}>
-                  <Text style={styles.statValue}>#10</Text>
+                  <Text style={styles.statValue}>#{userData.leaderboardRank}</Text>
                   <Text style={styles.statLabel}>Leaderboard</Text>
                 </View>
                 <Image source={leaderboardImage} style={styles.statImage} />
@@ -266,7 +280,10 @@ export default function Profile() {
                 </Text>
                 <Ionicons name="chevron-forward" size={20} color={Colors.octonary.DEFAULT} />
               </Pressable>
-              <Pressable style={styles.menuRow}>
+              <Pressable
+                style={styles.menuRow}
+                onPress={() => router.push("/my-recordings")}
+              >
                 <Text style={[styles.menuText, { color: Colors.octonary.DEFAULT }]}>
                   My Recordings
                 </Text>
@@ -426,7 +443,8 @@ export default function Profile() {
               <Pressable
                 style={[styles.titleDetailButton, styles.titleDetailEquip]}
                 onPress={() => {
-                  setEquippedTitleId(titleDetailId);
+                  const nextTitleId = titleDetailId ?? equippedTitleId;
+                  updateMockUserData({ equippedTitleId: nextTitleId });
                   setTitleDetailId(null);
                 }}
               >
@@ -555,9 +573,9 @@ export default function Profile() {
                 style={[styles.mediaDetailButton, styles.mediaDetailEquip]}
                 onPress={() => {
                   if (mediaDetail.type === "avatar") {
-                    setEquippedAvatarId(mediaDetail.id);
+                    updateMockUserData({ equippedAvatarId: mediaDetail.id });
                   } else {
-                    setEquippedFrameId(mediaDetail.id);
+                    updateMockUserData({ equippedFrameId: mediaDetail.id });
                   }
                   setMediaDetail(null);
                 }}
