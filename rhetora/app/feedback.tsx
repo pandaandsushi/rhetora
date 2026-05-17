@@ -1,7 +1,7 @@
-import { Image, ImageBackground, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Dimensions, Image, ImageBackground, PanResponder, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import NavBar from "../components/nav-bar";
 import PeerFeedbackCard from "../components/peer-feedback-card";
@@ -22,6 +22,10 @@ import {
 const bgImage = require("../assets/images/bg-motif.png");
 
 const postVideoImage = require("../assets/images/storymode/ch1/first-day.png");
+
+const { height: screenHeight } = Dimensions.get("window");
+const MIN_SHEET_HEIGHT = 260;
+const MAX_SHEET_HEIGHT = Math.min(screenHeight * 0.78, 640);
 
 const tagLabels: Record<PeerFeedbackPost["tag"], string> = {
   storymode: "Story",
@@ -51,6 +55,8 @@ export default function Feedback() {
   const [menuPostId, setMenuPostId] = useState<string | null>(null);
   const [showAspectDetails, setShowAspectDetails] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
+  const [sheetHeight, setSheetHeight] = useState(MIN_SHEET_HEIGHT);
+  const sheetHeightRef = useRef(sheetHeight);
 
   const [filterOpen, setFilterOpen] = useState(false);
 
@@ -71,6 +77,16 @@ export default function Feedback() {
 
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (commentsOpen) {
+      setSheetHeight(MIN_SHEET_HEIGHT);
+    }
+  }, [commentsOpen]);
+
+  useEffect(() => {
+    sheetHeightRef.current = sheetHeight;
+  }, [sheetHeight]);
 
   const maskedPosts = useMemo(() => {
     return userData.peerFeedbackPosts.map((post) => ({
@@ -155,6 +171,30 @@ export default function Feedback() {
     );
   };
 
+  const sheetPanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderRelease: (_event, gesture) => {
+          if (gesture.dy < -20) {
+            setSheetHeight(MAX_SHEET_HEIGHT);
+            sheetHeightRef.current = MAX_SHEET_HEIGHT;
+          } else if (gesture.dy > 20) {
+            setSheetHeight(MIN_SHEET_HEIGHT);
+            sheetHeightRef.current = MIN_SHEET_HEIGHT;
+          } else {
+            const next =
+              sheetHeightRef.current === MIN_SHEET_HEIGHT
+                ? MAX_SHEET_HEIGHT
+                : MIN_SHEET_HEIGHT;
+            setSheetHeight(next);
+            sheetHeightRef.current = next;
+          }
+        },
+      }),
+    [],
+  );
   return (
     <ImageBackground source={bgImage} style={styles.screen} resizeMode="cover">
       <SafeAreaView style={styles.safeArea}>
@@ -371,8 +411,10 @@ export default function Feedback() {
       {commentsOpen && (
         <View style={styles.modalOverlay}>
           <Pressable style={styles.modalBackdrop} onPress={() => setCommentsOpen(false)} />
-          <View style={styles.commentSheet}>
-            <View style={styles.commentSheetHandle} />
+          <View style={[styles.commentSheet, { height: sheetHeight }]}>
+            <View style={styles.commentSheetHandleArea} {...sheetPanResponder.panHandlers}>
+              <View style={styles.commentSheetHandle} />
+            </View>
             <Text style={styles.commentSheetTitle}>Feedback</Text>
             {commentsPostId && !isFeedbackVisible(commentsPostId) ? (
               <View style={styles.commentEmptyWrap}>
@@ -380,7 +422,16 @@ export default function Feedback() {
               </View>
             ) : (
               <ScrollView contentContainerStyle={styles.commentList} showsVerticalScrollIndicator={false}>
-                {(commentsPostId ? getEntriesForPost(commentsPostId) : []).map((entry) => {
+                {(() => {
+                  const entries = commentsPostId ? getEntriesForPost(commentsPostId) : [];
+                  if (entries.length === 0) {
+                    return (
+                      <View style={styles.commentEmptyWrap}>
+                        <Text style={styles.commentEmptyText}>No feedback yet</Text>
+                      </View>
+                    );
+                  }
+                  return entries.map((entry) => {
                   const authorAvatar = avatarList.find((item) => item.id === entry.authorAvatarId) ?? avatarList[0];
                   const aspects = getAspectRows(entry);
                   return (
@@ -438,7 +489,8 @@ export default function Feedback() {
                       </View>
                     </View>
                   );
-                })}
+                  });
+                })()}
               </ScrollView>
             )}
           </View>
@@ -840,7 +892,6 @@ const styles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 24,
     gap: 12,
-    maxHeight: "70%",
   },
   commentSheetHandle: {
     width: 48,
@@ -1102,5 +1153,11 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
     color: Colors.shade[200],
+  },
+  commentSheetHandleArea: {
+    width: "100%",
+    paddingVertical: 14,
+    alignItems: "center",
+    marginTop: -12,
   },
 });

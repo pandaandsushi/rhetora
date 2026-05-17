@@ -113,7 +113,7 @@ export default function FeedbackShare() {
 
   return (
     <ImageBackground source={bgImage} style={styles.screen} resizeMode="cover">
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView>
         <TopHeader
           title={step === "select" ? "Peer Feedback" : "New Feedback Share"}
           onBack={() => {
