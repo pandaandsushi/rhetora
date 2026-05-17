@@ -9,14 +9,12 @@ import { Colors } from "../constants/colors";
 import { avatarList } from "../constants/avatars";
 import { frameList } from "../constants/frames";
 import { getMockUserData, subscribeToMockUser, updateMockUserData } from "../data/mock-user";
-import { Color } from "react-native/types_generated/Libraries/Animated/AnimatedExports";
 
 const backgroundImage = require("../assets/images/bg-shop.png");
 const coinImage = require("../assets/images/shop/coin.png");
 const confettiImage = require("../assets/images/confetti.png");
-const episodeOneImage = require("../assets/images/storymode/eps1.png");
-const episodeTwoImage = require("../assets/images/storymode/eps2.png");
-const episodeThreeImage = require("../assets/images/storymode/eps3.png");
+const chapterOneImage = require("../assets/images/storymode/chapter1.png");
+const chapterTwoImage = require("../assets/images/storymode/chapter2.png");
 const vrImage = require("../assets/images/homepage/vrmode.png");
 
 type ShopTab = "avatar" | "frame" | "unlock";
@@ -26,33 +24,26 @@ type ShopItem = {
   title: string;
   image: any;
   price: number;
-  type: "avatar" | "frame" | "episode" | "vr";
+  type: "avatar" | "frame" | "chapter" | "vr";
 };
 
 const avatarPrices = new Map<string, number>(avatarList.map((item) => [item.id, 100]));
 const framePrices = new Map<string, number>(frameList.map((item) => [item.id, 100]));
 
-const episodeItems: ShopItem[] = [
+const chapterItems: ShopItem[] = [
   {
-    id: "ep-1",
-    title: "A Fresh Start",
-    image: episodeOneImage,
+    id: "chapter-1",
+    title: "The First Introduction",
+    image: chapterOneImage,
     price: 160,
-    type: "episode",
+    type: "chapter",
   },
   {
-    id: "ep-2",
-    title: "Breaking the Ice",
-    image: episodeTwoImage,
+    id: "chapter-2",
+    title: "A Day to Remember",
+    image: chapterTwoImage,
     price: 160,
-    type: "episode",
-  },
-  {
-    id: "ep-3",
-    title: "Small Talk",
-    image: episodeThreeImage,
-    price: 160,
-    type: "episode",
+    type: "chapter",
   },
 ];
 
@@ -83,6 +74,9 @@ export default function Shop() {
   const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
   const [purchaseError, setPurchaseError] = useState("");
 
+  const equippedAvatar =
+    avatarList.find((item) => item.id === userData.equippedAvatarId) ?? avatarList[0];
+
   useEffect(() => {
     const unsubscribe = subscribeToMockUser((next) => {
       setUserData(next);
@@ -112,7 +106,7 @@ export default function Shop() {
   }, []);
 
   const unlockItems = useMemo(() => {
-    return [...episodeItems, ...vrItems];
+    return [...chapterItems, ...vrItems];
   }, []);
 
   const isObtained = (item: ShopItem) => {
@@ -122,8 +116,8 @@ export default function Shop() {
     if (item.type === "frame") {
       return userData.ownedFrameIds.includes(item.id);
     }
-    if (item.type === "episode") {
-      return userData.unlockedEpisodeIds.includes(item.id);
+    if (item.type === "chapter") {
+      return userData.unlockedChapterIds.includes(item.id);
     }
     return userData.unlockedVrIds.includes(item.id);
   };
@@ -158,11 +152,11 @@ export default function Shop() {
         ? currentUser.ownedFrameIds
         : [...currentUser.ownedFrameIds, selectedItem.id];
       updateMockUserData({ coins: nextCoins, ownedFrameIds: nextOwned });
-    } else if (selectedItem.type === "episode") {
-      const nextUnlocked = currentUser.unlockedEpisodeIds.includes(selectedItem.id)
-        ? currentUser.unlockedEpisodeIds
-        : [...currentUser.unlockedEpisodeIds, selectedItem.id];
-      updateMockUserData({ coins: nextCoins, unlockedEpisodeIds: nextUnlocked });
+    } else if (selectedItem.type === "chapter") {
+      const nextUnlocked = currentUser.unlockedChapterIds.includes(selectedItem.id)
+        ? currentUser.unlockedChapterIds
+        : [...currentUser.unlockedChapterIds, selectedItem.id];
+      updateMockUserData({ coins: nextCoins, unlockedChapterIds: nextUnlocked });
     } else {
       const nextUnlocked = currentUser.unlockedVrIds.includes(selectedItem.id)
         ? currentUser.unlockedVrIds
@@ -205,7 +199,7 @@ export default function Shop() {
     setPurchaseError("");
   };
 
-  const actionLabel = selectedItem?.type === "episode" || selectedItem?.type === "vr" ? "Open now!" : "Equip now!";
+  const actionLabel = selectedItem?.type === "chapter" || selectedItem?.type === "vr" ? "Open now!" : "Equip now!";
 
   return (
     <ImageBackground source={backgroundImage} style={styles.screen} resizeMode="cover">
@@ -233,35 +227,39 @@ export default function Shop() {
           })}
         </View>
 
-        <View style={styles.filterRow}>
-          <View style={styles.coinPill}>
-            <Image source={coinImage} style={styles.coinIcon} />
-            <Text style={styles.coinText}>{userData.coins}</Text>
-          </View>
-          <Pressable
-            style={styles.obtainedToggle}
-            onPress={() => setShowObtainedOnly((prev) => !prev)}
-          >
-            <View style={[styles.checkBox, showObtainedOnly && styles.checkBoxActive]}>
-              {showObtainedOnly && (
-                <Ionicons name="checkmark" size={14} color={Colors.octonary.DEFAULT} />
-              )}
+        <View style={styles.panel}>
+          <View style={styles.filterRow}>
+            <View style={styles.coinPill}>
+              <Image source={coinImage} style={styles.coinIcon} />
+              <Text style={styles.coinText}>{userData.coins}</Text>
             </View>
-            <Text style={styles.obtainedText}>Show Obtained Only</Text>
-          </Pressable>
-        </View>
+            <Pressable
+              style={styles.obtainedToggle}
+              onPress={() => setShowObtainedOnly((prev) => !prev)}
+            >
+              <View style={[styles.checkBox, showObtainedOnly && styles.checkBoxActive]}>
+                {showObtainedOnly && (
+                  <Ionicons name="checkmark" size={14} color={Colors.octonary.DEFAULT} />
+                )}
+              </View>
+              <Text style={styles.obtainedText}>Show Obtained Only</Text>
+            </Pressable>
+          </View>
 
-        <View style={styles.grid}>
-          {activeItems.map((item) => (
-            <ShopItemCard
-              key={item.id}
-              title={item.title}
-              image={item.image}
-              price={item.price}
-              obtained={isObtained(item)}
-              onPress={() => openConfirm(item)}
-            />
-          ))}
+          <View style={styles.grid}>
+            {activeItems.map((item) => (
+              <ShopItemCard
+                key={item.id}
+                title={item.title}
+                image={item.image}
+                price={item.price}
+                obtained={isObtained(item)}
+                variant={item.type === "frame" ? "frame" : "unlock"}
+                avatarImage={item.type === "frame" ? equippedAvatar?.image : undefined}
+                onPress={() => openConfirm(item)}
+              />
+            ))}
+          </View>
         </View>
       </ScrollView>
 
@@ -271,7 +269,14 @@ export default function Shop() {
             <Text style={styles.modalTitle}>Are you sure you want to make this purchase?</Text>
             {selectedItem && (
               <View style={styles.modalItemCard}>
-                <Image source={selectedItem.image} style={styles.modalItemImage} />
+                {selectedItem.type === "frame" ? (
+                  <View style={styles.modalFramePreview}>
+                    <Image source={equippedAvatar?.image} style={styles.modalAvatarImage} />
+                    <Image source={selectedItem.image} style={styles.modalFrameImage} />
+                  </View>
+                ) : (
+                  <Image source={selectedItem.image} style={styles.modalItemImage} />
+                )}
                 <Text style={styles.modalItemTitle}>{selectedItem.title}</Text>
                 <View style={styles.modalPricePill}>
                   <Image source={coinImage} style={styles.modalCoinIcon} />
@@ -299,7 +304,14 @@ export default function Shop() {
             <Text style={styles.modalTitle}>Successfully bought!</Text>
             {selectedItem && (
               <View style={styles.modalSuccessItem}>
-                <Image source={selectedItem.image} style={styles.modalSuccessImage} />
+                {selectedItem.type === "frame" ? (
+                  <View style={styles.modalFrameSuccessPreview}>
+                    <Image source={equippedAvatar?.image} style={styles.modalAvatarSuccessImage} />
+                    <Image source={selectedItem.image} style={styles.modalFrameSuccessImage} />
+                  </View>
+                ) : (
+                  <Image source={selectedItem.image} style={styles.modalSuccessImage} />
+                )}
                 <Text style={styles.modalItemTitle}>{selectedItem.title}</Text>
               </View>
             )}
@@ -330,6 +342,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingBottom: 40,
     gap: 18,
+  },
+  panel: {
+    backgroundColor: Colors.shade[200],
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    gap: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 2,
   },
   tabRow: {
     flexDirection: "row",
@@ -450,6 +474,23 @@ const styles = StyleSheet.create({
     height: 90,
     resizeMode: "contain",
   },
+  modalFramePreview: {
+    width: 100,
+    height: 100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalAvatarImage: {
+    width: 82,
+    height: 82,
+    borderRadius: 41,
+  },
+  modalFrameImage: {
+    position: "absolute",
+    width: 100,
+    height: 100,
+    resizeMode: "contain",
+  },
   modalItemTitle: {
     fontFamily: "Quicksand-Bold",
     fontSize: 18,
@@ -523,6 +564,23 @@ const styles = StyleSheet.create({
   modalSuccessImage: {
     width: 120,
     height: 120,
+    resizeMode: "contain",
+  },
+  modalFrameSuccessPreview: {
+    width: 132,
+    height: 132,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalAvatarSuccessImage: {
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+  },
+  modalFrameSuccessImage: {
+    position: "absolute",
+    width: 132,
+    height: 132,
     resizeMode: "contain",
   },
   confetti: {

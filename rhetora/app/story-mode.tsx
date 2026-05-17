@@ -8,12 +8,14 @@ import {
   Text,
   View,
 } from "react-native";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 
 import NavBar from "../components/nav-bar";
 import TopHeader from "../components/top-header";
 import { Colors } from "../constants/colors";
+import { getMockUserData, subscribeToMockUser } from "../data/mock-user";
 
 const bgImage = require("../assets/images/bg-story.png");
 const chapterOneImage = require("../assets/images/storymode/chapter1.png");
@@ -36,6 +38,22 @@ const chapters = [
 
 export default function StoryMode() {
   const router = useRouter();
+  const [userData, setUserData] = useState(getMockUserData());
+
+  useEffect(() => {
+    const unsubscribe = subscribeToMockUser((next) => {
+      setUserData(next);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const chapterList = useMemo(() => {
+    return chapters.map((chapter) => ({
+      ...chapter,
+      locked: !userData.unlockedChapterIds.includes(chapter.id),
+    }));
+  }, [userData]);
 
   return (
     <View style={styles.screen}>
@@ -44,11 +62,16 @@ export default function StoryMode() {
         <TopHeader title="Story Mode" onBack={() => router.back()} />
 
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          {chapters.map((chapter) => (
+          {chapterList.map((chapter) => (
             <Pressable
               key={chapter.id}
-              style={styles.chapterCard}
-              onPress={() => router.push("/story-episodes")}
+              style={[styles.chapterCard, chapter.locked && styles.chapterCardLocked]}
+              onPress={() => {
+                if (!chapter.locked) {
+                  router.push("/story-episodes");
+                }
+              }}
+              disabled={chapter.locked}
             >
                 <Image source={chapter.image} style={styles.chapterImage} />
 
@@ -60,7 +83,9 @@ export default function StoryMode() {
                 <Text style={styles.chapterTitle}>{chapter.title}</Text>
 
                 <View style={styles.progressPill}>
-                  <Text style={styles.progressText}>{chapter.progress}</Text>
+                  <Text style={styles.progressText}>
+                    {chapter.locked ? "Locked" : chapter.progress}
+                  </Text>
                 </View>
               </Pressable>
           ))}
@@ -102,6 +127,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.shade[200],
     alignItems: "center",
     textAlign: "center",
+  },
+  chapterCardLocked: {
+    opacity: 0.6,
   },
   chapterImage: {
     width: "100%",

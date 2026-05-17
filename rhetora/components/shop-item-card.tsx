@@ -8,6 +8,8 @@ const coinImage = require("../assets/images/shop/coin.png");
 type ShopItemCardProps = {
   title: string;
   image: any;
+  avatarImage?: any;
+  variant?: "avatar" | "frame" | "unlock";
   price: number;
   obtained?: boolean;
   onPress?: () => void;
@@ -16,6 +18,8 @@ type ShopItemCardProps = {
 export default function ShopItemCard({
   title,
   image,
+  avatarImage,
+  variant = "avatar",
   price,
   obtained = false,
   onPress,
@@ -23,7 +27,14 @@ export default function ShopItemCard({
   return (
     <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.previewWrap}>
-        <Image source={image} style={styles.previewImage} />
+        {variant === "frame" && avatarImage ? (
+          <View style={styles.framePreview}>
+            <Image source={avatarImage} style={styles.avatarPreview} />
+            <Image source={image} style={styles.framePreviewImage} />
+          </View>
+        ) : (
+          <Image source={image} style={styles.previewImage} />
+        )}
       </View>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.pill}>
@@ -71,7 +82,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     overflow: "hidden",
   },
+  framePreview: {
+    width: 78,
+    height: 78,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  avatarPreview: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+  },
   previewImage: {
+    width: 78,
+    height: 78,
+    resizeMode: "contain",
+  },
+  framePreviewImage: {
+    position: "absolute",
     width: 78,
     height: 78,
     resizeMode: "contain",

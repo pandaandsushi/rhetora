@@ -23,7 +23,7 @@ export type MockUserData = {
   equippedTitleId: string;
   ownedAvatarIds: string[];
   ownedFrameIds: string[];
-  unlockedEpisodeIds: string[];
+  unlockedChapterIds: string[];
   unlockedVrIds: string[];
   recordings: Recording[];
   episodesCompleted: string[];
@@ -77,7 +77,7 @@ let mockUserData: MockUserData = {
   equippedTitleId: "sweet-victory",
   ownedAvatarIds: ["daydream", "future", "sad-doggo"],
   ownedFrameIds: ["little-puppy", "happy-holiday"],
-  unlockedEpisodeIds: ["ep-1"],
+  unlockedChapterIds: ["chapter-1"],
   unlockedVrIds: ["vr-1"],
   recordings: mockRecordings,
   episodesCompleted: ["ep-1"],
