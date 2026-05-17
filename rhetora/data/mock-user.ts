@@ -21,6 +21,10 @@ export type MockUserData = {
   equippedAvatarId: string;
   equippedFrameId: string;
   equippedTitleId: string;
+  ownedAvatarIds: string[];
+  ownedFrameIds: string[];
+  unlockedEpisodeIds: string[];
+  unlockedVrIds: string[];
   recordings: Recording[];
   episodesCompleted: string[];
   badgesObtained: string[];
@@ -71,6 +75,10 @@ let mockUserData: MockUserData = {
   equippedAvatarId: "sad-doggo",
   equippedFrameId: "little-puppy",
   equippedTitleId: "sweet-victory",
+  ownedAvatarIds: ["daydream", "future", "sad-doggo"],
+  ownedFrameIds: ["little-puppy", "happy-holiday"],
+  unlockedEpisodeIds: ["ep-1"],
+  unlockedVrIds: ["vr-1"],
   recordings: mockRecordings,
   episodesCompleted: ["ep-1"],
   badgesObtained: ["badge-1", "badge-3", "badge-4", "badge-6"],
