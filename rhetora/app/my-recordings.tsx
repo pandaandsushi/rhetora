@@ -32,7 +32,7 @@ export default function MyRecordings() {
   const [recordings, setRecordings] = useState<Recording[]>(getMockUserData().recordings);
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedModes, setSelectedModes] = useState<string[]>(["Story", "Casual"]);
-  const [selectedDateRange, setSelectedDateRange] = useState<string | null>("Today");
+  const [selectedDateRange, setSelectedDateRange] = useState<string | null>("All");
   const selectMode = params.select === "true";
   const selectedRecordingId =
     typeof params.recordingId === "string" ? params.recordingId : null;
@@ -57,7 +57,9 @@ export default function MyRecordings() {
     if (!parsed) {
       return false;
     }
-
+    if (range === "All") {
+      return true;
+    }
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const yesterdayStart = new Date(todayStart);
@@ -114,7 +116,7 @@ export default function MyRecordings() {
   };
 
   const toggleDate = (value: string) => {
-    setSelectedDateRange((prev) => (prev === value ? null : value));
+    setSelectedDateRange(value);
   };
 
   
@@ -215,7 +217,7 @@ export default function MyRecordings() {
 
             <Text style={[styles.filterHeading, styles.filterHeadingSpacing]}>Date</Text>
             <View style={styles.filterList}>
-              {["Today", "Yesterday", "Last Week", "Last Month"].map((range) => {
+              {["All", "Today", "Yesterday", "Last Week", "Last Month"].map((range) => {
                 const checked = selectedDateRange === range;
 
                 return (
@@ -238,7 +240,7 @@ export default function MyRecordings() {
                 style={[styles.filterButtonAction, styles.filterReset]}
                 onPress={() => {
                   setSelectedModes(["Story", "Casual"]);
-                  setSelectedDateRange(null);
+                  setSelectedDateRange("All");
                 }}
               >
                 <Text style={styles.filterResetText}>Reset</Text>

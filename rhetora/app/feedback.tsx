@@ -711,8 +711,7 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     paddingHorizontal: 20,
-    paddingTop: 10,
-    gap: 14,
+    paddingVertical: 10,
   },
   addButton: {
     width: 42,
