@@ -264,7 +264,9 @@ export default function Progress() {
 
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionTitle}>Time Practice</Text>
-              <Ionicons name="chevron-forward" size={20} color={Colors.octonary.DEFAULT} />
+              <Pressable onPress={() => router.push("/time-practice")}>
+                <Ionicons name="chevron-forward" size={20} color={Colors.octonary.DEFAULT} />
+              </Pressable>
             </View>
 
             <View style={styles.chartCard}>
