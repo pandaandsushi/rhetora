@@ -1,16 +1,27 @@
 const { getDefaultConfig } = require("expo/metro-config");
+const path = require("path");
 
 const config = getDefaultConfig(__dirname);
 
-config.transformer = {
-  ...config.transformer,
-  babelTransformerPath: require.resolve("react-native-svg-transformer"),
-};
+const projectRoot = __dirname;
 
-config.resolver = {
-  ...config.resolver,
-  assetExts: config.resolver.assetExts.filter((ext) => ext !== "svg"),
-  sourceExts: [...config.resolver.sourceExts, "svg"],
+// Point each module to its correct file in YOUR node_modules
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  const moduleMap = {
+    "react":                    "react/index.js",
+    "react/jsx-runtime":        "react/jsx-runtime.js",
+    "react/jsx-dev-runtime":    "react/jsx-dev-runtime.js",
+    "react-native":             "react-native/index.js",
+  };
+
+  if (moduleMap[moduleName]) {
+    return {
+      filePath: path.resolve(projectRoot, "node_modules", moduleMap[moduleName]),
+      type: "sourceFile",
+    };
+  }
+
+  return context.resolveRequest(context, moduleName, platform);
 };
 
 module.exports = config;

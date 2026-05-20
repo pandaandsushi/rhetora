@@ -170,7 +170,19 @@ export default function VrReady() {
             We use VR Cardboard. Please rotate your device to landscape before starting.
           </Text>
 
-          <Pressable style={styles.startButton}>
+          <Pressable
+            style={styles.startButton}
+            onPress={() =>
+              router.push({
+                pathname: "/vr-viro",
+                params: {
+                  scenarioId: scenario.id,
+                  audience: params.audience ?? "",
+                  time: params.time ?? "",
+                },
+              })
+            }
+          >
             <Text style={styles.startButtonText}>Start</Text>
           </Pressable>
 
