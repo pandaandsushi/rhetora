@@ -517,7 +517,7 @@ let mockUserData: MockUserData = {
   ownedAvatarIds: ["daydream", "future", "sad-doggo"],
   ownedFrameIds: ["little-puppy", "happy-holiday"],
   unlockedChapterIds: ["chapter-1"],
-  unlockedVrIds: ["vr-1"],
+  unlockedVrIds: [],
   recordings: mockRecordings,
   episodesCompleted: ["ep-1"],
   badgesObtained: ["badge-1", "badge-3", "badge-4", "badge-6"],

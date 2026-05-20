@@ -15,7 +15,9 @@ const coinImage = require("../assets/images/shop/coin.png");
 const confettiImage = require("../assets/images/confetti.png");
 const chapterOneImage = require("../assets/images/storymode/chapter1.png");
 const chapterTwoImage = require("../assets/images/storymode/chapter2.png");
-const vrImage = require("../assets/images/homepage/vrmode.png");
+const vrClassroomImage = require("../assets/images/vr/school.png");
+const vrMeetingImage = require("../assets/images/vr/meeting.png");
+const vrPodiumImage = require("../assets/images/vr/podium.png");
 
 type ShopTab = "avatar" | "frame" | "unlock";
 
@@ -49,16 +51,16 @@ const chapterItems: ShopItem[] = [
 
 const vrItems: ShopItem[] = [
   {
-    id: "vr-1",
-    title: "VR Scenario 1",
-    image: vrImage,
+    id: "vr-meeting",
+    title: "VR Meeting Room",
+    image: vrMeetingImage,
     price: 220,
     type: "vr",
   },
   {
-    id: "vr-2",
-    title: "VR Scenario 2",
-    image: vrImage,
+    id: "vr-podium",
+    title: "VR Podium",
+    image: vrPodiumImage,
     price: 220,
     type: "vr",
   },
