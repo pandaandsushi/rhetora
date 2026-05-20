@@ -50,6 +50,7 @@ export default function VrSetup() {
   const params = useLocalSearchParams<{ scenarioId?: string }>();
   const [audienceOpen, setAudienceOpen] = useState(false);
   const [selectedAudience, setSelectedAudience] = useState<AudienceOption | null>(null);
+  const timeLabel = "10 min(s)";
 
   const scenario = useMemo(() => {
     return vrScenarios.find((item) => item.id === params.scenarioId) ?? vrScenarios[0];
@@ -139,7 +140,20 @@ export default function VrSetup() {
           </View>
         )}
 
-        <Pressable style={styles.nextButton}>
+        <Pressable
+          style={[styles.nextButton, !selectedAudience && styles.nextButtonDisabled]}
+          disabled={!selectedAudience}
+          onPress={() =>
+            router.push({
+              pathname: "/vr-ready",
+              params: {
+                scenarioId: scenario.id,
+                audience: selectedAudience ?? "",
+                time: timeLabel,
+              },
+            })
+          }
+        >
           <Text style={styles.nextButtonText}>Next</Text>
         </Pressable>
       </ScrollView>
@@ -303,6 +317,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 6,
+  },
+  nextButtonDisabled: {
+    opacity: 0.5,
   },
   nextButtonText: {
     fontFamily: "Quicksand-Bold",
