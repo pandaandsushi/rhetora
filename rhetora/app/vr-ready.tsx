@@ -38,7 +38,12 @@ const vrScenarios = [
 
 export default function VrReady() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ scenarioId?: string; audience?: string; time?: string }>();
+  const params = useLocalSearchParams<{
+    scenarioId?: string;
+    audience?: string;
+    time?: string;
+    timeSeconds?: string;
+  }>();
   const [micDetected, setMicDetected] = useState(false);
   const [micLevel, setMicLevel] = useState(0);
   const [micActive, setMicActive] = useState(false);
@@ -179,6 +184,7 @@ export default function VrReady() {
                   scenarioId: scenario.id,
                   audience: params.audience ?? "",
                   time: params.time ?? "",
+                  timeSeconds: params.timeSeconds ?? "",
                 },
               })
             }

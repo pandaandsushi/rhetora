@@ -51,6 +51,7 @@ export default function VrSetup() {
   const [audienceOpen, setAudienceOpen] = useState(false);
   const [selectedAudience, setSelectedAudience] = useState<AudienceOption | null>(null);
   const timeLabel = "10 min(s)";
+  const timeSeconds = 10 * 60;
 
   const scenario = useMemo(() => {
     return vrScenarios.find((item) => item.id === params.scenarioId) ?? vrScenarios[0];
@@ -150,6 +151,7 @@ export default function VrSetup() {
                 scenarioId: scenario.id,
                 audience: selectedAudience ?? "",
                 time: timeLabel,
+                timeSeconds: String(timeSeconds),
               },
             })
           }
