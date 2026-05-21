@@ -1,21 +1,71 @@
-import { useEffect } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ScreenOrientation from "expo-screen-orientation";
+
+import { BACKEND_URL } from "../constants/api";
 
 export default function VrComplete() {
   const router = useRouter();
+  const params = useLocalSearchParams<{
+    audioUri?: string;
+    scenarioId?: string;
+    audience?: string;
+  }>();
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
   }, []);
 
   const handleContinue = async () => {
-    await ScreenOrientation.lockAsync(
-      ScreenOrientation.OrientationLock.PORTRAIT_UP
-    );
+    if (isUploading) {
+      return;
+    }
+    if (!params.audioUri) {
+      Alert.alert("Upload failed", "Recording not available.");
+      return;
+    }
 
-    router.replace("/vr-evaluation");
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("audio", {
+        uri: params.audioUri,
+        name: "vr-session.m4a",
+        type: "audio/m4a",
+      } as unknown as Blob);
+      formData.append("scenario", params.scenarioId ?? "vr-classroom");
+      formData.append("audience", params.audience ?? "");
+
+      const response = await fetch(`${BACKEND_URL}/evaluate`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Upload failed");
+      }
+
+      const data = await response.json();
+      console.log("=== EVALUATION RESPONSE ===", data);
+      console.log("=== TRANSCRIPT FROM BACKEND ===", data.transcript);
+      console.log("=== METRICS FROM BACKEND ===", data.metrics);
+      await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+
+      router.replace({
+        pathname: "/vr-evaluation",
+        params: {
+          data: JSON.stringify(data),
+        },
+      });
+    } catch (error) {
+      Alert.alert("Upload failed", error?.message ?? "Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -28,7 +78,11 @@ export default function VrComplete() {
       </Text>
 
       <Pressable style={styles.button} onPress={handleContinue}>
-        <Text style={styles.buttonText}>Continue to Evaluation</Text>
+        {isUploading ? (
+          <ActivityIndicator size="small" color="#FFFFFF" />
+        ) : (
+          <Text style={styles.buttonText}>Continue to Evaluation</Text>
+        )}
       </Pressable>
     </View>
   );

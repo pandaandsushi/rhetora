@@ -1,8 +1,8 @@
-import { Image, ImageBackground, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useMemo, useState } from "react";
 import * as ScreenOrientation from "expo-screen-orientation";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { Colors } from "../constants/colors";
 import feedbackData from "./feedbackdata.json";
@@ -16,18 +16,31 @@ const scenarioImages = {
 
 export default function VrEvaluation() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ data?: string }>();
   const [quickSummaryOpen, setQuickSummaryOpen] = useState(true);
   const [transcriptOpen, setTranscriptOpen] = useState(true);
   const [didWellOpen, setDidWellOpen] = useState(true);
   const [audienceOpen, setAudienceOpen] = useState(true);
   const [actionsOpen, setActionsOpen] = useState(true);
 
-  const summary = feedbackData.quickSummary;
-  const scenarioTitle = `VR Mode: ${feedbackData.scenario}`;
+  const parsedPayload = useMemo(() => {
+    if (!params.data) {
+      return null;
+    }
+    try {
+      return JSON.parse(params.data);
+    } catch {
+      return null;
+    }
+  }, [params.data]);
+
+  const evaluationData = parsedPayload?.feedback ?? feedbackData;
+  const summary = evaluationData.quickSummary;
+  const scenarioTitle = `VR Mode: ${evaluationData.scenario}`;
   const previewImage = useMemo(() => {
-    return scenarioImages[feedbackData.scenario as keyof typeof scenarioImages] ??
+    return scenarioImages[evaluationData.scenario as keyof typeof scenarioImages] ??
       scenarioImages.Podium;
-  }, []);
+  }, [evaluationData.scenario]);
   useEffect(() => {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
 
@@ -113,7 +126,7 @@ export default function VrEvaluation() {
         </Pressable>
         {transcriptOpen && (
           <View style={styles.sectionCard}>
-            <Text style={styles.sectionBody}>{feedbackData.transcript}</Text>
+            <Text style={styles.sectionBody}>{evaluationData.transcript}</Text>
           </View>
         )}
 
@@ -130,7 +143,7 @@ export default function VrEvaluation() {
         </Pressable>
         {didWellOpen && (
           <View style={styles.sectionCard}>
-            {feedbackData.whatYouDidWell.map((item) => (
+            {evaluationData.whatYouDidWell.map((item) => (
               <View key={item} style={styles.bulletRow}>
                 <Text style={styles.bullet}>•</Text>
                 <Text style={styles.sectionBody}>{item}</Text>
@@ -154,15 +167,15 @@ export default function VrEvaluation() {
           <View style={styles.sectionCard}>
             <View style={styles.reactionRow}>
               <Text style={styles.reactionLabel}>Beginning:</Text>
-              <Text style={styles.sectionBody}>{feedbackData.audienceReaction.beginning}</Text>
+              <Text style={styles.sectionBody}>{evaluationData.audienceReaction.beginning}</Text>
             </View>
             <View style={styles.reactionRow}>
               <Text style={styles.reactionLabel}>Middle:</Text>
-              <Text style={styles.sectionBody}>{feedbackData.audienceReaction.middle}</Text>
+              <Text style={styles.sectionBody}>{evaluationData.audienceReaction.middle}</Text>
             </View>
             <View style={styles.reactionRow}>
               <Text style={styles.reactionLabel}>End:</Text>
-              <Text style={styles.sectionBody}>{feedbackData.audienceReaction.end}</Text>
+              <Text style={styles.sectionBody}>{evaluationData.audienceReaction.end}</Text>
             </View>
           </View>
         )}
@@ -180,7 +193,7 @@ export default function VrEvaluation() {
         </Pressable>
         {actionsOpen && (
           <View style={[styles.sectionCard, styles.actionsCard]}>
-            {feedbackData.recommendedActions.map((action, index) => (
+            {evaluationData.recommendedActions.map((action, index) => (
               <View key={action.title} style={styles.actionRow}>
                 <Text style={styles.actionIndex}>{index + 1}.</Text>
                 <View style={styles.actionBody}>

@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ScreenOrientation from "expo-screen-orientation";
+import { Audio } from "expo-av";
+import * as FileSystem from "expo-file-system/legacy";
 import {
   ViroAmbientLight,
   Viro360Image,
@@ -36,6 +38,8 @@ export default function VrViro() {
     timeSeconds?: string;
   }>();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recordingRef = useRef<Audio.Recording | null>(null);
+  const completingRef = useRef(false);
 
   const timeSeconds = useMemo(() => {
     const parsed = Number(params.timeSeconds);
@@ -44,6 +48,92 @@ export default function VrViro() {
     }
     return 1 * 60;
   }, [params.timeSeconds]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const startRecording = async () => {
+      try {
+        console.log("[VR] Requesting mic permission...");
+        const { granted, status } = await Audio.requestPermissionsAsync();
+
+        console.log("[VR] Mic permission:", { granted, status });
+
+        if (!granted || !isMounted) {
+          console.warn("[VR] Mic permission not granted");
+          return;
+        }
+
+        await Audio.setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+          staysActiveInBackground: false,
+        });
+
+        console.log("[VR] Starting recording...");
+
+        const { recording } = await Audio.Recording.createAsync(
+          {
+            isMeteringEnabled: false,
+            android: {
+              extension: ".m4a",
+              outputFormat: Audio.AndroidOutputFormat.MPEG_4,
+              audioEncoder: Audio.AndroidAudioEncoder.AAC,
+              sampleRate: 44100,
+              numberOfChannels: 1,
+              bitRate: 64000,
+            },
+            ios: {
+              extension: ".m4a",
+              outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
+              audioQuality: Audio.IOSAudioQuality.MIN,
+              sampleRate: 44100,
+              numberOfChannels: 1,
+              bitRate: 64000,
+              linearPCMBitDepth: 16,
+              linearPCMIsBigEndian: false,
+              linearPCMIsFloat: false,
+            },
+          },
+        );
+
+        recordingRef.current = recording;
+      } catch (error) {
+        console.warn("VR recording failed to start", error);
+      }
+    };
+
+    startRecording();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const stopRecording = async () => {
+  const recording = recordingRef.current;
+
+  console.log("[VR] stopRecording called. recording exists?", !!recording);
+
+  if (!recording) {
+    return null;
+  }
+
+  try {
+    await recording.stopAndUnloadAsync();
+
+    const uri = recording.getURI();
+    console.log("[VR] Recording URI:", uri);
+
+    recordingRef.current = null;
+
+    return uri;
+  } catch (error) {
+    console.warn("[VR] Recording failed to stop", error);
+    recordingRef.current = null;
+    return null;
+  }
+};
 
   const [remainingSeconds, setRemainingSeconds] = useState(timeSeconds);
 
@@ -118,7 +208,21 @@ export default function VrViro() {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
-    router.replace("/vr-complete");
+    if (completingRef.current) {
+      return;
+    }
+    completingRef.current = true;
+    (async () => {
+      const audioUri = await stopRecording();
+      router.replace({
+        pathname: "/vr-complete",
+        params: {
+          audioUri: audioUri ?? "",
+          scenarioId: params.scenarioId ?? "vr-classroom",
+          audience: params.audience ?? "",
+        },
+      });
+    })();
   }, [remainingSeconds, router]);
 
   const timerLabel = useMemo(() => {
