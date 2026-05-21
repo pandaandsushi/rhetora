@@ -42,7 +42,7 @@ export default function VrViro() {
     if (Number.isFinite(parsed) && parsed > 0) {
       return parsed;
     }
-    return 10 * 60;
+    return 1 * 60;
   }, [params.timeSeconds]);
 
   const [remainingSeconds, setRemainingSeconds] = useState(timeSeconds);
@@ -118,7 +118,7 @@ export default function VrViro() {
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
     }
-    router.replace("/vr-evaluation");
+    router.replace("/vr-complete");
   }, [remainingSeconds, router]);
 
   const timerLabel = useMemo(() => {

@@ -11,6 +11,8 @@ import {
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
+import DropdownSelect from "../components/dropdown-select";
+import SpeakingTimeInput, { parseTimeToSeconds } from "../components/speaking-time-input";
 import PracticeCameraPanel from "../components/practice-camera-panel";
 import TopHeader from "../components/top-header";
 import { Colors } from "../constants/colors";
@@ -35,8 +37,8 @@ export default function PitchLab() {
   const [tutorialIndex, setTutorialIndex] = useState(0);
   const [tutorialCollapsed, setTutorialCollapsed] = useState(false);
   const [skipTutorial, setSkipTutorial] = useState(false);
-  const [pitchOpen, setPitchOpen] = useState(false);
   const [selectedPitch, setSelectedPitch] = useState<PitchOption>("Product Idea");
+  const [timeValue, setTimeValue] = useState({ hours: "00", minutes: "10", seconds: "00" });
 
   const activeStep = useMemo(() => tutorialSteps[tutorialIndex], [tutorialIndex]);
 
@@ -46,6 +48,17 @@ export default function PitchLab() {
       return;
     }
     setTutorialIndex((prev) => prev + 1);
+  };
+
+  const handleStart = () => {
+    const totalSeconds = parseTimeToSeconds(timeValue) || 10 * 60;
+    router.push({
+      pathname: "/practice-session",
+      params: {
+        cameraOn: "true",
+        totalSeconds: String(totalSeconds),
+      },
+    });
   };
 
   return (
@@ -122,63 +135,16 @@ export default function PitchLab() {
           )}
         </Pressable>
 
-        <View style={styles.timerRow}>
-          <Text style={styles.timerLabel}>Speaking Time</Text>
-          <View style={styles.timerDefault}>
-            <Ionicons name="refresh" size={16} color={Colors.octonary.DEFAULT} />
-            <Text style={styles.timerDefaultText}>Default</Text>
-          </View>
-        </View>
-
-        <View style={styles.timeInputs}>
-          {[
-            { label: "00", key: "hours" },
-            { label: "10", key: "minutes" },
-            { label: "00", key: "seconds" },
-          ].map((item, index) => (
-            <View key={item.key} style={styles.timeBoxWrap}>
-              <View style={styles.timeBox}>
-                <Text style={styles.timeValue}>{item.label}</Text>
-              </View>
-              {index < 2 && <Text style={styles.timeDivider}>:</Text>}
-            </View>
-          ))}
-        </View>
+        <SpeakingTimeInput value={timeValue} onChange={setTimeValue} />
 
         <View style={styles.selectRow}>
           <Text style={styles.selectLabel}>Pitch Type</Text>
         </View>
-        <Pressable style={styles.selectField} onPress={() => setPitchOpen((prev) => !prev)}>
-          <Text style={styles.selectValue}>{selectedPitch}</Text>
-          <Ionicons name={pitchOpen ? "chevron-up" : "chevron-down"} size={18} color={Colors.neutral[400]} />
-        </Pressable>
-        {pitchOpen && (
-          <View style={styles.selectList}>
-            {pitchOptions.map((option, index) => (
-              <Pressable
-                key={option}
-                style={[
-                  styles.selectItem,
-                  option === selectedPitch && styles.selectItemActive,
-                  index === pitchOptions.length - 1 && styles.selectItemLast,
-                ]}
-                onPress={() => {
-                  setSelectedPitch(option);
-                  setPitchOpen(false);
-                }}
-              >
-                <Text
-                  style={[
-                    styles.selectItemText,
-                    option === selectedPitch && styles.selectItemTextActive,
-                  ]}
-                >
-                  {option}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        )}
+        <DropdownSelect
+          value={selectedPitch}
+          options={pitchOptions as unknown as string[]}
+          onSelect={(value) => setSelectedPitch(value as PitchOption)}
+        />
 
         <View style={styles.quickTips}>
           <View style={styles.quickTipsHeader}>
@@ -210,7 +176,7 @@ export default function PitchLab() {
           </View>
         </View>
 
-        <Pressable style={styles.startButton}>
+        <Pressable style={styles.startButton} onPress={handleStart}>
           <Text style={styles.startButtonText}>Start</Text>
         </Pressable>
 

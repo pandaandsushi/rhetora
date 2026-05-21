@@ -11,6 +11,11 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
+import DropdownSelect from "../components/dropdown-select";
+import SpeakingTimeInput, {
+  formatDurationLabel,
+  parseTimeToSeconds,
+} from "../components/speaking-time-input";
 import TopHeader from "../components/top-header";
 import { Colors } from "../constants/colors";
 
@@ -48,10 +53,8 @@ type AudienceOption = (typeof audienceOptions)[number];
 export default function VrSetup() {
   const router = useRouter();
   const params = useLocalSearchParams<{ scenarioId?: string }>();
-  const [audienceOpen, setAudienceOpen] = useState(false);
   const [selectedAudience, setSelectedAudience] = useState<AudienceOption | null>(null);
-  const timeLabel = "10 min(s)";
-  const timeSeconds = 10 * 60;
+  const [timeValue, setTimeValue] = useState({ hours: "00", minutes: "10", seconds: "00" });
 
   const scenario = useMemo(() => {
     return vrScenarios.find((item) => item.id === params.scenarioId) ?? vrScenarios[0];
@@ -77,84 +80,34 @@ export default function VrSetup() {
           <Text style={styles.scenarioTitle}>{scenario.title}</Text>
         </View>
 
-        <View style={styles.timerRow}>
-          <Text style={styles.timerLabel}>Speaking Time</Text>
-          <Pressable style={styles.timerDefault}>
-            <Ionicons name="refresh" size={16} color={Colors.octonary.DEFAULT} />
-            <Text style={styles.timerDefaultText}>Default</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.timeInputs}>
-          {[
-            { label: "00", key: "hours" },
-            { label: "10", key: "minutes" },
-            { label: "00", key: "seconds" },
-          ].map((item, index) => (
-            <View key={item.key} style={styles.timeBoxWrap}>
-              <View style={styles.timeBox}>
-                <Text style={styles.timeValue}>{item.label}</Text>
-              </View>
-              {index < 2 && <Text style={styles.timeDivider}>:</Text>}
-            </View>
-          ))}
-        </View>
+        <SpeakingTimeInput value={timeValue} onChange={setTimeValue} />
 
         <View style={styles.selectRow}>
           <Text style={styles.selectLabel}>Audience Size</Text>
         </View>
-        <Pressable style={styles.selectField} onPress={() => setAudienceOpen((prev) => !prev)}>
-          <Text style={styles.selectValue}>
-            {selectedAudience ?? "Select Audience Size"}
-          </Text>
-          <Ionicons
-            name={audienceOpen ? "chevron-up" : "chevron-down"}
-            size={18}
-            color={Colors.neutral[400]}
-          />
-        </Pressable>
-        {audienceOpen && (
-          <View style={styles.selectList}>
-            {audienceOptions.map((option, index) => (
-              <Pressable
-                key={option}
-                style={[
-                  styles.selectItem,
-                  option === selectedAudience && styles.selectItemActive,
-                  index === audienceOptions.length - 1 && styles.selectItemLast,
-                ]}
-                onPress={() => {
-                  setSelectedAudience(option);
-                  setAudienceOpen(false);
-                }}
-              >
-                <Text
-                  style={[
-                    styles.selectItemText,
-                    option === selectedAudience && styles.selectItemTextActive,
-                  ]}
-                >
-                  {option}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-        )}
+        <DropdownSelect
+          value={selectedAudience ?? undefined}
+          placeholder="Select Audience Size"
+          options={audienceOptions as unknown as string[]}
+          onSelect={(value) => setSelectedAudience(value as AudienceOption)}
+        />
 
         <Pressable
           style={[styles.nextButton, !selectedAudience && styles.nextButtonDisabled]}
           disabled={!selectedAudience}
-          onPress={() =>
+          onPress={() => {
+            const totalSeconds = parseTimeToSeconds(timeValue) || 10 * 60;
+            const timeLabel = formatDurationLabel(timeValue);
             router.push({
               pathname: "/vr-ready",
               params: {
                 scenarioId: scenario.id,
                 audience: selectedAudience ?? "",
                 time: timeLabel,
-                timeSeconds: String(timeSeconds),
+                timeSeconds: String(totalSeconds),
               },
-            })
-          }
+            });
+          }}
         >
           <Text style={styles.nextButtonText}>Next</Text>
         </Pressable>

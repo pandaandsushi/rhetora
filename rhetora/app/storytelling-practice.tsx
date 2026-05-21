@@ -6,7 +6,6 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -14,6 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import TopHeader from "../components/top-header";
 
 import PracticeCameraPanel from "../components/practice-camera-panel";
+import SpeakingTimeInput from "../components/speaking-time-input";
 import { Colors } from "../constants/colors";
 
 const bgImage = require("../assets/images/bg-motif.png");
@@ -43,9 +43,7 @@ export default function StorytellingPractice() {
   const [selectedGenre, setSelectedGenre] = useState("fantasy");
   const [skipTutorial, setSkipTutorial] = useState(false);
 
-  const [hours, setHours] = useState("00");
-  const [minutes, setMinutes] = useState("10");
-  const [seconds, setSeconds] = useState("00");
+  const [timeValue, setTimeValue] = useState({ hours: "00", minutes: "10", seconds: "00" });
 
   const activeStep = useMemo(() => tutorialSteps[tutorialIndex], [tutorialIndex]);
 
@@ -61,21 +59,15 @@ export default function StorytellingPractice() {
     setTutorialIndex((prev) => prev + 1);
   };
 
-  const handleDefaultTime = () => {
-    setHours("00");
-    setMinutes("10");
-    setSeconds("00");
-  };
-
   const handleStart = () => {
     router.push({
       pathname: "/storytelling-session",
       params: {
         genre: selectedGenre,
-        hours: hours,
-        minutes: minutes,
-        seconds: seconds,
-        totalDuration: `${hours}:${minutes}:${seconds}`
+        hours: timeValue.hours,
+        minutes: timeValue.minutes,
+        seconds: timeValue.seconds,
+        totalDuration: `${timeValue.hours}:${timeValue.minutes}:${timeValue.seconds}`,
       },
     });
   };
@@ -148,56 +140,7 @@ export default function StorytellingPractice() {
           )}
         </Pressable>
 
-        <View style={styles.timerRow}>
-          <Text style={styles.timerLabel}>Speaking Time</Text>
-          <Pressable style={styles.timerDefault} onPress={handleDefaultTime}>
-            <Ionicons name="refresh" size={16} color={Colors.octonary.DEFAULT} />
-            <Text style={styles.timerDefaultText}>Default</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.timeInputs}>
-          <View style={styles.timeBoxWrap}>
-            <View style={styles.timeBox}>
-              <TextInput
-                style={styles.timeValue}
-                value={hours}
-                onChangeText={setHours}
-                keyboardType="numeric"
-                maxLength={2}
-                selectTextOnFocus
-              />
-            </View>
-            <Text style={styles.timeDivider}>:</Text>
-          </View>
-
-          <View style={styles.timeBoxWrap}>
-            <View style={styles.timeBox}>
-              <TextInput
-                style={styles.timeValue}
-                value={minutes}
-                onChangeText={setMinutes}
-                keyboardType="numeric"
-                maxLength={2}
-                selectTextOnFocus
-              />
-            </View>
-            <Text style={styles.timeDivider}>:</Text>
-          </View>
-
-          <View style={styles.timeBoxWrap}>
-            <View style={styles.timeBox}>
-              <TextInput
-                style={styles.timeValue}
-                value={seconds}
-                onChangeText={setSeconds}
-                keyboardType="numeric"
-                maxLength={2}
-                selectTextOnFocus
-              />
-            </View>
-          </View>
-        </View>
+        <SpeakingTimeInput value={timeValue} onChange={setTimeValue} />
 
         <Text style={styles.genreLabel}>Select Genre</Text>
         <View style={styles.genreWrap}>

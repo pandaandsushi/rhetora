@@ -14,6 +14,7 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
 import PracticeCameraPanel from "../components/practice-camera-panel";
+import SpeakingTimeInput, { parseTimeToSeconds } from "../components/speaking-time-input";
 import TopHeader from "../components/top-header";
 import { Colors } from "../constants/colors";
 
@@ -37,6 +38,7 @@ export default function FillerFree() {
   const [words, setWords] = useState<string[]>(defaultWords);
   const [addOpen, setAddOpen] = useState(false);
   const [newWord, setNewWord] = useState("");
+  const [timeValue, setTimeValue] = useState({ hours: "00", minutes: "10", seconds: "00" });
 
   const activeStep = useMemo(() => tutorialSteps[tutorialIndex], [tutorialIndex]);
 
@@ -65,6 +67,17 @@ export default function FillerFree() {
 
   const handleRemoveWord = (wordToRemove: string) => {
     setWords((prev) => prev.filter((word) => word !== wordToRemove));
+  };
+
+  const handleStart = () => {
+    const totalSeconds = parseTimeToSeconds(timeValue) || 10 * 60;
+    router.push({
+      pathname: "/practice-session",
+      params: {
+        cameraOn: "true",
+        totalSeconds: String(totalSeconds),
+      },
+    });
   };
 
   return (
@@ -139,28 +152,7 @@ export default function FillerFree() {
           )}
         </Pressable>
 
-        <View style={styles.timerRow}>
-          <Text style={styles.timerLabel}>Speaking Time</Text>
-          <View style={styles.timerDefault}>
-            <Ionicons name="refresh" size={16} color={Colors.octonary.DEFAULT} />
-            <Text style={styles.timerDefaultText}>Default</Text>
-          </View>
-        </View>
-
-        <View style={styles.timeInputs}>
-          {[
-            { label: "00", key: "hours" },
-            { label: "10", key: "minutes" },
-            { label: "00", key: "seconds" },
-          ].map((item, index) => (
-            <View key={item.key} style={styles.timeBoxWrap}>
-              <View style={styles.timeBox}>
-                <Text style={styles.timeValue}>{item.label}</Text>
-              </View>
-              {index < 2 && <Text style={styles.timeDivider}>:</Text>}
-            </View>
-          ))}
-        </View>
+        <SpeakingTimeInput value={timeValue} onChange={setTimeValue} />
 
         <Text style={styles.wordBankLabel}>Word Bank</Text>
         <View style={styles.wordBankRow}>
@@ -180,7 +172,7 @@ export default function FillerFree() {
           </Pressable>
         </View>
 
-        <Pressable style={styles.startButton}>
+        <Pressable style={styles.startButton} onPress={handleStart}>
           <Text style={styles.startButtonText}>Start</Text>
         </Pressable>
 

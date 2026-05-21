@@ -15,21 +15,39 @@ import Svg, { Circle } from "react-native-svg";
 import { Colors } from "../constants/colors";
 import PracticeCameraPanel from "../components/practice-camera-panel";
 import TopHeader from "../components/top-header";
-const TOTAL_SECONDS = 10 * 60;
+const DEFAULT_TOTAL_SECONDS = 10 * 60;
 const logoRhetora = require("../assets/images/logorhetora.png");
 export default function PracticeSession() {
   const router = useRouter();
-  
-  const { cameraOn } = useLocalSearchParams<{ cameraOn: string }>(); 
-  
-  const [remainingSeconds, setRemainingSeconds] = useState(TOTAL_SECONDS);
+
+  const { cameraOn, totalSeconds, hours, minutes, seconds } = useLocalSearchParams<{
+    cameraOn?: string;
+    totalSeconds?: string;
+    hours?: string;
+    minutes?: string;
+    seconds?: string;
+  }>();
+
+  const initialTotalSeconds = useMemo(() => {
+    const parsedTotal = Number(totalSeconds);
+    if (Number.isFinite(parsedTotal) && parsedTotal > 0) {
+      return parsedTotal;
+    }
+    const h = parseInt(hours ?? "0", 10) || 0;
+    const m = parseInt(minutes ?? "10", 10) || 0;
+    const s = parseInt(seconds ?? "0", 10) || 0;
+    const combined = h * 3600 + m * 60 + s;
+    return combined > 0 ? combined : DEFAULT_TOTAL_SECONDS;
+  }, [totalSeconds, hours, minutes, seconds]);
+
+  const [remainingSeconds, setRemainingSeconds] = useState(initialTotalSeconds);
   const [isPaused, setIsPaused] = useState(false);
   const [restartVisible, setRestartVisible] = useState(false);
   const [finishVisible, setFinishVisible] = useState(false);
   const [timeUpVisible, setTimeUpVisible] = useState(false);
 
 
-  const progress = remainingSeconds / TOTAL_SECONDS;
+  const progress = remainingSeconds / initialTotalSeconds;
   const ringSize = 86;
   const ringStroke = 8;
   const ringRadius = (ringSize - ringStroke) / 2;
@@ -62,7 +80,7 @@ export default function PracticeSession() {
   }, [isPaused, timeUpVisible]);
 
   const handleRestart = () => {
-    setRemainingSeconds(TOTAL_SECONDS);
+    setRemainingSeconds(initialTotalSeconds);
     setIsPaused(false);
     setRestartVisible(false);
   };

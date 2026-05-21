@@ -1,0 +1,74 @@
+{
+  "mode": "vr",
+  "scenario": "Podium",
+  "quickSummary": {
+    "totalFillerWords": 6,
+    "wordRatePerMinute": 8,
+    "fillerWords": [
+      { "word": "like", "count": 2 },
+      { "word": "so", "count": 2 },
+      { "word": "um", "count": 2 },
+      { "word": "right", "count": 1 }
+    ]
+  },
+  "transcript": "Communication skills are a fundamental competency crucial for academic and professional success...",
+  "overallFeedback": {
+    "title": "You handled the podium scenario well.",
+    "summary": "Your speech had a clear structure and the main ideas were easy to follow. You started confidently and showed good control over the topic. However, some filler words and moments of hesitation slightly reduced the smoothness of your delivery."
+  },
+  "skillBreakdown": [
+    {
+      "skill": "Confidence",
+      "score": 78,
+      "level": "Good",
+      "reason": "You started with a steady tone and clear opening, but hesitation appeared in the middle of the speech."
+    },
+    {
+      "skill": "Clarity",
+      "score": 82,
+      "level": "Good",
+      "reason": "Your ideas were understandable and logically connected."
+    },
+    {
+      "skill": "Engagement",
+      "score": 70,
+      "level": "Fair",
+      "reason": "The audience would likely stay engaged at the beginning, but attention may decrease when pacing becomes less varied."
+    },
+    {
+      "skill": "Structure",
+      "score": 85,
+      "level": "Good",
+      "reason": "Your speech had a clear introduction, explanation, and conclusion."
+    }
+  ],
+  "whatYouDidWell": [
+    "Strong and confident opening",
+    "Clear explanation of your background",
+    "Logical flow of ideas",
+    "Good recovery after moments of hesitation"
+  ],
+  "audienceReaction": {
+    "beginning": "Audience is attentive and engaged because your opening is clear.",
+    "middle": "Slight drop in attention due to pauses and filler words.",
+    "end": "Engagement improves again as your delivery becomes more stable."
+  },
+  "recommendedActions": [
+    {
+      "title": "Managing hesitation",
+      "description": "It is okay to pause. Replacing filler words with silence can make you sound more confident."
+    },
+    {
+      "title": "Maintaining engagement",
+      "description": "Small variations in tone and pacing can help keep the audience engaged."
+    },
+    {
+      "title": "Smoother transitions",
+      "description": "Take a brief pause before introducing a new idea."
+    }
+  ],
+  "nextPracticeRecommendation": {
+    "mode": "Filler-Free",
+    "reason": "This can help reduce hesitation and filler words before trying another VR scenario."
+  }
+}
