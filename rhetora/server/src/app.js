@@ -6,6 +6,7 @@ import transcriptionRoutes from "./routes/transcription.routes.js";
 import vrRoutes from "./routes/vr.routes.js";
 import storytellingRoutes from "./routes/storytelling.routes.js";
 import pitchRoutes from "./routes/pitch.routes.js";
+import fillerFreeRoutes from "./routes/fillerFree.routes.js";
 
 const app = express();
 
@@ -17,5 +18,6 @@ app.use(transcriptionRoutes);
 app.use(vrRoutes);
 app.use(storytellingRoutes);
 app.use(pitchRoutes);
+app.use(fillerFreeRoutes);
 
 export default app;

@@ -38,7 +38,7 @@ export default function FillerFree() {
   const [words, setWords] = useState<string[]>(defaultWords);
   const [addOpen, setAddOpen] = useState(false);
   const [newWord, setNewWord] = useState("");
-  const [timeValue, setTimeValue] = useState({ hours: "00", minutes: "10", seconds: "00" });
+  const [timeValue, setTimeValue] = useState({ hours: "00", minutes: "01", seconds: "00" });
 
   const activeStep = useMemo(() => tutorialSteps[tutorialIndex], [tutorialIndex]);
 
@@ -70,12 +70,15 @@ export default function FillerFree() {
   };
 
   const handleStart = () => {
-    const totalSeconds = parseTimeToSeconds(timeValue) || 10 * 60;
+    const rawSeconds = parseTimeToSeconds(timeValue) || 60;
+    // Clamp to max 1 minute (60 seconds)
+    const totalSeconds = Math.min(rawSeconds, 60);
     router.push({
-      pathname: "/practice-session",
+      pathname: "/filler-free-session",
       params: {
         cameraOn: "true",
         totalSeconds: String(totalSeconds),
+        fillerWords: JSON.stringify(words),
       },
     });
   };
@@ -152,7 +155,8 @@ export default function FillerFree() {
           )}
         </Pressable>
 
-        <SpeakingTimeInput value={timeValue} onChange={setTimeValue} />
+        <SpeakingTimeInput value={timeValue} onChange={setTimeValue} label="Speaking Time (max 1 min)" />
+        <Text style={styles.timeCaption}>Session is capped at 60 seconds</Text>
 
         <Text style={styles.wordBankLabel}>Word Bank</Text>
         <View style={styles.wordBankRow}>
@@ -388,6 +392,13 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 22,
     color: Colors.senary[300],
+  },
+  timeCaption: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.senary[300],
+    textAlign: "center",
+    marginTop: -6,
   },
   wordBankLabel: {
     fontFamily: "Quicksand-Bold",

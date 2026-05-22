@@ -1,0 +1,52 @@
+{
+  "question": "What is your favorite way to spend your free time?",
+  "transcript": "To be honest, my favorite way to spend my free time is, um, definitely hiking in the mountains. I really love the, um, fresh air and the sense of adventure, you know? It's just so, like, peaceful to disconnect from my phone and just focus on the trail, and, um, it really helps me clear my head after a busy week at the university. Besides hiking, I also enjoy, uh, experimenting with new recipes in the kitchen. Sometimes the food is a bit of a, like, disaster, but I find it really, you know, rewarding to create something from scratch. It's a great way to, um, express my creativity outside of coding or, um, studying for my final projects.",
+  "fillerCounts": {
+    "um": 5,
+    "like": 2,
+    "you know": 2,
+    "uh": 2
+  },
+  "wordRatePerMinute": 8,
+  "totalFillerWords": 11,
+  "evaluation": {
+    "quickSummary": "You shared a warm and personal answer! Your response was engaging and covered two interesting hobbies. However, frequent filler words like 'um', 'like', and 'you know' interrupted the natural flow of your speech. Try replacing these with short, intentional pauses to sound more confident and polished.",
+    "skillBreakdown": [
+      {
+        "skill": "Fluency",
+        "score": 58,
+        "level": "Fair",
+        "reason": "Your speech had a natural topic and ideas, but the frequent use of 'um', 'uh', 'like', and 'you know' interrupted the flow and made it harder to follow.",
+        "improvementTip": "Practice pausing silently instead of filling gaps with filler sounds. Record yourself and listen back to become more aware of your habits."
+      },
+      {
+        "skill": "Conciseness",
+        "score": 70,
+        "level": "Good",
+        "reason": "Your answer covered two relevant hobbies and stayed on topic, though some sentences were longer than needed due to repeated filler phrases.",
+        "improvementTip": "Try to express each idea in one or two focused sentences. Less padding means your key points land more clearly."
+      },
+      {
+        "skill": "Confidence",
+        "score": 65,
+        "level": "Fair",
+        "reason": "Your ideas were genuine and relatable, but the hesitation markers (um, uh) suggested some uncertainty, even though your content was solid.",
+        "improvementTip": "Slow down slightly and commit to each word. Confidence comes across when you speak deliberately rather than rushing to fill silence."
+      }
+    ],
+    "recommendedActions": [
+      {
+        "title": "Replace fillers with pauses",
+        "description": "Instead of saying 'um' or 'uh', try pausing briefly. Pauses make you sound more confident and give your listener time to absorb what you said."
+      },
+      {
+        "title": "Slow down slightly",
+        "description": "Fillers often appear when you are thinking quickly. Slowing down gives you more control and reduces the urge to fill silence with sounds."
+      },
+      {
+        "title": "Use cleaner transitions",
+        "description": "Take a short pause before starting a new idea instead of using 'like' or 'you know' as bridges between thoughts."
+      }
+    ]
+  }
+}
