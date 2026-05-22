@@ -52,11 +52,13 @@ export default function PitchLab() {
 
   const handleStart = () => {
     const totalSeconds = parseTimeToSeconds(timeValue) || 10 * 60;
+
     router.push({
-      pathname: "/practice-session",
+      pathname: "/pitch-lab-session",
       params: {
-        cameraOn: "true",
+        pitchType: selectedPitch,
         totalSeconds: String(totalSeconds),
+        cameraOn: "true",
       },
     });
   };

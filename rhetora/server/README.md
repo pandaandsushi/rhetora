@@ -20,6 +20,8 @@
 - `POST /storytelling/initial` (JSON body: `{ genre }`)
 - `POST /storytelling/turn` (multipart/form-data, field `audio` + `genre`, `currentTurn`, `maxTurns`, `turns`)
 - `POST /storytelling/evaluate` (JSON body: `{ turns, genre, metrics }`)
+- `POST /pitch/initial` (JSON body: `{ pitchType }`)
+- `POST /pitch/evaluate` (multipart/form-data, field `audio` + `pitchType`, `promptTitle`, `promptInstruction`)
 
 ### Example curl
 
@@ -46,4 +48,14 @@ curl -X POST http://localhost:5050/storytelling/turn \
 curl -X POST http://localhost:5050/storytelling/evaluate \
    -H "Content-Type: application/json" \
    -d '{"genre":"horror","turns":[],"metrics":{}}'
+
+curl -X POST http://localhost:5050/pitch/initial \
+   -H "Content-Type: application/json" \
+   -d '{"pitchType":"Product Idea"}'
+
+curl -X POST http://localhost:5050/pitch/evaluate \
+   -F "audio=@./sample.m4a" \
+   -F "pitchType=Product Idea" \
+   -F "promptTitle=Pitch a productivity app" \
+   -F "promptInstruction=Explain what it does and why it matters"
 ```

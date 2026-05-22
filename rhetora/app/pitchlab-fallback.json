@@ -1,0 +1,85 @@
+{
+  "mode": "pitch",
+  "pitchType": "Product Idea",
+  "prompt": {
+    "title": "You are pitching a mobile app that helps students improve their productivity.",
+    "instruction": "Explain what it does and why people should use it."
+  },
+  "pitchScore": 76,
+  "wordRatePerMinute": 8,
+  "quickSummary": "Your pitch clearly introduced the problem of student procrastination and explained FocusMate as a solution. The structure was easy to follow, moving from problem to solution and then to a call-to-action. However, the pitch could be stronger by reducing filler words, making the unique value clearer, and ending with a more memorable closing statement.",
+  "skillBreakdown": [
+    {
+      "skill": "Confidence",
+      "score": 74,
+      "level": "Good",
+      "reason": "You opened with a statistic and presented your idea with a clear intention. However, several filler words such as 'um', 'uh', and 'you know' made the delivery sound slightly less confident.",
+      "improvementTip": "Replace filler words with short pauses. This will make your pitch sound more controlled and convincing."
+    },
+    {
+      "skill": "Structure",
+      "score": 82,
+      "level": "Good",
+      "reason": "Your pitch followed a logical sequence: problem, solution, feature explanation, and call-to-action. This made the idea easy to understand.",
+      "improvementTip": "Make the closing stronger by ending with a concise and memorable statement about why users should join or try the product."
+    },
+    {
+      "skill": "Conciseness",
+      "score": 72,
+      "level": "Good",
+      "reason": "Most of your points were relevant, but some phrases could be shortened. The pitch would feel more impactful if repeated filler phrases and unnecessary transitions were reduced.",
+      "improvementTip": "Try using shorter sentences and focus each sentence on one clear message."
+    }
+  ],
+  "transcript": "Hi everyone, um, did you know that over eighty percent of students struggle with procrastination and, uh, feel overwhelmed by their deadlines? It's a huge problem, like, especially when you're trying to balance social life and academics. That’s why we built 'FocusMate,' a mobile app that, um, uses smart scheduling to help students manage their time and, you know, actually finish their assignments without the late-night stress.\n\nUnlike other apps, FocusMate, uh, gamifies your study sessions by giving you rewards for staying focused, like, virtual coins and badges. We believe that by turning productivity into a game, we can, um, help every student reach their full potential. We are currently looking for, uh, early adopters to join our beta program and, you know, help us shape the future of student success.",
+  "overallFeedback": {
+    "title": "You delivered a clear and structured product pitch.",
+    "summary": "Your pitch successfully explained the problem and introduced FocusMate as a relevant solution for students. The idea was easy to follow and you included a clear call-to-action for early adopters. To improve, focus on sounding more concise, reducing filler words, and highlighting what makes FocusMate different from other productivity apps."
+  },
+  "whatYouDidWell": [
+    "Strong opening with a statistic.",
+    "Clear explanation of the problem.",
+    "Logical flow from problem to solution to feature explanation.",
+    "Included a call-to-action for early adopters."
+  ],
+  "structureAnalysis": [
+    {
+      "title": "Hook / Attention Grabber",
+      "description": "You opened with a statistic about students struggling with procrastination. This is effective because it immediately shows the relevance of the problem."
+    },
+    {
+      "title": "Problem",
+      "description": "The problem was clearly stated: students struggle with procrastination, deadlines, and balancing academics with social life."
+    },
+    {
+      "title": "Solution",
+      "description": "FocusMate was introduced clearly as a mobile app that uses smart scheduling to help students manage time and finish assignments."
+    },
+    {
+      "title": "Features / Value",
+      "description": "You explained the gamification feature with rewards such as virtual coins and badges. This helps show the app's value, but the unique advantage compared to other apps could be explained more specifically."
+    },
+    {
+      "title": "Differentiation",
+      "description": "You mentioned that FocusMate is different from other apps, but the explanation could be stronger by clearly stating what makes it more effective or more enjoyable."
+    },
+    {
+      "title": "Closing / Call-to-Action",
+      "description": "You ended by inviting early adopters to join the beta program. This is a good call-to-action, but it could be more memorable and persuasive."
+    }
+  ],
+  "recommendedActions": [
+    {
+      "title": "Reduce filler words to strengthen confidence",
+      "description": "Your message is strong, but removing fillers such as 'um', 'uh', 'like', and 'you know' will make you sound more convincing."
+    },
+    {
+      "title": "Highlight your unique value more clearly",
+      "description": "Explain what makes FocusMate different from other productivity apps in one strong sentence."
+    },
+    {
+      "title": "Strengthen your closing statement",
+      "description": "Your call-to-action is good, but it can be more impactful if you end with a memorable benefit or invitation."
+    }
+  ]
+}
