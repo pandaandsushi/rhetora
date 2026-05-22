@@ -274,7 +274,7 @@ export default function StorytellingSession() {
         setAiPrompt(data.nextPrompt);
       }
 
-      const nextTurnIndex = currentTurn + 1;
+      const nextTurnIndex = currentTurn + 2;
       if (nextTurnIndex > maxTurnCount || !data.nextPrompt) {
         setPhase("finished");
         await finalizeEvaluation(nextTurns, data.metrics);
@@ -362,15 +362,16 @@ export default function StorytellingSession() {
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.cameraWrapper}>
           <PracticeCameraPanel
-          initialCameraOn={cameraOn === "true"}
-          placeholder={
-            <Image
-              source={logoRhetora}
-              style={{ width: 90, height: 90 }}
-              resizeMode="contain"
-            />
-          }
-        />
+            initialCameraOn={cameraOn === "true"}
+            micMonitorEnabled={phase !== "recording" && phase !== "processing"}
+            placeholder={
+              <Image
+                source={logoRhetora}
+                style={{ width: 90, height: 90 }}
+                resizeMode="contain"
+              />
+            }
+          />
         </View>
 
         <View style={styles.controlsRow}>

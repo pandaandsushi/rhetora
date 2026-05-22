@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView, useCameraPermissions } from "expo-camera";
@@ -14,6 +14,7 @@ type PracticeCameraPanelProps = {
   toggleIconName?: React.ComponentProps<typeof Ionicons>["name"];
   initialCameraOn?: boolean;
   onCameraToggle?: (isOn: boolean) => void;
+  micMonitorEnabled?: boolean;
 };
 
 export default function PracticeCameraPanel({
@@ -22,6 +23,7 @@ export default function PracticeCameraPanel({
   toggleIconName,
   initialCameraOn = false,
   onCameraToggle,
+  micMonitorEnabled = true,
 }: PracticeCameraPanelProps) {
   const [isCameraOn, setIsCameraOn] = useState(initialCameraOn);
   const [permission, requestPermission] = useCameraPermissions();
@@ -95,6 +97,10 @@ export default function PracticeCameraPanel({
             linearPCMIsBigEndian: false,
             linearPCMIsFloat: false,
           },
+          web: {
+            mimeType: "audio/webm",
+            bitsPerSecond: 128000,
+          },
         },
         (status) => {
           if (status.isRecording && status.metering != null) {
@@ -134,7 +140,7 @@ export default function PracticeCameraPanel({
       let isActive = true;
 
       const init = async () => {
-        if (isActive) {
+        if (isActive && micMonitorEnabled) {
           await startMicMonitor();
         }
       };
@@ -144,8 +150,14 @@ export default function PracticeCameraPanel({
         isActive = false;
         stopMicMonitor();
       };
-    }, [])
+    }, [micMonitorEnabled])
   );
+
+  useEffect(() => {
+    if (!micMonitorEnabled) {
+      stopMicMonitor();
+    }
+  }, [micMonitorEnabled]);
 
   return (
     <View style={styles.wrapper}>
