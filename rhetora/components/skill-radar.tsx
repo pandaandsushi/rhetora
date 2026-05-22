@@ -111,7 +111,7 @@ export default function SkillRadar({
               {
                 left: point.x - 28,
                 top: point.y - 10,
-                width: 56,
+                width: 70,
               },
             ]}
           >

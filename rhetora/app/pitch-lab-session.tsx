@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import CollapsibleSection from "../components/collapsible-section";
 import Svg, { Circle } from "react-native-svg";
 import { Audio } from "expo-av";
 
@@ -22,6 +23,18 @@ import { BACKEND_URL } from "../constants/api";
 import pitchFallback from "./pitchlab-fallback.json";
 
 const logoRhetora = require("../assets/images/logorhetora.png");
+
+type PitchPrompt = {
+  title: string;
+  instruction: string;
+  tips?: {
+    hook?: string;
+    problem?: string;
+    solution?: string;
+    value?: string;
+    closing?: string;
+  };
+};
 
 export default function PitchLabSession() {
   const router = useRouter();
@@ -36,8 +49,9 @@ export default function PitchLabSession() {
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 600;
   }, [totalSeconds]);
 
-  const [prompt, setPrompt] = useState(pitchFallback.prompt);
+  const [prompt, setPrompt] = useState<PitchPrompt>(pitchFallback.prompt);
   const [promptLoading, setPromptLoading] = useState(true);
+  const [sessionStarted, setSessionStarted] = useState(false);
 
   const [remainingSeconds, setRemainingSeconds] = useState(initialTotalSeconds);
   const [isPaused, setIsPaused] = useState(false);
@@ -157,6 +171,7 @@ export default function PitchLabSession() {
     const started = await startRecording();
 
     if (started) {
+      setSessionStarted(true);
       startTimer();
     }
   };
@@ -172,6 +187,7 @@ export default function PitchLabSession() {
     setRemainingSeconds(initialTotalSeconds);
     setIsPaused(false);
     setIsRecording(false);
+    setSessionStarted(false);
 
     await handleStartSession();
   };
@@ -253,7 +269,6 @@ export default function PitchLabSession() {
       } finally {
         if (isMounted) {
           setPromptLoading(false);
-          handleStartSession();
         }
       }
     };
@@ -272,7 +287,7 @@ export default function PitchLabSession() {
   }, [pitchType]);
 
   useEffect(() => {
-    if (!timerRef.current) {
+    if (!timerRef.current || !sessionStarted) {
       return;
     }
 
@@ -281,7 +296,21 @@ export default function PitchLabSession() {
     } else if (isRecording) {
       startTimer();
     }
-  }, [isPaused]);
+  }, [isPaused, sessionStarted]);
+
+  const promptDetails = useMemo(() => {
+  return {
+    title: prompt?.title ?? pitchFallback.prompt.title,
+    instruction: prompt?.instruction ?? pitchFallback.prompt.instruction,
+    tips: {
+      hook: prompt?.tips?.hook ?? "",
+      problem: prompt?.tips?.problem ?? "",
+      solution: prompt?.tips?.solution ?? "",
+      value: prompt?.tips?.value ?? "",
+      closing: prompt?.tips?.closing ?? "",
+    },
+  };
+}, [prompt]);
 
   return (
     <View style={styles.screen}>
@@ -357,16 +386,62 @@ export default function PitchLabSession() {
 
         <View style={styles.promptContainer}>
           <Text style={styles.promptTitle}>
-            {promptLoading ? "Loading pitch prompt..." : prompt.title}
+            {promptLoading ? "Loading pitch prompt..." : promptDetails.title}
           </Text>
           <Text style={styles.promptInstruction}>
-            {promptLoading ? "Please wait a moment." : prompt.instruction}
+            {promptLoading ? "Please wait a moment." : promptDetails.instruction}
           </Text>
         </View>
 
-        <Pressable style={styles.finishButton} onPress={() => setFinishVisible(true)}>
-          <Text style={styles.finishButtonText}>Finish</Text>
-        </Pressable>
+        {!promptLoading && (
+            <CollapsibleSection title="Pitch Tips">
+                {!!promptDetails.tips.hook && (
+                <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Hook</Text>
+                    <Text style={styles.detailValue}>{promptDetails.tips.hook}</Text>
+                </View>
+                )}
+
+                {!!promptDetails.tips.problem && (
+                <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Problem</Text>
+                    <Text style={styles.detailValue}>{promptDetails.tips.problem}</Text>
+                </View>
+                )}
+
+                {!!promptDetails.tips.solution && (
+                <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Solution</Text>
+                    <Text style={styles.detailValue}>{promptDetails.tips.solution}</Text>
+                </View>
+                )}
+
+                {!!promptDetails.tips.value && (
+                <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Value</Text>
+                    <Text style={styles.detailValue}>{promptDetails.tips.value}</Text>
+                </View>
+                )}
+
+                {!!promptDetails.tips.closing && (
+                <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Closing</Text>
+                    <Text style={styles.detailValue}>{promptDetails.tips.closing}</Text>
+                </View>
+                )}
+            </CollapsibleSection>
+            )}
+            {!sessionStarted && !promptLoading && (
+          <Pressable style={styles.startButton} onPress={handleStartSession}>
+            <Text style={styles.startButtonText}>Start Talking</Text>
+          </Pressable>
+        )}
+
+        {sessionStarted && (
+          <Pressable style={styles.finishButton} onPress={() => setFinishVisible(true)}>
+            <Text style={styles.finishButtonText}>Finish</Text>
+          </Pressable>
+        )}
       </ScrollView>
 
       <Modal transparent animationType="fade" visible={finishVisible}>
@@ -485,6 +560,46 @@ const styles = StyleSheet.create({
     color: Colors.octonary.DEFAULT,
     textAlign: "center",
     lineHeight: 34,
+  },
+  detailRow: {
+    gap: 6,
+    marginBottom: 10,
+  },
+  detailLabel: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 13,
+    color: Colors.octonary.DEFAULT,
+  },
+  detailValue: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 13,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 18,
+  },
+  detailList: {
+    gap: 6,
+  },
+  detailBulletRow: {
+    flexDirection: "row",
+    gap: 6,
+  },
+  detailBullet: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 14,
+    color: Colors.quinary[300],
+  },
+  startButton: {
+    width: "100%",
+    height: 54,
+    borderRadius: 14,
+    backgroundColor: Colors.quinary[300],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  startButtonText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.shade[200],
   },
   finishButton: {
     width: "100%",
