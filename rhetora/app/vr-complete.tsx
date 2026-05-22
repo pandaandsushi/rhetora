@@ -11,6 +11,8 @@ export default function VrComplete() {
     audioUri?: string;
     scenarioId?: string;
     audience?: string;
+    time?: string;
+    timeSeconds?: string;
   }>();
   const [isUploading, setIsUploading] = useState(false);
 
@@ -18,6 +20,22 @@ export default function VrComplete() {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
   }, []);
 
+  const handleRetry = async () => {
+    if (isUploading) {
+      return;
+    }
+
+    router.replace({
+      pathname: "/vr-ready",
+      params: {
+        scenarioId: params.scenarioId ?? "vr-classroom",
+        audience: params.audience ?? "",
+        time: params.time ?? "",
+        timeSeconds: params.timeSeconds ?? "",
+      },
+    });
+  };
+  
   const handleContinue = async () => {
     if (isUploading) {
       return;
@@ -84,6 +102,14 @@ export default function VrComplete() {
           <Text style={styles.buttonText}>Continue to Evaluation</Text>
         )}
       </Pressable>
+
+      <Pressable
+        style={[styles.retryButton, isUploading && styles.buttonDisabled]}
+        onPress={handleRetry}
+        disabled={isUploading}
+      >
+        <Text style={styles.retryButtonText}>Retry Practice</Text>
+      </Pressable>
     </View>
   );
 }
@@ -120,5 +146,23 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 16,
     fontWeight: "700",
+  },
+  retryButton: {
+    marginTop: 14,
+    borderWidth: 1.5,
+    borderColor: "#FFFFFF",
+    paddingHorizontal: 28,
+    paddingVertical: 14,
+    borderRadius: 16,
+  },
+
+  retryButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+
+  buttonDisabled: {
+    opacity: 0.5,
   },
 });

@@ -35,6 +35,7 @@ export default function VrViro() {
   const params = useLocalSearchParams<{
     scenarioId?: string;
     audience?: string;
+    time?: string;
     timeSeconds?: string;
   }>();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -215,13 +216,15 @@ export default function VrViro() {
     (async () => {
       const audioUri = await stopRecording();
       router.replace({
-        pathname: "/vr-complete",
-        params: {
-          audioUri: audioUri ?? "",
-          scenarioId: params.scenarioId ?? "vr-classroom",
-          audience: params.audience ?? "",
-        },
-      });
+      pathname: "/vr-complete",
+      params: {
+        audioUri: audioUri ?? "",
+        scenarioId: params.scenarioId ?? "vr-classroom",
+        audience: params.audience ?? "",
+        time: params.time ?? "",
+        timeSeconds: params.timeSeconds ?? "",
+      },
+    });
     })();
   }, [remainingSeconds, router]);
 
