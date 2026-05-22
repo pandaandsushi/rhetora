@@ -2,12 +2,12 @@ import { ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, View }
 import { useMemo, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
+import CollapsibleSection from "../components/collapsible-section";
 import { Colors } from "../constants/colors";
 import TopHeader from "../components/top-header";
 import SkillRadar from "../components/skill-radar";
 
-const bgImage = require("../assets/images/storymode/bg/bg-bedroom.png");
+const bgImage = require("../assets/images/bg-motif.png");
 
 const fallbackEvaluation = {
   mode: "storytelling",
@@ -118,7 +118,6 @@ type StorytellingEvaluation = typeof fallbackEvaluation;
 export default function StorytellingEvaluation() {
   const router = useRouter();
   const params = useLocalSearchParams<{ data?: string }>();
-  const [quickSummaryOpen, setQuickSummaryOpen] = useState(true);
   const [skillsModalOpen, setSkillsModalOpen] = useState(false);
 
   const evaluation = useMemo<StorytellingEvaluation>(() => {
@@ -194,22 +193,13 @@ export default function StorytellingEvaluation() {
           </View>
         </View>
 
-        <Pressable
-          style={styles.quickSummaryHeader}
-          onPress={() => setQuickSummaryOpen((prev) => !prev)}
-        >
-          <Text style={styles.quickSummaryTitle}>Quick Summary</Text>
-          <Ionicons
-            name={quickSummaryOpen ? "chevron-up" : "chevron-down"}
-            size={18}
-            color={Colors.octonary.DEFAULT}
-          />
-        </Pressable>
-        {quickSummaryOpen && (
-          <View style={styles.quickSummaryBody}>
+        <CollapsibleSection
+            title="Quick Summary"
+            headerStyle={styles.quickSummaryHeader}
+            contentStyle={styles.quickSummaryContent}
+            >
             <Text style={styles.quickSummaryText}>{safeEvaluation.quickSummary}</Text>
-          </View>
-        )}
+        </CollapsibleSection>
 
         <View style={styles.summaryCard}>
           <View style={styles.summaryStat}>
@@ -238,47 +228,51 @@ export default function StorytellingEvaluation() {
           <SkillRadar labels={skillLabels} values={skillScores} size={220} />
         </View>
 
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Story Recap</Text>
-          {safeEvaluation.storyRecap.items.map((item, index) => (
-            <Text
-              key={`${item.speaker}-${index}`}
-              style={item.speaker === "user" ? styles.recapUserText : styles.recapAiText}
+        <CollapsibleSection title="Story Recap">
+            {safeEvaluation.storyRecap.items.map((item, index) => (
+                <Text
+                key={`${item.speaker}-${index}`}
+                style={item.speaker === "user" ? styles.recapUserText : styles.recapAiText}
+                >
+                {item.text}
+                </Text>
+            ))}
+        </CollapsibleSection>
+
+        <CollapsibleSection title="What You Did Well">
+            {safeEvaluation.whatYouDidWell.map((line) => (
+                <View key={line} style={styles.bulletRow}>
+                <Text style={styles.bullet}>•</Text>
+                <Text style={styles.sectionBody}>{line}</Text>
+                </View>
+            ))}
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Structure Analysis">
+            {safeEvaluation.structureAnalysis.map((item) => (
+                <View key={item.title} style={styles.analysisRow}>
+                <View style={styles.bulletRow}>
+                    <Text style={styles.bullet}>•</Text>
+                    <View style={{ flex: 1 }}>
+                    <Text style={styles.analysisTitle}>{item.title}</Text>
+                    <Text style={styles.sectionBody}>{item.description}</Text>
+                    </View>
+                </View>
+                </View>
+            ))}
+        </CollapsibleSection>
+
+        <CollapsibleSection
+            title="Recommended Actions"
+            containerStyle={styles.recommendedCard}
             >
-              {item.text}
-            </Text>
-          ))}
-        </View>
-
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>What You Did Well</Text>
-          {safeEvaluation.whatYouDidWell.map((line) => (
-            <View key={line} style={styles.bulletRow}>
-              <Text style={styles.bullet}>•</Text>
-              <Text style={styles.sectionBody}>{line}</Text>
-            </View>
-          ))}
-        </View>
-
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionTitle}>Structure Analysis</Text>
-          {safeEvaluation.structureAnalysis.map((item) => (
-            <View key={item.title} style={styles.analysisRow}>
-              <Text style={styles.analysisTitle}>{item.title}</Text>
-              <Text style={styles.sectionBody}>{item.description}</Text>
-            </View>
-          ))}
-        </View>
-
-        <View style={[styles.sectionCard, styles.recommendedCard]}>
-          <Text style={styles.sectionTitle}>Recommended Actions</Text>
-          {safeEvaluation.recommendedActions.map((action) => (
-            <View key={action.title} style={styles.recommendedRow}>
-              <Text style={styles.recommendedTitle}>{action.title}</Text>
-              <Text style={styles.sectionBody}>{action.description}</Text>
-            </View>
-          ))}
-        </View>
+            {safeEvaluation.recommendedActions.map((action) => (
+                <View key={action.title} style={styles.recommendedRow}>
+                <Text style={styles.recommendedTitle}>{action.title}</Text>
+                <Text style={styles.sectionBody}>{action.description}</Text>
+                </View>
+            ))}
+        </CollapsibleSection>
 
         <Pressable style={styles.primaryButton} onPress={() => router.replace("/home")}>
           <Text style={styles.primaryButtonText}>Okay</Text>
@@ -341,15 +335,6 @@ const styles = StyleSheet.create({
       alignItems: "center",
       justifyContent: "center",
     },
-    quickSummaryHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: 16,
-      height: 46,
-      borderRadius: 12,
-      backgroundColor: "#F6C99A",
-    },
     quickSummaryTitle: {
       fontFamily: "Quicksand-Bold",
       fontSize: 16,
@@ -359,12 +344,6 @@ const styles = StyleSheet.create({
       backgroundColor: Colors.shade[200],
       borderRadius: 14,
       padding: 16,
-    },
-    quickSummaryText: {
-      fontFamily: "AlbertSans-Regular",
-      fontSize: 14,
-      color: Colors.octonary.DEFAULT,
-      lineHeight: 20,
     },
   genreLabel: {
     textAlign: "center",
@@ -440,13 +419,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.octonary.DEFAULT,
   },
-  sectionBody: {
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 14,
-    color: Colors.octonary.DEFAULT,
-    lineHeight: 20,
-    flex: 1,
-  },
   recapAiText: {
     fontFamily: "AlbertSans-Regular",
     fontSize: 14,
@@ -475,9 +447,6 @@ const styles = StyleSheet.create({
     fontFamily: "AlbertSans-Bold",
     fontSize: 14,
     color: Colors.quinary[300],
-  },
-  recommendedCard: {
-    backgroundColor: "#FFEBA6",
   },
   recommendedRow: {
     gap: 4,
@@ -568,4 +537,32 @@ const styles = StyleSheet.create({
     color: Colors.octonary.DEFAULT,
     marginTop: 4,
   },
+  quickSummaryHeader: {
+    backgroundColor: "#F6C99A",
+    },
+
+    quickSummaryContent: {
+    backgroundColor: "#F6C99A",
+    paddingTop: 0,
+    },
+
+    quickSummaryText: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 20,
+    },
+
+    recommendedCard: {
+    backgroundColor: "#FFEBA6",
+    borderColor: Colors.octonary.DEFAULT,
+    },
+
+    sectionBody: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 20,
+    flex: 1,
+    },
 });
