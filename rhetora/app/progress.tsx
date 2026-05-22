@@ -11,10 +11,11 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import Svg, { Circle, Line, Path, Polygon } from "react-native-svg";
+import Svg, { Circle, Line, Path } from "react-native-svg";
 
 import NavBar from "../components/nav-bar";
 import RecentActivityCard from "../components/recent-activity-card";
+import SkillRadar from "../components/skill-radar";
 import { Colors } from "../constants/colors";
 import { avatarList } from "../constants/avatars";
 import { getMockUserData, subscribeToMockUser } from "../data/mock-user";
@@ -70,20 +71,6 @@ const dashboardData = {
   ],
 };
 
-const buildRadarPoints = (size: number, values: number[]) => {
-  const center = size / 2;
-  const radius = size / 2 - 12;
-  const step = (Math.PI * 2) / values.length;
-
-  return values.map((value, index) => {
-    const angle = -Math.PI / 2 + index * step;
-    const pointRadius = radius * value;
-    const x = center + Math.cos(angle) * pointRadius;
-    const y = center + Math.sin(angle) * pointRadius;
-    return `${x},${y}`;
-  });
-};
-
 const buildLinePath = (width: number, height: number, values: number[]) => {
   const padding = 16;
   const maxValue = Math.max(...values, 1);
@@ -129,15 +116,19 @@ export default function Progress() {
       setUserData(next);
     });
 
-    return unsubscribe;
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      }
+    };
   }, []);
 
   const equippedAvatar =
     avatarList.find((item) => item.id === userData.equippedAvatarId) ?? avatarList[0];
 
-  const radarPoints = useMemo(
-    () => buildRadarPoints(chartWidth, dashboardData.skillMap.values),
-    [],
+  const radarValues = useMemo(
+    () => dashboardData.skillMap.values.map((value) => value * 100),
+    []
   );
   const linePath = useMemo(
     () => buildLinePath(chartWidth, 170, dashboardData.timePractice.data),
@@ -205,61 +196,11 @@ export default function Progress() {
             </View>
 
             <View style={styles.chartCard}>
-              <View style={styles.radarWrap}>
-                <Svg width={chartWidth} height={chartWidth}>
-                  {[0.2, 0.4, 0.6, 0.8, 1].map((fraction) => (
-                    <Circle
-                      key={`ring-${fraction}`}
-                      cx={chartWidth / 2}
-                      cy={chartWidth / 2}
-                      r={(chartWidth / 2 - 12) * fraction}
-                      stroke={Colors.neutral[200]}
-                      strokeWidth={1}
-                      fill="none"
-                    />
-                  ))}
-                  {radarPoints.map((_, index) => {
-                    const angle = -Math.PI / 2 + (Math.PI * 2 * index) / radarPoints.length;
-                    const x = chartWidth / 2 + Math.cos(angle) * (chartWidth / 2 - 12);
-                    const y = chartWidth / 2 + Math.sin(angle) * (chartWidth / 2 - 12);
-                    return (
-                      <Line
-                        key={`axis-${index}`}
-                        x1={chartWidth / 2}
-                        y1={chartWidth / 2}
-                        x2={x}
-                        y2={y}
-                        stroke={Colors.neutral[200]}
-                        strokeWidth={1}
-                      />
-                    );
-                  })}
-                  <Polygon
-                    points={radarPoints.join(" ")}
-                    fill="rgba(88, 130, 219, 0.28)"
-                    stroke={Colors.blue[400]}
-                    strokeWidth={2}
-                  />
-                  {radarPoints.map((point, index) => {
-                    const [x, y] = point.split(",").map(Number);
-                    return (
-                      <Circle
-                        key={`dot-${index}`}
-                        cx={x}
-                        cy={y}
-                        r={3}
-                        fill={Colors.turquoise[400]}
-                      />
-                    );
-                  })}
-                </Svg>
-
-                {dashboardData.skillMap.labels.map((label, index) => (
-                  <Text key={`label-${label}`} style={[styles.radarLabel, styles[`radarLabel${index}`]]}>
-                    {label}
-                  </Text>
-                ))}
-              </View>
+              <SkillRadar
+                labels={dashboardData.skillMap.labels}
+                values={radarValues}
+                size={chartWidth}
+              />
             </View>
 
             <View style={styles.sectionHeaderRow}>
@@ -471,43 +412,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.shade[200],
     padding: 16,
     alignItems: "center",
-  },
-  radarWrap: {
-    width: chartWidth,
-    height: chartWidth,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  radarLabel: {
-    position: "absolute",
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
-    color: Colors.octonary.DEFAULT,
-    textAlign: "center",
-  },
-  radarLabel0: {
-    top: -6,
-    left: chartWidth * 0.2,
-  },
-  radarLabel1: {
-    top: 12,
-    right: 0,
-  },
-  radarLabel2: {
-    top: chartWidth * 0.38,
-    right: -12,
-  },
-  radarLabel3: {
-    bottom: 6,
-    right: chartWidth * 0.1,
-  },
-  radarLabel4: {
-    bottom: -4,
-    left: chartWidth * 0.18,
-  },
-  radarLabel5: {
-    top: chartWidth * 0.4,
-    left: -12,
   },
   minutesLabel: {
     alignSelf: "flex-start",

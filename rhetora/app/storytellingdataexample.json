@@ -1,0 +1,88 @@
+{
+  "mode": "storytelling",
+  "genre": "horror",
+  "storyScore": 80,
+  "wordRatePerMinute": 8,
+  "quickSummary": "You continued the horror story by having the character look for a light source and a weapon, which is a logical response to the situation. The story flowed well and maintained the suspenseful atmosphere. To improve, you can add more descriptive details and emotional depth to make the scene more immersive.",
+  "skillBreakdown": [
+    {
+      "skill": "Fluency",
+      "score": 76,
+      "level": "Good",
+      "reason": "Your continuation was understandable and moved forward without major confusion. However, the delivery could feel smoother if you reduce hesitation and connect your actions with clearer transitions.",
+      "improvementTip": "Use short transition phrases such as 'after that', 'suddenly', or 'because of that' to make the story flow more naturally."
+    },
+    {
+      "skill": "Critical Thinking",
+      "score": 84,
+      "level": "Good",
+      "reason": "You responded logically to the situation by looking for a light source and something to protect yourself. This shows that you understood the problem in the scene and made a realistic decision.",
+      "improvementTip": "Try adding the character's reasoning more explicitly, such as why they choose one path or what risk they are considering."
+    },
+    {
+      "skill": "Structure",
+      "score": 80,
+      "level": "Good",
+      "reason": "Your story follows a clear sequence from noticing the figure, finding a candle, and discovering the three-branch pathway. The events are connected, but the story could benefit from a stronger build-up between each moment.",
+      "improvementTip": "Before introducing a new event, briefly describe the setting or emotion to make the transition feel more complete."
+    }
+  ],
+  "storyRecap": {
+    "items": [
+      {
+        "speaker": "ai",
+        "text": "The lights flickered as you walked down the empty hallway. From your room window, you saw a figure standing still, staring directly at you..."
+      },
+      {
+        "speaker": "user",
+        "text": "I immediately tried to find a light source to see better and find a weapon just in case."
+      },
+      {
+        "speaker": "ai",
+        "text": "You found a candle and went to check outside, only to realize that the figure was a sign leading to a three-branch pathway."
+      }
+    ]
+  },
+  "overallFeedback": {
+    "title": "You created a clear and logical horror continuation.",
+    "summary": "Your response continued the story in a way that made sense and kept the scene moving. You made realistic decisions for the character, especially by looking for light and protection. To make the story more engaging, you can add more sensory details, emotion, and suspense before moving to the next event."
+  },
+  "whatYouDidWell": [
+    "You continued the story directly from the AI prompt.",
+    "Your actions were logical and easy to follow.",
+    "You maintained the horror atmosphere.",
+    "You gave the character a clear immediate goal."
+  ],
+  "structureAnalysis": [
+    {
+      "title": "Continuation from prompt",
+      "description": "You responded directly to the dark hallway and mysterious figure, so the story stayed connected to the original situation."
+    },
+    {
+      "title": "Action taken",
+      "description": "Looking for a light source and a weapon is a realistic response in a tense situation."
+    },
+    {
+      "title": "Atmosphere development",
+      "description": "The scene could be stronger if you described what the character heard, saw, or felt while moving through the hallway."
+    },
+    {
+      "title": "Emotional depth",
+      "description": "The character's fear, hesitation, or curiosity could be explored more to make the story feel more immersive."
+    }
+  ],
+  "recommendedActions": [
+    {
+      "title": "Add descriptive details",
+      "description": "Instead of only stating actions, describe what the character sees, hears, or feels to make the scene more vivid."
+    },
+    {
+      "title": "Build tension gradually",
+      "description": "Slow down important moments before revealing what happens next. This helps create suspense."
+    },
+    {
+      "title": "Express emotion",
+      "description": "Include the character's fear, confusion, or curiosity so the audience can connect more with the story."
+    }
+  ]
+}

@@ -1,45 +1,115 @@
-import { ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useMemo } from "react";
+import { ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { useMemo, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 import { Colors } from "../constants/colors";
 import TopHeader from "../components/top-header";
+import SkillRadar from "../components/skill-radar";
 
 const bgImage = require("../assets/images/storymode/bg/bg-bedroom.png");
 
 const fallbackEvaluation = {
   mode: "storytelling",
   genre: "general",
-  storyScore: 82,
-  wordRatePerMinute: 132,
-  storyRecap: [
-    "Set the scene with a mysterious hallway and flickering lights.",
-    "Built tension by describing the quiet figure outside the window.",
-    "Ended with an unresolved moment to keep the audience curious.",
+  storyScore: 80,
+  wordRatePerMinute: 8,
+  quickSummary:
+    "You continued the horror story by having the character look for a light source and a weapon, which is a logical response to the situation. The story flowed well and maintained the suspenseful atmosphere. To improve, you can add more descriptive details and emotional depth to make the scene more immersive.",
+  skillBreakdown: [
+    {
+      skill: "Fluency",
+      score: 76,
+      level: "Good",
+      reason:
+        "Your continuation was understandable and moved forward without major confusion. However, the delivery could feel smoother if you reduce hesitation and connect your actions with clearer transitions.",
+      improvementTip:
+        "Use short transition phrases such as 'after that', 'suddenly', or 'because of that' to make the story flow more naturally.",
+    },
+    {
+      skill: "Critical Thinking",
+      score: 84,
+      level: "Good",
+      reason:
+        "You responded logically to the situation by looking for a light source and something to protect yourself. This shows that you understood the problem in the scene and made a realistic decision.",
+      improvementTip:
+        "Try adding the character's reasoning more explicitly, such as why they choose one path or what risk they are considering.",
+    },
+    {
+      skill: "Structure",
+      score: 80,
+      level: "Good",
+      reason:
+        "Your story follows a clear sequence from noticing the figure, finding a candle, and discovering the three-branch pathway. The events are connected, but the story could benefit from a stronger build-up between each moment.",
+      improvementTip:
+        "Before introducing a new event, briefly describe the setting or emotion to make the transition feel more complete.",
+    },
   ],
+  storyRecap: {
+    items: [
+      {
+        speaker: "ai",
+        text: "The lights flickered as you walked down the empty hallway. From your room window, you saw a figure standing still, staring directly at you...",
+      },
+      {
+        speaker: "user",
+        text: "I immediately tried to find a light source to see better and find a weapon just in case.",
+      },
+      {
+        speaker: "ai",
+        text: "You found a candle and went to check outside, only to realize that the figure was a sign leading to a three-branch pathway.",
+      },
+    ],
+  },
+  overallFeedback: {
+    title: "You created a clear and logical horror continuation.",
+    summary:
+      "Your response continued the story in a way that made sense and kept the scene moving. You made realistic decisions for the character, especially by looking for light and protection. To make the story more engaging, you can add more sensory details, emotion, and suspense before moving to the next event.",
+  },
   whatYouDidWell: [
-    "Created a clear setting with sensory details.",
-    "Kept the pacing steady and suspenseful.",
-    "Used short sentences to emphasize tension.",
+    "You continued the story directly from the AI prompt.",
+    "Your actions were logical and easy to follow.",
+    "You maintained the horror atmosphere.",
+    "You gave the character a clear immediate goal.",
   ],
   structureAnalysis: [
     {
-      title: "Hook",
-      description: "The first line establishes intrigue and a strong visual.",
+      title: "Continuation from prompt",
+      description:
+        "You responded directly to the dark hallway and mysterious figure, so the story stayed connected to the original situation.",
     },
     {
-      title: "Build",
-      description: "Each sentence adds a new layer of suspense without rushing.",
+      title: "Action taken",
+      description:
+        "Looking for a light source and a weapon is a realistic response in a tense situation.",
     },
     {
-      title: "Cliffhanger",
-      description: "You leave the audience wanting the next turn.",
+      title: "Atmosphere development",
+      description:
+        "The scene could be stronger if you described what the character heard, saw, or felt while moving through the hallway.",
+    },
+    {
+      title: "Emotional depth",
+      description:
+        "The character's fear, hesitation, or curiosity could be explored more to make the story feel more immersive.",
     },
   ],
   recommendedActions: [
-    "Add a character action to heighten urgency.",
-    "Introduce one specific sound to sharpen the atmosphere.",
-    "End with a question to invite the next response.",
+    {
+      title: "Add descriptive details",
+      description:
+        "Instead of only stating actions, describe what the character sees, hears, or feels to make the scene more vivid.",
+    },
+    {
+      title: "Build tension gradually",
+      description:
+        "Slow down important moments before revealing what happens next. This helps create suspense.",
+    },
+    {
+      title: "Express emotion",
+      description:
+        "Include the character's fear, confusion, or curiosity so the audience can connect more with the story.",
+    },
   ],
 };
 
@@ -48,6 +118,8 @@ type StorytellingEvaluation = typeof fallbackEvaluation;
 export default function StorytellingEvaluation() {
   const router = useRouter();
   const params = useLocalSearchParams<{ data?: string }>();
+  const [quickSummaryOpen, setQuickSummaryOpen] = useState(true);
+  const [skillsModalOpen, setSkillsModalOpen] = useState(false);
 
   const evaluation = useMemo<StorytellingEvaluation>(() => {
     if (!params.data) {
@@ -60,6 +132,50 @@ export default function StorytellingEvaluation() {
     }
   }, [params.data]);
 
+  const safeEvaluation = useMemo(() => {
+    const skillBreakdown = Array.isArray(evaluation.skillBreakdown)
+      ? evaluation.skillBreakdown
+      : [];
+    const storyRecapItems = Array.isArray(evaluation.storyRecap?.items)
+      ? evaluation.storyRecap.items
+      : [];
+    const recommendedActions = Array.isArray(evaluation.recommendedActions)
+      ? evaluation.recommendedActions
+      : [];
+    const whatYouDidWell = Array.isArray(evaluation.whatYouDidWell)
+      ? evaluation.whatYouDidWell
+      : [];
+    const structureAnalysis = Array.isArray(evaluation.structureAnalysis)
+      ? evaluation.structureAnalysis
+      : [];
+
+    return {
+      ...fallbackEvaluation,
+      ...evaluation,
+      skillBreakdown,
+      storyRecap: { items: storyRecapItems },
+      recommendedActions,
+      whatYouDidWell,
+      structureAnalysis,
+    };
+  }, [evaluation]);
+
+  const skillLabels = useMemo(
+    () => safeEvaluation.skillBreakdown.map((skill) => skill.skill),
+    [safeEvaluation.skillBreakdown]
+  );
+  const skillScores = useMemo(
+    () => safeEvaluation.skillBreakdown.map((skill) => skill.score),
+    [safeEvaluation.skillBreakdown]
+  );
+  const storyScore = useMemo(() => {
+    if (!safeEvaluation.skillBreakdown.length) {
+      return safeEvaluation.storyScore;
+    }
+    const total = safeEvaluation.skillBreakdown.reduce((sum, skill) => sum + skill.score, 0);
+    return Math.round(total / safeEvaluation.skillBreakdown.length);
+  }, [safeEvaluation.skillBreakdown, safeEvaluation.storyScore]);
+
   return (
     <ImageBackground source={bgImage} style={styles.screen} resizeMode="cover">
       <TopHeader
@@ -70,36 +186,73 @@ export default function StorytellingEvaluation() {
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Text style={styles.genreLabel}>Genre</Text>
-        <Text style={styles.genreValue}>{evaluation.genre}</Text>
+        <Text style={styles.genreValue}>{safeEvaluation.genre}</Text>
+
+        <View style={styles.mediaCard}>
+          <View style={styles.mediaPlayButton}>
+            <Ionicons name="play" size={26} color={Colors.shade[200]} />
+          </View>
+        </View>
+
+        <Pressable
+          style={styles.quickSummaryHeader}
+          onPress={() => setQuickSummaryOpen((prev) => !prev)}
+        >
+          <Text style={styles.quickSummaryTitle}>Quick Summary</Text>
+          <Ionicons
+            name={quickSummaryOpen ? "chevron-up" : "chevron-down"}
+            size={18}
+            color={Colors.octonary.DEFAULT}
+          />
+        </Pressable>
+        {quickSummaryOpen && (
+          <View style={styles.quickSummaryBody}>
+            <Text style={styles.quickSummaryText}>{safeEvaluation.quickSummary}</Text>
+          </View>
+        )}
 
         <View style={styles.summaryCard}>
           <View style={styles.summaryStat}>
             <Text style={styles.summaryLabel}>Story Score</Text>
-            <Text style={styles.summaryValue}>{evaluation.storyScore}</Text>
+            <Text style={styles.summaryValue}>
+              {storyScore}
+              <Text style={styles.summaryUnit}>/100</Text>
+            </Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryStat}>
             <Text style={styles.summaryLabel}>Word Rate</Text>
             <Text style={styles.summaryValue}>
-              {evaluation.wordRatePerMinute}
-              <Text style={styles.summaryUnit}>/min</Text>
+              {safeEvaluation.wordRatePerMinute}
+              <Text style={styles.summaryUnit}>/minute</Text>
             </Text>
           </View>
         </View>
 
+        <Pressable style={styles.skillHeader} onPress={() => setSkillsModalOpen(true)}>
+          <Text style={styles.sectionTitle}>Skill Breakdown</Text>
+          <Ionicons name="chevron-forward" size={18} color={Colors.octonary.DEFAULT} />
+        </Pressable>
+
+        <View style={styles.skillCard}>
+          <SkillRadar labels={skillLabels} values={skillScores} size={220} />
+        </View>
+
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Story Recap</Text>
-          {evaluation.storyRecap.map((line) => (
-            <View key={line} style={styles.bulletRow}>
-              <Text style={styles.bullet}>•</Text>
-              <Text style={styles.sectionBody}>{line}</Text>
-            </View>
+          {safeEvaluation.storyRecap.items.map((item, index) => (
+            <Text
+              key={`${item.speaker}-${index}`}
+              style={item.speaker === "user" ? styles.recapUserText : styles.recapAiText}
+            >
+              {item.text}
+            </Text>
           ))}
         </View>
 
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>What You Did Well</Text>
-          {evaluation.whatYouDidWell.map((line) => (
+          {safeEvaluation.whatYouDidWell.map((line) => (
             <View key={line} style={styles.bulletRow}>
               <Text style={styles.bullet}>•</Text>
               <Text style={styles.sectionBody}>{line}</Text>
@@ -109,7 +262,7 @@ export default function StorytellingEvaluation() {
 
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Structure Analysis</Text>
-          {evaluation.structureAnalysis.map((item) => (
+          {safeEvaluation.structureAnalysis.map((item) => (
             <View key={item.title} style={styles.analysisRow}>
               <Text style={styles.analysisTitle}>{item.title}</Text>
               <Text style={styles.sectionBody}>{item.description}</Text>
@@ -117,12 +270,12 @@ export default function StorytellingEvaluation() {
           ))}
         </View>
 
-        <View style={styles.sectionCard}>
+        <View style={[styles.sectionCard, styles.recommendedCard]}>
           <Text style={styles.sectionTitle}>Recommended Actions</Text>
-          {evaluation.recommendedActions.map((action) => (
-            <View key={action} style={styles.bulletRow}>
-              <Text style={styles.bullet}>•</Text>
-              <Text style={styles.sectionBody}>{action}</Text>
+          {safeEvaluation.recommendedActions.map((action) => (
+            <View key={action.title} style={styles.recommendedRow}>
+              <Text style={styles.recommendedTitle}>{action.title}</Text>
+              <Text style={styles.sectionBody}>{action.description}</Text>
             </View>
           ))}
         </View>
@@ -131,6 +284,33 @@ export default function StorytellingEvaluation() {
           <Text style={styles.primaryButtonText}>Okay</Text>
         </Pressable>
       </ScrollView>
+
+      <Modal transparent animationType="fade" visible={skillsModalOpen}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderRow}>
+              <Text style={styles.modalTitle}>Skill Breakdown</Text>
+              <Pressable onPress={() => setSkillsModalOpen(false)}>
+                <Ionicons name="close" size={20} color={Colors.octonary.DEFAULT} />
+              </Pressable>
+            </View>
+            <ScrollView contentContainerStyle={styles.modalContent}>
+              {safeEvaluation.skillBreakdown.map((skill) => (
+                <View key={skill.skill} style={styles.modalSkillCard}>
+                  <View style={styles.modalSkillHeader}>
+                    <Text style={styles.modalSkillTitle}>{skill.skill}</Text>
+                    <Text style={styles.modalSkillScore}>{skill.score}</Text>
+                  </View>
+                  <Text style={styles.modalSkillLevel}>{skill.level}</Text>
+                  <Text style={styles.modalSkillText}>{skill.reason}</Text>
+                  <Text style={styles.modalTipLabel}>Improvement Tip</Text>
+                  <Text style={styles.modalSkillText}>{skill.improvementTip}</Text>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </ImageBackground>
   );
 }
@@ -146,6 +326,46 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     gap: 16,
   },
+    mediaCard: {
+      height: 180,
+      borderRadius: 18,
+      backgroundColor: "rgba(0, 0, 0, 0.25)",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    mediaPlayButton: {
+      width: 58,
+      height: 58,
+      borderRadius: 29,
+      backgroundColor: Colors.senary[300],
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    quickSummaryHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 16,
+      height: 46,
+      borderRadius: 12,
+      backgroundColor: "#F6C99A",
+    },
+    quickSummaryTitle: {
+      fontFamily: "Quicksand-Bold",
+      fontSize: 16,
+      color: Colors.octonary.DEFAULT,
+    },
+    quickSummaryBody: {
+      backgroundColor: Colors.shade[200],
+      borderRadius: 14,
+      padding: 16,
+    },
+    quickSummaryText: {
+      fontFamily: "AlbertSans-Regular",
+      fontSize: 14,
+      color: Colors.octonary.DEFAULT,
+      lineHeight: 20,
+    },
   genreLabel: {
     textAlign: "center",
     fontFamily: "AlbertSans-Medium",
@@ -193,6 +413,18 @@ const styles = StyleSheet.create({
     color: Colors.octonary.DEFAULT,
     marginTop: 4,
   },
+    skillHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      paddingHorizontal: 2,
+    },
+    skillCard: {
+      backgroundColor: Colors.shade[200],
+      borderRadius: 18,
+      paddingVertical: 12,
+      alignItems: "center",
+    },
   summaryUnit: {
     fontSize: 12,
     color: Colors.shade[100],
@@ -215,6 +447,18 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     flex: 1,
   },
+  recapAiText: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 20,
+  },
+  recapUserText: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 14,
+    color: Colors.senary[300],
+    lineHeight: 20,
+  },
   bulletRow: {
     flexDirection: "row",
     gap: 8,
@@ -232,6 +476,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.quinary[300],
   },
+  recommendedCard: {
+    backgroundColor: "#FFEBA6",
+  },
+  recommendedRow: {
+    gap: 4,
+  },
+  recommendedTitle: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+  },
   primaryButton: {
     backgroundColor: Colors.quinary[300],
     borderRadius: 999,
@@ -244,5 +499,73 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
     color: Colors.shade[200],
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  modalCard: {
+    width: "100%",
+    maxHeight: "80%",
+    borderRadius: 18,
+    backgroundColor: Colors.shade[200],
+    padding: 20,
+    gap: 12,
+  },
+  modalHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  modalTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+  },
+  modalContent: {
+    gap: 12,
+    paddingBottom: 8,
+  },
+  modalSkillCard: {
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.quinary[300],
+    padding: 14,
+    gap: 6,
+  },
+  modalSkillHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  modalSkillTitle: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 15,
+    color: Colors.octonary.DEFAULT,
+  },
+  modalSkillScore: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.octonary.DEFAULT,
+  },
+  modalSkillLevel: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 13,
+    color: Colors.senary[300],
+  },
+  modalSkillText: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 13,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 18,
+  },
+  modalTipLabel: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 12,
+    color: Colors.octonary.DEFAULT,
+    marginTop: 4,
   },
 });

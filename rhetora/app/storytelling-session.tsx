@@ -361,7 +361,7 @@ export default function StorytellingSession() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.cameraWrapper}>
-          <PracticeCameraPanel
+          {/* <PracticeCameraPanel
             initialCameraOn={cameraOn === "true"}
             micMonitorEnabled={phase !== "recording" && phase !== "processing"}
             placeholder={
@@ -371,7 +371,7 @@ export default function StorytellingSession() {
                 resizeMode="contain"
               />
             }
-          />
+          /> */}
         </View>
 
         <View style={styles.controlsRow}>
