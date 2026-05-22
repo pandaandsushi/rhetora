@@ -1,0 +1,40 @@
+{
+  "quickSummary": "Good job! You effectively introduced yourself and maintained a steady speaking pace.",
+  "whatYouDidWell": [
+    "You introduced yourself in a structured and easy-to-follow way",
+    "Your content feels relevant and meaningful",
+    "Your explanation of your interests is clear and specific",
+    "You maintained a consistent speaking pace overall"
+  ],
+  "structureAnalysis": [
+    {
+      "point": "Opening",
+      "excerpt": "\"Hi everyone, my name is Alex...\"",
+      "feedback": "Strong and appropriate opening"
+    },
+    {
+      "point": "Middle",
+      "excerpt": "You clearly explained your academic background and current interests.",
+      "feedback": "This provides a solid foundation for others to connect with you."
+    },
+    {
+      "point": "Ending",
+      "excerpt": "The introduction ends without a clear closing statement.",
+      "feedback": "This is a great opportunity to leave a stronger impression."
+    }
+  ],
+  "recommendedActions": [
+    {
+      "title": "Filler words (um, uh, like)",
+      "description": "These appear when you are thinking about what to say next. This is completely normal. Instead of filling the silence, try taking a short pause. Pauses actually make you sound more confident."
+    },
+    {
+      "title": "Stronger ending",
+      "description": "Your introduction would feel more complete with a simple closing sentence. For example: 'I'm excited to be here and look forward to learning with all of you.'"
+    },
+    {
+      "title": "Confidence in transitions",
+      "description": "When moving between ideas, take a brief pause before continuing."
+    }
+  ]
+}

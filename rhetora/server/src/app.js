@@ -7,6 +7,7 @@ import vrRoutes from "./routes/vr.routes.js";
 import storytellingRoutes from "./routes/storytelling.routes.js";
 import pitchRoutes from "./routes/pitch.routes.js";
 import fillerFreeRoutes from "./routes/fillerFree.routes.js";
+import storyModeRoutes from "./routes/storyMode.routes.js";
 
 const app = express();
 
@@ -19,5 +20,6 @@ app.use(vrRoutes);
 app.use(storytellingRoutes);
 app.use(pitchRoutes);
 app.use(fillerFreeRoutes);
+app.use(storyModeRoutes);
 
 export default app;

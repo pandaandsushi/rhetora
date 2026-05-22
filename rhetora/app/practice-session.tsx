@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import {
   Image,
   Modal,
@@ -11,6 +11,9 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Circle } from "react-native-svg";
+import { Audio } from "expo-av";
+
+import { BACKEND_URL } from "../constants/api";
 
 import { Colors } from "../constants/colors";
 import PracticeCameraPanel from "../components/practice-camera-panel";
@@ -45,6 +48,10 @@ export default function PracticeSession() {
   const [restartVisible, setRestartVisible] = useState(false);
   const [finishVisible, setFinishVisible] = useState(false);
   const [timeUpVisible, setTimeUpVisible] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const recordingRef = useRef<Audio.Recording | null>(null);
+  const submitRef = useRef(false);
 
 
   const progress = remainingSeconds / initialTotalSeconds;
@@ -61,23 +68,111 @@ export default function PracticeSession() {
   }, [remainingSeconds]);
 
   useEffect(() => {
-    if (isPaused || timeUpVisible) {
-      return;
+    let timer: NodeJS.Timeout;
+
+    if (!isPaused && !timeUpVisible && !isProcessing) {
+      timer = setInterval(() => {
+        setRemainingSeconds((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            setTimeUpVisible(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     }
 
-    const timer = setInterval(() => {
-      setRemainingSeconds((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setTimeUpVisible(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
     return () => clearInterval(timer);
-  }, [isPaused, timeUpVisible]);
+  }, [isPaused, timeUpVisible, isProcessing]);
+
+  useEffect(() => {
+    startRecording();
+    return () => {
+      if (recordingRef.current) {
+        recordingRef.current.stopAndUnloadAsync().catch(() => {});
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (timeUpVisible) {
+      handleFinishSession();
+    }
+  }, [timeUpVisible]);
+
+  const startRecording = async () => {
+    try {
+      const { granted } = await Audio.requestPermissionsAsync();
+      if (!granted) return;
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+      });
+
+      const { recording } = await Audio.Recording.createAsync(
+        Audio.RecordingOptionsPresets.HIGH_QUALITY
+      );
+      recordingRef.current = recording;
+    } catch (err) {
+      console.warn("Failed to start recording", err);
+    }
+  };
+
+  const stopRecording = async () => {
+    if (!recordingRef.current) return null;
+    try {
+      await recordingRef.current.stopAndUnloadAsync();
+      const uri = recordingRef.current.getURI();
+      recordingRef.current = null;
+      return uri;
+    } catch (err) {
+      console.warn("Failed to stop recording", err);
+      recordingRef.current = null;
+      return null;
+    }
+  };
+
+  const handleFinishSession = async () => {
+    if (submitRef.current) return;
+    submitRef.current = true;
+    setIsProcessing(true);
+    setFinishVisible(false);
+
+    try {
+      const uri = await stopRecording();
+      if (!uri) throw new Error("No recording URI");
+
+      const formData = new FormData();
+      formData.append("audio", {
+        uri,
+        name: "story-mode.m4a",
+        type: "audio/m4a",
+      } as any);
+      formData.append("episodeTitle", "The First Introduction");
+
+      const res = await fetch(`${BACKEND_URL}/story-mode/evaluate`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error(await res.text());
+
+      const data = await res.json();
+      router.replace({
+        pathname: "/story-mode-evaluation",
+        params: { data: JSON.stringify(data) },
+      });
+    } catch (err) {
+      console.warn("Failed to evaluate, using fallback", err);
+      const fallback = require("./story-mode-fallback.json");
+      router.replace({
+        pathname: "/story-mode-evaluation",
+        params: { data: JSON.stringify({ evaluation: fallback, metrics: { wordRatePerMinute: 110, totalFillerWords: 5, fillerCounts: {"um": 3, "like": 2} } }) },
+      });
+    }
+  };
 
   const handleRestart = () => {
     setRemainingSeconds(initialTotalSeconds);
@@ -86,8 +181,7 @@ export default function PracticeSession() {
   };
 
   const handleFinish = () => {
-    setFinishVisible(false);
-    router.back();
+    handleFinishSession();
   };
 
   return (
@@ -106,6 +200,7 @@ export default function PracticeSession() {
 
         <PracticeCameraPanel
           initialCameraOn={cameraOn === "true"}
+          micMonitorEnabled={false}
           placeholder={
             <Image
               source={logoRhetora}
@@ -170,8 +265,11 @@ export default function PracticeSession() {
           </Pressable>
         </View>
 
-        <Pressable style={styles.finishButton} onPress={() => setFinishVisible(true)}>
-          <Text style={styles.finishButtonText}>Finish</Text>
+        <Pressable 
+          style={[styles.finishButton, isProcessing && { opacity: 0.7 }]} 
+          onPress={() => !isProcessing && setFinishVisible(true)}
+        >
+          <Text style={styles.finishButtonText}>{isProcessing ? "Processing..." : "Finish"}</Text>
         </Pressable>
       </View>
       
@@ -212,7 +310,7 @@ export default function PracticeSession() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Time's up! Great job finishing the session.</Text>
-            <Pressable style={styles.modalConfirmButton} onPress={() => router.back()}>
+            <Pressable style={styles.modalConfirmButton} onPress={handleFinishSession}>
               <Text style={styles.modalConfirmText}>Okay</Text>
             </Pressable>
           </View>

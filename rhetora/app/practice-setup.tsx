@@ -40,6 +40,7 @@ export default function PracticeSetup() {
 
         <PracticeCameraPanel
           showStatus
+          micMonitorEnabled={false}
           placeholder={
             <Image
               source={logoRhetora}
