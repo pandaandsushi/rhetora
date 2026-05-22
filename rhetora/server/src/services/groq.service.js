@@ -13,9 +13,22 @@ const callGroq = async (prompt) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: GROQ_MODEL,
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.3,
+      model: GROQ_MODEL || "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a public speaking coach. Return ONLY valid JSON. Do not include markdown, code fences, explanations, comments, or any text outside the JSON object.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      temperature: 0.2,
+      response_format: {
+        type: "json_object",
+      },
     }),
   });
 
@@ -26,6 +39,10 @@ const callGroq = async (prompt) => {
 
   const data = await response.json();
   const text = data?.choices?.[0]?.message?.content;
+
+  console.log("=== GROQ RAW RESPONSE ===");
+  console.log(text);
+
   const parsed = parseModelJson(text);
 
   if (!parsed) {
