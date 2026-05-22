@@ -1,5 +1,5 @@
 import { transcribeBuffer } from "./deepgram.service.js";
-import { callGemini } from "./gemini.service.js";
+import { callLLM } from "./llm.service.js";
 import {
   buildStoryInitialPrompt,
   buildStoryContinuationPrompt,
@@ -8,7 +8,7 @@ import {
 
 const getInitialStoryPrompt = async (genre) => {
   const prompt = buildStoryInitialPrompt(genre);
-  const result = await callGemini(prompt);
+  const result = await callLLM(prompt);
   return { text: result.text };
 };
 
@@ -34,7 +34,7 @@ const processStoryTurn = async ({ file, genre, currentTurn, maxTurns, turns }) =
   }
 
   const prompt = buildStoryContinuationPrompt({ genre, turns: nextTurns });
-  const continuation = await callGemini(prompt);
+  const continuation = await callLLM(prompt);
   const aiTurn = {
     id: `ai-${Date.now()}`,
     speaker: "ai",
@@ -52,7 +52,7 @@ const processStoryTurn = async ({ file, genre, currentTurn, maxTurns, turns }) =
 
 const evaluateStory = async ({ turns, genre, metrics }) => {
   const prompt = buildStoryEvaluationPrompt({ genre, turns, metrics });
-  const result = await callGemini(prompt);
+  const result = await callLLM(prompt);
   return { evaluation: result };
 };
 

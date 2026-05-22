@@ -6,6 +6,8 @@ export const PORT = process.env.PORT || 5050;
 export const DEEPGRAM_API_KEY = process.env.DEEPGRAM_API_KEY;
 export const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
 export const GOOGLE_AI_MODEL = process.env.GOOGLE_AI_MODEL || "gemini-2.5-flash";
+export const GROQ_API_KEY = process.env.GROQ_API_KEY;
+export const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
 
 export const DEEPGRAM_PARAMS = {
   model: process.env.DEEPGRAM_MODEL || "nova-3",

@@ -1,10 +1,10 @@
 import { transcribeBuffer } from "./deepgram.service.js";
-import { callGemini } from "./gemini.service.js";
+import { callLLM } from "./llm.service.js";
 import { buildPitchEvaluationPrompt, buildPitchInitialPrompt } from "../prompts/pitch.prompt.js";
 
 const getPitchPrompt = async (pitchType) => {
   const prompt = buildPitchInitialPrompt(pitchType);
-  const result = await callGemini(prompt);
+  const result = await callLLM(prompt);
   return { prompt: result };
 };
 
@@ -16,7 +16,7 @@ const evaluatePitch = async ({ file, pitchType, prompt }) => {
     transcript: result.transcript,
     metrics: result.metrics,
   });
-  const feedback = await callGemini(evalPrompt);
+  const feedback = await callLLM(evalPrompt);
 
   return {
     evaluation: {

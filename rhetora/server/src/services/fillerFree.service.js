@@ -1,5 +1,5 @@
 import { transcribeBuffer } from "./deepgram.service.js";
-import { callGemini } from "./gemini.service.js";
+import { callLLM } from "./llm.service.js";
 import { buildSpeechMetrics } from "../utils/speechMetrics.js";
 import {
   buildFillerFreeQuestionPrompt,
@@ -77,7 +77,7 @@ const getRandomFallbackQuestion = () => {
 const getFillerFreeQuestion = async () => {
   try {
     const prompt = buildFillerFreeQuestionPrompt();
-    const result = await callGemini(prompt);
+    const result = await callLLM(prompt);
     return { question: result.question ?? getRandomFallbackQuestion() };
   } catch (error) {
     console.warn("[FillerFree] Gemini question generation failed, using fallback:", error?.message);
@@ -108,7 +108,7 @@ const evaluateFillerFree = async ({ file, fillerWords, question }) => {
       fillerCounts,
       metrics,
     });
-    evaluation = await callGemini(prompt);
+    evaluation = await callLLM(prompt);
   } catch (error) {
     console.warn("[FillerFree] Gemini evaluation failed, using fallback:", error?.message);
     evaluation = buildFallbackEvaluation();

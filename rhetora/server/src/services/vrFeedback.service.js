@@ -1,5 +1,5 @@
 import { transcribeBuffer } from "./deepgram.service.js";
-import { callGemini } from "./gemini.service.js";
+import { callLLM } from "./llm.service.js";
 import { buildVrPrompt } from "../prompts/vr.prompt.js";
 
 const evaluateVrSession = async (file, { scenario, audience }) => {
@@ -10,7 +10,7 @@ const evaluateVrSession = async (file, { scenario, audience }) => {
     scenario,
     audience,
   });
-  const feedback = await callGemini(prompt);
+  const feedback = await callLLM(prompt);
 
   return {
     feedback,
