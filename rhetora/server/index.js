@@ -177,7 +177,52 @@ const transcribeBuffer = async (file) => {
   };
 };
 
+const buildStoryInitialPrompt = (genre) => {
+  return [
+    "You are a creative writing assistant.",
+    "Write a short opening for a story in the requested genre.",
+    "Keep it to 2-3 sentences, vivid but concise.",
+    "Return ONLY JSON: {\"text\": string}.",
+    `Genre: ${genre || "general"}`,
+  ].join("\n");
+};
+
+const buildStoryContinuationPrompt = ({ genre, turns }) => {
+  const formattedTurns = turns
+    .map((turn) => `${turn.speaker.toUpperCase()}: ${turn.text}`)
+    .join("\n");
+
+  return [
+    "You are a creative writing assistant.",
+    "Continue the story with 2-4 sentences.",
+    "Maintain tone, characters, and continuity.",
+    "Return ONLY JSON: {\"text\": string}.",
+    `Genre: ${genre || "general"}`,
+    "---",
+    formattedTurns,
+  ].join("\n");
+};
+
+const buildStoryEvaluationPrompt = ({ genre, turns, metrics }) => {
+  const formattedTurns = turns
+    .map((turn) => `${turn.speaker.toUpperCase()}: ${turn.text}`)
+    .join("\n");
+
+  return [
+    "You are a storytelling coach.",
+    "Evaluate the user's storytelling based on the conversation.",
+    "Return ONLY JSON with this shape:",
+    "{\n  mode: \"storytelling\",\n  genre: string,\n  storyScore: number,\n  wordRatePerMinute: number,\n  storyRecap: string[],\n  whatYouDidWell: string[],\n  structureAnalysis: { title: string, description: string }[],\n  recommendedActions: string[]\n}",
+    "Keep storyScore between 0-100.",
+    `Genre: ${genre || "general"}`,
+    `Metrics: ${JSON.stringify(metrics)}`,
+    "---",
+    formattedTurns,
+  ].join("\n");
+};
+
 app.use(cors());
+app.use(express.json({ limit: "2mb" }));
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
@@ -223,6 +268,90 @@ app.post("/evaluate", upload.single("audio"), async (req, res) => {
       transcript: result.transcript,
       metrics: result.metrics,
     });
+  } catch (error) {
+    return res.status(500).json({ error: error?.message ?? "Unknown error" });
+  }
+});
+
+app.post("/storytelling/initial", async (req, res) => {
+  try {
+    const { genre } = req.body || {};
+    const prompt = buildStoryInitialPrompt(genre);
+    const result = await callGemini(prompt);
+    console.log("=== STORY OPENING ===");
+    console.log(result.text);
+    return res.json({ text: result.text });
+  } catch (error) {
+    return res.status(500).json({ error: error?.message ?? "Unknown error" });
+  }
+});
+
+app.post("/storytelling/turn", upload.single("audio"), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: "Missing audio file" });
+    }
+
+    const genre = req.body?.genre || "";
+    const currentTurn = Number(req.body?.currentTurn || "1");
+    const maxTurns = Number(req.body?.maxTurns || "1");
+    const rawTurns = req.body?.turns || "[]";
+    const turns = JSON.parse(rawTurns);
+
+    const result = await transcribeBuffer(req.file);
+    const userTurn = {
+      id: `user-${Date.now()}`,
+      speaker: "user",
+      text: result.transcript,
+      transcript: result.transcript,
+      createdAt: new Date().toISOString(),
+    };
+    console.log(`=== USER TURN ${currentTurn} ===`);
+    console.log(userTurn.text);
+    const nextTurns = [...turns, userTurn];
+
+    if (currentTurn >= maxTurns) {
+      console.log("=== STORY END ===");
+      console.log(nextTurns);
+      return res.json({
+        turns: nextTurns,
+        transcript: result.transcript,
+        nextPrompt: null,
+        metrics: result.metrics,
+      });
+    }
+
+    const prompt = buildStoryContinuationPrompt({ genre, turns: nextTurns });
+    const continuation = await callGemini(prompt);
+    const aiTurn = {
+      id: `ai-${Date.now()}`,
+      speaker: "ai",
+      text: continuation.text,
+      createdAt: new Date().toISOString(),
+    };
+    console.log("=== STORY CONTINUATION ===");
+    console.log(continuation.text);
+
+    return res.json({
+      turns: [...nextTurns, aiTurn],
+      transcript: result.transcript,
+      nextPrompt: continuation.text,
+      metrics: result.metrics,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: error?.message ?? "Unknown error" });
+  }
+});
+
+app.post("/storytelling/evaluate", async (req, res) => {
+  try {
+    const { turns = [], genre = "" } = req.body || {};
+    const metrics = req.body?.metrics || {};
+    const prompt = buildStoryEvaluationPrompt({ genre, turns, metrics });
+    const result = await callGemini(prompt);
+    console.log("=== STORY EVALUATION ===");
+    console.log(result.text);
+    return res.json({ evaluation: result });
   } catch (error) {
     return res.status(500).json({ error: error?.message ?? "Unknown error" });
   }

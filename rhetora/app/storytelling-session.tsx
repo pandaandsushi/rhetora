@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Image,
   Modal,
@@ -12,11 +12,21 @@ import {
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Circle } from "react-native-svg";
+import { Audio } from "expo-av";
 
 import { Colors } from "../constants/colors";
 import PracticeCameraPanel from "../components/practice-camera-panel";
 import TopHeader from "../components/top-header";
+import { BACKEND_URL } from "../constants/api";
 const logoRhetora = require("../assets/images/logorhetora.png");
+
+type StoryTurn = {
+  id: string;
+  speaker: "ai" | "user";
+  text: string;
+  transcript?: string;
+  createdAt: string;
+};
 
 export default function StorytellingSession() {
   const router = useRouter();
@@ -29,26 +39,28 @@ export default function StorytellingSession() {
     cameraOn: string;
     maxTurns: string;
   }>();
-  console.log("Received params:", { genre, hours, minutes, seconds, cameraOn, maxTurns });
-  const initialTotalSeconds = useMemo(() => {
+  const timePerTurnSeconds = useMemo(() => {
     const h = parseInt(hours || "0", 10);
-    const m = parseInt(minutes || "10", 10);
+    const m = parseInt(minutes || "1", 10);
     const s = parseInt(seconds || "0", 10);
-    return h * 3600 + m * 60 + s;
+    const total = h * 3600 + m * 60 + s;
+    return total > 0 ? total : 60;
   }, [hours, minutes, seconds]);
 
-  const [remainingSeconds, setRemainingSeconds] = useState(initialTotalSeconds);
-  const [isPaused, setIsPaused] = useState(false);
+  const [remainingSeconds, setRemainingSeconds] = useState(timePerTurnSeconds);
+  const [phase, setPhase] = useState<"ai" | "recording" | "processing" | "finished">("ai");
+  const [turns, setTurns] = useState<StoryTurn[]>([]);
+  const [currentTurn, setCurrentTurn] = useState(1);
   
   const [restartVisible, setRestartVisible] = useState(false);
-  const [finishVisible, setFinishVisible] = useState(false);
   const [timeUpVisible, setTimeUpVisible] = useState(false);
 
-  const [aiPrompt, setAiPrompt] = useState(
-    "The lights flickered as you walked down the empty hallway. From your room window, you saw a figure standing still, staring directly at you..."
-  );
+  const [aiPrompt, setAiPrompt] = useState("Loading...");
+  const recordingRef = useRef<Audio.Recording | null>(null);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const submitRef = useRef(false);
 
-  const progress = initialTotalSeconds > 0 ? remainingSeconds / initialTotalSeconds : 0;
+  const progress = timePerTurnSeconds > 0 ? remainingSeconds / timePerTurnSeconds : 0;
   const ringSize = 110;
   const ringStroke = 8;
   const ringRadius = (ringSize - ringStroke) / 2;
@@ -67,32 +79,275 @@ export default function StorytellingSession() {
   }, [remainingSeconds]);
 
   useEffect(() => {
-    if (isPaused || timeUpVisible) return;
+    let isMounted = true;
 
-    const timer = setInterval(() => {
+    const loadInitialPrompt = async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/storytelling/initial`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ genre }),
+        });
+        if (!response.ok) {
+          throw new Error(await response.text());
+        }
+        const data = await response.json();
+        if (!isMounted) {
+          return;
+        }
+        const aiTurn: StoryTurn = {
+          id: `ai-${Date.now()}`,
+          speaker: "ai",
+          text: data.text,
+          createdAt: new Date().toISOString(),
+        };
+        setTurns([aiTurn]);
+        setAiPrompt(data.text);
+      } catch (error) {
+        console.warn("Failed to load initial prompt", error);
+        if (isMounted) {
+          setAiPrompt("Start the story with your imagination.");
+        }
+      }
+    };
+
+    loadInitialPrompt();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [genre]);
+
+  const clearTurnTimer = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      clearTurnTimer();
+      if (recordingRef.current) {
+        recordingRef.current.stopAndUnloadAsync().catch(() => null);
+        recordingRef.current = null;
+      }
+    };
+  }, []);
+
+  const startTurnTimer = () => {
+    clearTurnTimer();
+    setRemainingSeconds(timePerTurnSeconds);
+    timerRef.current = setInterval(() => {
       setRemainingSeconds((prev) => {
         if (prev <= 1) {
-          clearInterval(timer);
+          clearTurnTimer();
           setTimeUpVisible(true);
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
+  };
 
-    return () => clearInterval(timer);
-  }, [isPaused, timeUpVisible]);
+  const startRecording = async () => {
+    try {
+      console.log("[Story] Requesting mic permission...");
+      const { granted, status } = await Audio.requestPermissionsAsync();
+
+      console.log("[Story] Mic permission:", { granted, status });
+
+      if (!granted) {
+        console.warn("[Story] Mic permission not granted");
+        return false;
+      }
+
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: true,
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+      });
+
+      console.log("[Story] Starting recording...");
+
+      const { recording } = await Audio.Recording.createAsync({
+        isMeteringEnabled: false,
+        android: {
+          extension: ".m4a",
+          outputFormat: Audio.AndroidOutputFormat.MPEG_4,
+          audioEncoder: Audio.AndroidAudioEncoder.AAC,
+          sampleRate: 44100,
+          numberOfChannels: 1,
+          bitRate: 64000,
+        },
+        ios: {
+          extension: ".m4a",
+          outputFormat: Audio.IOSOutputFormat.MPEG4AAC,
+          audioQuality: Audio.IOSAudioQuality.MIN,
+          sampleRate: 44100,
+          numberOfChannels: 1,
+          bitRate: 64000,
+          linearPCMBitDepth: 16,
+          linearPCMIsBigEndian: false,
+          linearPCMIsFloat: false,
+        },
+        web: {
+          mimeType: "audio/webm",
+          bitsPerSecond: 128000,
+        },
+      });
+
+      recordingRef.current = recording;
+
+      console.log("[Story] Recording started:", !!recordingRef.current);
+
+      return true;
+    } catch (error) {
+      console.warn("[Story] Recording failed to start", error);
+      recordingRef.current = null;
+      return false;
+    }
+  };
+
+  const stopRecording = async () => {
+    const recording = recordingRef.current;
+
+    console.log("[Story] stopRecording called. recording exists?", !!recording);
+
+    if (!recording) {
+      return null;
+    }
+
+    try {
+      await recording.stopAndUnloadAsync();
+
+      const uri = recording.getURI();
+      console.log("[Story] Recording URI:", uri);
+
+      recordingRef.current = null;
+      return uri ?? null;
+    } catch (error) {
+      console.warn("[Story] Recording failed to stop", error);
+      recordingRef.current = null;
+      return null;
+    }
+  };
+
+  const submitTurn = async () => {
+    if (submitRef.current || phase !== "recording") {
+      return;
+    }
+    submitRef.current = true;
+    setPhase("processing");
+    clearTurnTimer();
+
+    try {
+      const uri = await stopRecording();
+      if (!uri) {
+        throw new Error("Recording not available");
+      }
+
+      const formData = new FormData();
+      formData.append("audio", {
+        uri,
+        name: `story-turn-${currentTurn}.m4a`,
+        type: "audio/m4a",
+      } as unknown as Blob);
+      formData.append("genre", genre ?? "");
+      formData.append("currentTurn", String(currentTurn));
+      formData.append("maxTurns", String(maxTurnCount));
+      formData.append("turns", JSON.stringify(turns));
+
+      const response = await fetch(`${BACKEND_URL}/storytelling/turn`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      const data = await response.json();
+      const nextTurns = data.turns ?? turns;
+      setTurns(nextTurns);
+      if (data.nextPrompt) {
+        setAiPrompt(data.nextPrompt);
+      }
+
+      const nextTurnIndex = currentTurn + 1;
+      if (nextTurnIndex > maxTurnCount || !data.nextPrompt) {
+        setPhase("finished");
+        await finalizeEvaluation(nextTurns, data.metrics);
+      } else {
+        setCurrentTurn(nextTurnIndex);
+        setPhase("ai");
+        setTimeUpVisible(false);
+      }
+    } catch (error) {
+      console.warn("Failed to submit turn", error);
+      setPhase("ai");
+    } finally {
+      submitRef.current = false;
+    }
+  };
+
+  const finalizeEvaluation = async (nextTurns: StoryTurn[], metrics: any) => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/storytelling/evaluate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ turns: nextTurns, genre, metrics }),
+      });
+
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+
+      const data = await response.json();
+      router.replace({
+        pathname: "/storytelling-evaluation",
+        params: {
+          data: JSON.stringify(data.evaluation),
+        },
+      });
+    } catch (error) {
+      console.warn("Failed to generate evaluation", error);
+      router.replace("/storytelling-evaluation");
+    }
+  };
 
   const handleRestart = () => {
-    setRemainingSeconds(initialTotalSeconds);
-    setIsPaused(false);
+    setRemainingSeconds(timePerTurnSeconds);
+    setPhase("ai");
     setRestartVisible(false);
   };
 
-  const handleFinish = () => {
-    setFinishVisible(false);
-    router.back();
+  const handleStartTalking = async () => {
+    if (phase !== "ai") {
+      return;
+    }
+
+    setTimeUpVisible(false);
+    setPhase("processing");
+
+    const started = await startRecording();
+
+    if (!started) {
+      setPhase("ai");
+      return;
+    }
+
+    setPhase("recording");
+    startTurnTimer();
   };
+
+  useEffect(() => {
+    if (!timeUpVisible || phase !== "recording") {
+      return;
+    }
+    setTimeUpVisible(false);
+    submitTurn();
+  }, [timeUpVisible, phase]);
 
   return (
     <View style={styles.screen}>
@@ -153,17 +408,6 @@ export default function StorytellingSession() {
               </View>
               <Text style={styles.actionLabel}>Restart</Text>
             </Pressable>
-
-            <Pressable style={styles.actionButton} onPress={() => setIsPaused((prev) => !prev)}>
-              <View style={styles.actionIconWrapLight}>
-                <Ionicons
-                  name={isPaused ? "play" : "pause"}
-                  size={24}
-                  color={Colors.octonary.DEFAULT}
-                />
-              </View>
-              <Text style={styles.actionLabel}>{isPaused ? "Resume" : "Pause"}</Text>
-            </Pressable>
           </View>
         </View>
 
@@ -171,9 +415,21 @@ export default function StorytellingSession() {
           <Text style={styles.storyPromptText}>{aiPrompt}</Text>
         </View>
 
-        <Pressable style={styles.finishButton} onPress={() => setFinishVisible(true)}>
-          <Text style={styles.finishButtonText}>Finish</Text>
-        </Pressable>
+        {phase === "ai" && (
+          <Pressable style={styles.startTalkingButton} onPress={handleStartTalking}>
+            <Text style={styles.startTalkingText}>Start Talking</Text>
+          </Pressable>
+        )}
+
+        {phase === "recording" && (
+          <Pressable style={styles.finishButton} onPress={submitTurn}>
+            <Text style={styles.finishButtonText}>Submit Turn</Text>
+          </Pressable>
+        )}
+
+        {phase === "processing" && (
+          <Text style={styles.processingText}>Processing your turn...</Text>
+        )}
       </ScrollView>
 
       <Modal transparent animationType="fade" visible={restartVisible}>
@@ -192,32 +448,6 @@ export default function StorytellingSession() {
         </View>
       </Modal>
 
-      <Modal transparent animationType="fade" visible={finishVisible}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>You still have some time, are you sure you want to finish this session?</Text>
-            <View style={styles.modalActions}>
-              <Pressable style={styles.modalGhostButton} onPress={() => setFinishVisible(false)}>
-                <Text style={styles.modalGhostText}>Cancel</Text>
-              </Pressable>
-              <Pressable style={styles.modalConfirmButton} onPress={handleFinish}>
-                <Text style={styles.modalConfirmText}>Confirm</Text>
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal transparent animationType="fade" visible={timeUpVisible}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Time's up! Great job finishing the session.</Text>
-            <Pressable style={styles.modalConfirmButton} onPress={() => router.back()}>
-              <Text style={styles.modalConfirmText}>Okay</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -319,6 +549,24 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 18,
     color: Colors.shade[200],
+  },
+  startTalkingButton: {
+    width: "100%",
+    height: 54,
+    borderRadius: 30,
+    backgroundColor: Colors.quinary[300],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  startTalkingText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.shade[200],
+  },
+  processingText: {
+    fontFamily: "AlbertSans-Medium",
+    fontSize: 15,
+    color: Colors.octonary.DEFAULT,
   },
   modalOverlay: {
     flex: 1,
