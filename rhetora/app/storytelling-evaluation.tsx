@@ -277,6 +277,9 @@ export default function StorytellingEvaluation() {
         <Pressable style={styles.primaryButton} onPress={() => router.replace("/home")}>
           <Text style={styles.primaryButtonText}>Okay</Text>
         </Pressable>
+        <Text style={styles.footerNote}>
+            Result will be saved and can be viewed in <Text style={styles.footerBold}>My Recordings</Text>
+        </Text>
       </ScrollView>
 
       <Modal transparent animationType="fade" visible={skillsModalOpen}>
@@ -457,7 +460,7 @@ const styles = StyleSheet.create({
     color: Colors.octonary.DEFAULT,
   },
   primaryButton: {
-    backgroundColor: Colors.quinary[300],
+    backgroundColor: Colors.senary[300],
     borderRadius: 999,
     height: 54,
     alignItems: "center",
@@ -468,6 +471,15 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
     color: Colors.shade[200],
+  },
+  footerNote: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.octonary.DEFAULT,
+    textAlign: "center",
+  },
+  footerBold: {
+    fontFamily: "AlbertSans-Bold",
   },
   modalOverlay: {
     flex: 1,

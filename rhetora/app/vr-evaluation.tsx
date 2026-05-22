@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useMemo, useState } from "react";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useLocalSearchParams, useRouter } from "expo-router";
-
+import CollapsibleSection from "../components/collapsible-section";
 import { Colors } from "../constants/colors";
 import feedbackData from "./feedbackdata.json";
 import TopHeader from "@/components/top-header";
@@ -48,6 +48,26 @@ export default function VrEvaluation() {
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     };
   }, []);
+
+  const safeSummary = {
+    totalFillerWords: summary?.totalFillerWords ?? 0,
+    wordRatePerMinute: summary?.wordRatePerMinute ?? 0,
+    fillerWords: Array.isArray(summary?.fillerWords) ? summary.fillerWords : [],
+  };
+
+  const safeWhatYouDidWell = Array.isArray(evaluationData.whatYouDidWell)
+    ? evaluationData.whatYouDidWell
+    : [];
+
+  const safeRecommendedActions = Array.isArray(evaluationData.recommendedActions)
+    ? evaluationData.recommendedActions
+    : [];
+
+  const safeAudienceReaction = evaluationData.audienceReaction ?? {
+    beginning: "-",
+    middle: "-",
+    end: "-",
+  };
 
   return (
     <ImageBackground source={bgImage} style={styles.screen} resizeMode="cover">
@@ -113,97 +133,59 @@ export default function VrEvaluation() {
           </View>
         )}
 
-        <Pressable
-          style={styles.sectionHeader}
-          onPress={() => setTranscriptOpen((prev) => !prev)}
-        >
-          <Text style={styles.sectionTitle}>Transcript</Text>
-          <Ionicons
-            name={transcriptOpen ? "chevron-up" : "chevron-down"}
-            size={18}
-            color={Colors.octonary.DEFAULT}
-          />
-        </Pressable>
-        {transcriptOpen && (
-          <View style={styles.sectionCard}>
-            <Text style={styles.sectionBody}>{evaluationData.transcript}</Text>
-          </View>
-        )}
+        <CollapsibleSection title="Transcript">
+          <Text style={styles.sectionBody}>{evaluationData.transcript}</Text>
+        </CollapsibleSection>
 
-        <Pressable
-          style={styles.sectionHeader}
-          onPress={() => setDidWellOpen((prev) => !prev)}
+        <CollapsibleSection title="What You Did Well">
+          {safeWhatYouDidWell.map((item) => (
+            <View key={item} style={styles.bulletRow}>
+              <Text style={styles.bullet}>•</Text>
+              <Text style={styles.sectionBody}>{item}</Text>
+            </View>
+          ))}
+        </CollapsibleSection>
+
+        <CollapsibleSection title="Audience Reaction">
+          <View style={styles.reactionRow}>
+            <Text style={styles.bullet}>•</Text>
+            <Text style={styles.sectionBody}>
+              <Text style={styles.reactionLabel}>🙂 Beginning: </Text>
+              {safeAudienceReaction.beginning}
+            </Text>
+          </View>
+
+          <View style={styles.reactionRow}>
+            <Text style={styles.bullet}>•</Text>
+            <Text style={styles.sectionBody}>
+              <Text style={styles.reactionLabel}>😐 Middle: </Text>
+              {safeAudienceReaction.middle}
+            </Text>
+          </View>
+
+          <View style={styles.reactionRow}>
+            <Text style={styles.bullet}>•</Text>
+            <Text style={styles.sectionBody}>
+              <Text style={styles.reactionLabel}>🙂 End: </Text>
+              {safeAudienceReaction.end}
+            </Text>
+          </View>
+        </CollapsibleSection>
+
+        <CollapsibleSection
+          title="Recommended Actions"
+          containerStyle={styles.actionsCard}
         >
-          <Text style={styles.sectionTitle}>What You Did Well</Text>
-          <Ionicons
-            name={didWellOpen ? "chevron-up" : "chevron-down"}
-            size={18}
-            color={Colors.octonary.DEFAULT}
-          />
-        </Pressable>
-        {didWellOpen && (
-          <View style={styles.sectionCard}>
-            {evaluationData.whatYouDidWell.map((item) => (
-              <View key={item} style={styles.bulletRow}>
-                <Text style={styles.bullet}>•</Text>
-                <Text style={styles.sectionBody}>{item}</Text>
+          {safeRecommendedActions.map((action, index) => (
+            <View key={action.title} style={styles.actionRow}>
+              <Text style={styles.actionIndex}>{index + 1}.</Text>
+              <View style={styles.actionBody}>
+                <Text style={styles.actionTitle}>{action.title}</Text>
+                <Text style={styles.sectionBody}>{action.description}</Text>
               </View>
-            ))}
-          </View>
-        )}
-
-        <Pressable
-          style={styles.sectionHeader}
-          onPress={() => setAudienceOpen((prev) => !prev)}
-        >
-          <Text style={styles.sectionTitle}>Audience Reaction</Text>
-          <Ionicons
-            name={audienceOpen ? "chevron-up" : "chevron-down"}
-            size={18}
-            color={Colors.octonary.DEFAULT}
-          />
-        </Pressable>
-        {audienceOpen && (
-          <View style={styles.sectionCard}>
-            <View style={styles.reactionRow}>
-              <Text style={styles.reactionLabel}>Beginning:</Text>
-              <Text style={styles.sectionBody}>{evaluationData.audienceReaction.beginning}</Text>
             </View>
-            <View style={styles.reactionRow}>
-              <Text style={styles.reactionLabel}>Middle:</Text>
-              <Text style={styles.sectionBody}>{evaluationData.audienceReaction.middle}</Text>
-            </View>
-            <View style={styles.reactionRow}>
-              <Text style={styles.reactionLabel}>End:</Text>
-              <Text style={styles.sectionBody}>{evaluationData.audienceReaction.end}</Text>
-            </View>
-          </View>
-        )}
-
-        <Pressable
-          style={styles.sectionHeader}
-          onPress={() => setActionsOpen((prev) => !prev)}
-        >
-          <Text style={styles.sectionTitle}>Recommended Actions</Text>
-          <Ionicons
-            name={actionsOpen ? "chevron-up" : "chevron-down"}
-            size={18}
-            color={Colors.octonary.DEFAULT}
-          />
-        </Pressable>
-        {actionsOpen && (
-          <View style={[styles.sectionCard, styles.actionsCard]}>
-            {evaluationData.recommendedActions.map((action, index) => (
-              <View key={action.title} style={styles.actionRow}>
-                <Text style={styles.actionIndex}>{index + 1}.</Text>
-                <View style={styles.actionBody}>
-                  <Text style={styles.actionTitle}>{action.title}</Text>
-                  <Text style={styles.sectionBody}>{action.description}</Text>
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
+          ))}
+        </CollapsibleSection>
 
         <Pressable style={styles.primaryButton} onPress={() => router.replace("/home")}>
           <Text style={styles.primaryButtonText}>Okay</Text>
