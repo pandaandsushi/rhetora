@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { useRouter } from "expo-router";
@@ -37,13 +38,14 @@ const genres = [
 
 export default function StorytellingPractice() {
   const router = useRouter();
+  const [maxTurns, setMaxTurns] = useState("4");
   const [tutorialVisible, setTutorialVisible] = useState(true);
   const [tutorialIndex, setTutorialIndex] = useState(0);
   const [tutorialCollapsed, setTutorialCollapsed] = useState(false);
   const [selectedGenre, setSelectedGenre] = useState("fantasy");
   const [skipTutorial, setSkipTutorial] = useState(false);
 
-  const [timeValue, setTimeValue] = useState({ hours: "00", minutes: "10", seconds: "00" });
+  const [timeValue, setTimeValue] = useState({ hours: "00", minutes: "01", seconds: "00" });
 
   const activeStep = useMemo(() => tutorialSteps[tutorialIndex], [tutorialIndex]);
 
@@ -51,6 +53,19 @@ export default function StorytellingPractice() {
     genres.find(g => g.key === selectedGenre)?.color || Colors.additional.purple, 
   [selectedGenre]);
 
+  const handleMaxTurnsChange = (value: string) => {
+    const numericValue = value.replace(/[^0-9]/g, "");
+
+    if (numericValue === "") {
+      setMaxTurns("");
+      return;
+    }
+
+    const parsed = Number(numericValue);
+    const limitedValue = Math.min(parsed, 10);
+
+    setMaxTurns(String(limitedValue));
+  };
   const handleNextTutorial = () => {
     if (tutorialIndex >= tutorialSteps.length - 1) {
       setTutorialVisible(false);
@@ -60,6 +75,12 @@ export default function StorytellingPractice() {
   };
 
   const handleStart = () => {
+    const parsedMaxTurns = Number(maxTurns);
+    const finalMaxTurns =
+      Number.isFinite(parsedMaxTurns) && parsedMaxTurns > 0
+        ? Math.min(parsedMaxTurns, 10)
+        : 4;
+
     router.push({
       pathname: "/storytelling-session",
       params: {
@@ -67,6 +88,7 @@ export default function StorytellingPractice() {
         hours: timeValue.hours,
         minutes: timeValue.minutes,
         seconds: timeValue.seconds,
+        maxTurns: String(finalMaxTurns),
         totalDuration: `${timeValue.hours}:${timeValue.minutes}:${timeValue.seconds}`,
       },
     });
@@ -140,7 +162,22 @@ export default function StorytellingPractice() {
           )}
         </Pressable>
 
-        <SpeakingTimeInput value={timeValue} onChange={setTimeValue} />
+        <SpeakingTimeInput value={timeValue} onChange={setTimeValue} label="Time per Turn"/>
+        
+        <Text style={styles.genreLabel}>Max Turns</Text>
+
+        <View style={styles.turnInputCard}>
+          <TextInput
+            style={styles.turnInput}
+            value={maxTurns}
+            onChangeText={handleMaxTurnsChange}
+            keyboardType="number-pad"
+            maxLength={2}
+            placeholder="4"
+            placeholderTextColor={Colors.neutral[400]}
+          />
+          <Text style={styles.turnInputHint}>Maximum 10 turns</Text>
+        </View>
 
         <Text style={styles.genreLabel}>Select Genre</Text>
         <View style={styles.genreWrap}>
@@ -474,5 +511,38 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 18,
     color: Colors.shade[200],
+  },
+
+  turnText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+  },
+
+  turnTextActive: {
+    color: Colors.shade[200],
+  },
+  turnInputCard: {
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.quinary[300],
+    backgroundColor: Colors.shade[200],
+    paddingBottom: 12,
+    gap: 6,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  turnInput: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+    paddingVertical: 4,
+  },
+
+  turnInputHint: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.neutral[500],
   },
 });

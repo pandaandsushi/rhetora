@@ -21,14 +21,15 @@ const logoRhetora = require("../assets/images/logorhetora.png");
 export default function StorytellingSession() {
   const router = useRouter();
 
-  const { genre, hours, minutes, seconds, cameraOn } = useLocalSearchParams<{
+  const { genre, hours, minutes, seconds, cameraOn, maxTurns } = useLocalSearchParams<{
     genre: string;
     hours: string;
     minutes: string;
     seconds: string;
     cameraOn: string;
+    maxTurns: string;
   }>();
-  console.log("Received params:", { genre, hours, minutes, seconds, cameraOn });
+  console.log("Received params:", { genre, hours, minutes, seconds, cameraOn, maxTurns });
   const initialTotalSeconds = useMemo(() => {
     const h = parseInt(hours || "0", 10);
     const m = parseInt(minutes || "10", 10);
@@ -54,6 +55,11 @@ export default function StorytellingSession() {
   const ringCircumference = 2 * Math.PI * ringRadius;
   const ringOffset = ringCircumference * (1 - progress);
 
+  const maxTurnCount = useMemo(() => {
+    const parsed = Number(maxTurns);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 4;
+  }, [maxTurns]);
+  
   const formattedTime = useMemo(() => {
     const m = Math.floor(remainingSeconds / 60);
     const s = remainingSeconds % 60;
