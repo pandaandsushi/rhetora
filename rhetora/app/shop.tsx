@@ -28,6 +28,7 @@ type ShopItem = {
   price: number;
   type: "avatar" | "frame" | "chapter" | "vr";
 };
+type UnlockFilter = "all" | "chapter" | "vr";
 
 const avatarPrices = new Map<string, number>(avatarList.map((item) => [item.id, 100]));
 const framePrices = new Map<string, number>(frameList.map((item) => [item.id, 100]));
@@ -76,6 +77,7 @@ export default function Shop() {
   const [obtainedOpen, setObtainedOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
   const [purchaseError, setPurchaseError] = useState("");
+  const [unlockFilter, setUnlockFilter] = useState<UnlockFilter>("all");
 
   const equippedAvatar =
     avatarList.find((item) => item.id === userData.equippedAvatarId) ?? avatarList[0];
@@ -138,18 +140,41 @@ export default function Shop() {
   };
 
   const activeItems = useMemo(() => {
-    const list = activeTab === "avatar" ? avatarItems : activeTab === "frame" ? frameItems : unlockItems;
-    const filtered = showObtainedOnly ? list.filter((item) => isObtained(item)) : list;
+    const baseList =
+      activeTab === "avatar"
+        ? avatarItems
+        : activeTab === "frame"
+          ? frameItems
+          : unlockItems;
+
+    const unlockFilteredList =
+      activeTab === "unlock" && unlockFilter !== "all"
+        ? baseList.filter((item) => item.type === unlockFilter)
+        : baseList;
+
+    const filtered = showObtainedOnly
+      ? unlockFilteredList.filter((item) => isObtained(item))
+      : unlockFilteredList;
 
     return [...filtered].sort((a, b) => {
       const aObtained = isObtained(a);
       const bObtained = isObtained(b);
+
       if (aObtained === bObtained) {
         return 0;
       }
+
       return aObtained ? 1 : -1;
     });
-  }, [activeTab, avatarItems, frameItems, unlockItems, showObtainedOnly, userData]);
+  }, [
+    activeTab,
+    unlockFilter,
+    avatarItems,
+    frameItems,
+    unlockItems,
+    showObtainedOnly,
+    userData,
+  ]);
 
   const handlePurchase = () => {
     if (!selectedItem) {
@@ -255,7 +280,13 @@ export default function Shop() {
               <Pressable
                 key={tab.id}
                 style={[styles.tabButton, active && styles.tabButtonActive]}
-                onPress={() => setActiveTab(tab.id as ShopTab)}
+                onPress={() => {
+                  setActiveTab(tab.id as ShopTab);
+
+                  if (tab.id !== "unlock") {
+                    setUnlockFilter("all");
+                  }
+                }}
               >
                 <Text style={[styles.tabText, active && styles.tabTextActive]}>{tab.label}</Text>
               </Pressable>
@@ -281,6 +312,38 @@ export default function Shop() {
               <Text style={styles.obtainedText}>Show Obtained Only</Text>
             </Pressable>
           </View>
+
+          {activeTab === "unlock" && (
+            <View style={styles.unlockFilterRow}>
+              {[
+                { id: "all", label: "All" },
+                { id: "chapter", label: "Chapters" },
+                { id: "vr", label: "Scenarios" },
+              ].map((filter) => {
+                const active = unlockFilter === filter.id;
+
+                return (
+                  <Pressable
+                    key={filter.id}
+                    style={[
+                      styles.unlockFilterButton,
+                      active && styles.unlockFilterButtonActive,
+                    ]}
+                    onPress={() => setUnlockFilter(filter.id as UnlockFilter)}
+                  >
+                    <Text
+                      style={[
+                        styles.unlockFilterText,
+                        active && styles.unlockFilterTextActive,
+                      ]}
+                    >
+                      {filter.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
 
           <View style={styles.grid}>
             {activeItems.map((item) => (
@@ -673,5 +736,34 @@ const styles = StyleSheet.create({
     fontFamily: "AlbertSans-Regular",
     fontSize: 14,
     color: Colors.error[500],
+  },
+  unlockFilterRow: {
+    flexDirection: "row",
+    gap: 8,
+    backgroundColor: Colors.neutral[100],
+    borderRadius: 14,
+    padding: 4,
+  },
+
+  unlockFilterButton: {
+    flex: 1,
+    borderRadius: 11,
+    paddingVertical: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
+  unlockFilterButtonActive: {
+    backgroundColor: Colors.senary[300],
+  },
+
+  unlockFilterText: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 13,
+    color: Colors.neutral[500],
+  },
+
+  unlockFilterTextActive: {
+    color: Colors.shade[200],
   },
 });
