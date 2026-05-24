@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   ImageBackground,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -97,6 +98,7 @@ export default function FillerFreeEvaluation() {
   }>();
 
   const [selectedPill, setSelectedPill] = useState<string | null>(null);
+  const [skillsModalOpen, setSkillsModalOpen] = useState(false);
 
   const sessionData = useMemo<SessionData>(() => {
     if (!params.data) return fillerFreeFallback;
@@ -238,7 +240,11 @@ export default function FillerFreeEvaluation() {
         {/* Skill Breakdown */}
         {skillBreakdown.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>Skill Breakdown</Text>
+            <Pressable style={styles.skillHeader} onPress={() => setSkillsModalOpen(true)}>
+              <Text style={styles.sectionTitle}>Skill Breakdown</Text>
+              <Ionicons name="chevron-forward" size={18} color={Colors.octonary.DEFAULT} />
+            </Pressable>
+
             <View style={styles.skillCard}>
               <SkillRadar labels={skillLabels} values={skillScores} size={220} />
             </View>
@@ -272,6 +278,37 @@ export default function FillerFreeEvaluation() {
           <Text style={styles.footerBold}>My Recordings</Text>
         </Text>
       </ScrollView>
+      <Modal transparent animationType="fade" visible={skillsModalOpen}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderRow}>
+              <Text style={styles.modalTitle}>Skill Breakdown</Text>
+              <Pressable onPress={() => setSkillsModalOpen(false)}>
+                <Ionicons name="close" size={20} color={Colors.octonary.DEFAULT} />
+              </Pressable>
+            </View>
+
+            <ScrollView contentContainerStyle={styles.modalContent}>
+              {skillBreakdown.map((skill) => (
+                <View key={skill.skill} style={styles.modalSkillCard}>
+                  <View style={styles.modalSkillHeader}>
+                    <Text style={styles.modalSkillTitle}>{skill.skill}</Text>
+                    <Text style={styles.modalSkillScore}>{skill.score}</Text>
+                  </View>
+
+                  <Text style={styles.modalSkillLevel}>{skill.level}</Text>
+
+                  <Text style={styles.modalTipLabel}>Reason</Text>
+                  <Text style={styles.modalSkillText}>{skill.reason}</Text>
+
+                  <Text style={styles.modalTipLabel}>Improvement Tip</Text>
+                  <Text style={styles.modalSkillText}>{skill.improvementTip}</Text>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </ImageBackground>
   );
 }
@@ -476,5 +513,91 @@ const styles = StyleSheet.create({
   },
   footerBold: {
     fontFamily: "AlbertSans-Bold",
+  },
+  skillHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 2,
+  },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+
+  modalCard: {
+    width: "100%",
+    maxHeight: "80%",
+    borderRadius: 18,
+    backgroundColor: Colors.shade[200],
+    padding: 20,
+    gap: 12,
+  },
+
+  modalHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  modalTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+  },
+
+  modalContent: {
+    gap: 12,
+    paddingBottom: 8,
+  },
+
+  modalSkillCard: {
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.quinary[300],
+    padding: 14,
+    gap: 6,
+  },
+
+  modalSkillHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  modalSkillTitle: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 15,
+    color: Colors.octonary.DEFAULT,
+  },
+
+  modalSkillScore: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.octonary.DEFAULT,
+  },
+
+  modalSkillLevel: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 13,
+    color: Colors.senary[300],
+  },
+
+  modalSkillText: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 13,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 18,
+  },
+
+  modalTipLabel: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 12,
+    color: Colors.octonary.DEFAULT,
+    marginTop: 4,
   },
 });
