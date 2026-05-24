@@ -17,12 +17,66 @@ const scenarioImages = {
 export default function VrEvaluation() {
   const router = useRouter();
   const params = useLocalSearchParams<{ data?: string }>();
-  const [quickSummaryOpen, setQuickSummaryOpen] = useState(true);
-  const [transcriptOpen, setTranscriptOpen] = useState(true);
-  const [didWellOpen, setDidWellOpen] = useState(true);
-  const [audienceOpen, setAudienceOpen] = useState(true);
-  const [actionsOpen, setActionsOpen] = useState(true);
+  const [selectedPill, setSelectedPill] = useState<string | null>(null);
 
+  const handlePillPress = (word: string) => {
+    setSelectedPill((prev) => (prev === word ? null : word));
+  };
+
+  function HighlightedTranscript({
+    text,
+    fillerWords,
+    selectedWord,
+  }: {
+    text: string;
+    fillerWords: string[];
+    selectedWord: string | null;
+  }) {
+    if (!text) {
+      return <Text style={styles.sectionBody}>No transcript available.</Text>;
+    }
+
+    if (fillerWords.length === 0) {
+      return <Text style={styles.sectionBody}>{text}</Text>;
+    }
+
+    const escapedWords = fillerWords.map((word) =>
+      word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    );
+
+    const pattern = new RegExp(`\\b(${escapedWords.join("|")})\\b`, "gi");
+    const parts = text.split(pattern);
+
+    return (
+      <Text style={styles.sectionBody}>
+        {parts.map((part, index) => {
+          const isFillerWord = fillerWords.some(
+            (word) => word.toLowerCase() === part.toLowerCase()
+          );
+
+          const isSelected = selectedWord
+            ? part.toLowerCase() === selectedWord.toLowerCase()
+            : isFillerWord;
+
+          if (!isFillerWord) {
+            return <Text key={`${part}-${index}`}>{part}</Text>;
+          }
+
+          return (
+            <Text
+              key={`${part}-${index}`}
+              style={[
+                styles.transcriptHighlight,
+                isSelected && styles.transcriptHighlightSelected,
+              ]}
+            >
+              {part}
+            </Text>
+          );
+        })}
+      </Text>
+    );
+  }
   const parsedPayload = useMemo(() => {
     if (!params.data) {
       return null;
@@ -35,7 +89,13 @@ export default function VrEvaluation() {
   }, [params.data]);
 
   const evaluationData = parsedPayload?.feedback ?? feedbackData;
-  const summary = evaluationData.quickSummary;
+
+  const quickSummary =
+    typeof evaluationData.quickSummary === "string"
+      ? evaluationData.quickSummary
+      : evaluationData.overallFeedback?.summary ??
+        "Great effort! Review your speaking performance below.";
+
   const scenarioTitle = `VR Mode: ${evaluationData.scenario}`;
   const previewImage = useMemo(() => {
     return scenarioImages[evaluationData.scenario as keyof typeof scenarioImages] ??
@@ -49,12 +109,29 @@ export default function VrEvaluation() {
     };
   }, []);
 
+  const legacySummary =
+    typeof evaluationData.quickSummary === "object" && evaluationData.quickSummary !== null
+      ? evaluationData.quickSummary
+      : null;
+
   const safeSummary = {
-    totalFillerWords: summary?.totalFillerWords ?? 0,
-    wordRatePerMinute: summary?.wordRatePerMinute ?? 0,
-    fillerWords: Array.isArray(summary?.fillerWords) ? summary.fillerWords : [],
+    totalFillerWords:
+      evaluationData.totalFillerWords ??
+      legacySummary?.totalFillerWords ??
+      0,
+    wordRatePerMinute:
+      evaluationData.wordRatePerMinute ??
+      legacySummary?.wordRatePerMinute ??
+      0,
+    fillerWords: Array.isArray(evaluationData.fillerWords)
+      ? evaluationData.fillerWords
+      : Array.isArray(legacySummary?.fillerWords)
+        ? legacySummary.fillerWords
+        : [],
   };
 
+
+  const fillerWords = safeSummary.fillerWords.map((item) => item.word);
   const safeWhatYouDidWell = Array.isArray(evaluationData.whatYouDidWell)
     ? evaluationData.whatYouDidWell
     : [];
@@ -89,52 +166,77 @@ export default function VrEvaluation() {
           </View>
         </View>
 
-        <Pressable
-          style={styles.summaryHeader}
-          onPress={() => setQuickSummaryOpen((prev) => !prev)}
+        <CollapsibleSection
+          title="Quick Summary"
+          headerStyle={styles.quickSummaryHeader}
+          contentStyle={styles.quickSummaryContent}
         >
-          <Text style={styles.summaryTitle}>Quick Summary</Text>
-          <Ionicons
-            name={quickSummaryOpen ? "chevron-up" : "chevron-down"}
-            size={18}
-            color={Colors.octonary.DEFAULT}
-          />
-        </Pressable>
+          <Text style={styles.quickSummaryText}>{quickSummary}</Text>
+        </CollapsibleSection>
 
-        {quickSummaryOpen && (
-          <View style={styles.summaryCard}>
-            <View style={styles.summaryStats}>
-              <View style={styles.summaryStat}>
-                <Text style={styles.summaryLabel}>Total Filler Words</Text>
-                <Text style={styles.summaryValue}>{summary.totalFillerWords}</Text>
-              </View>
-              <View style={styles.summaryDivider} />
-              <View style={styles.summaryStat}>
-                <Text style={styles.summaryLabel}>Word Rate</Text>
-                <Text style={styles.summaryValue}>
-                  {summary.wordRatePerMinute}
-                  <Text style={styles.summaryUnit}>/minute</Text>
-                </Text>
-              </View>
+        <View style={styles.summaryCard}>
+          <View style={styles.summaryStats}>
+            <View style={styles.summaryStat}>
+              <Text style={styles.summaryLabel}>Total Filler Words</Text>
+              <Text style={styles.summaryValue}>{safeSummary.totalFillerWords}</Text>
             </View>
 
-            <View style={styles.fillerRow}>
-              {summary.fillerWords.map((item) => (
-                <View key={item.word} style={styles.fillerPill}>
-                  <View style={styles.fillerCount}>
-                    <Text style={styles.fillerCountText}>{item.count}</Text>
-                  </View>
-                  <Text style={styles.fillerWord}>{item.word}</Text>
-                </View>
-              ))}
-            </View>
+            <View style={styles.summaryDivider} />
 
-            <Text style={styles.summaryHint}>Click to see details</Text>
+            <View style={styles.summaryStat}>
+              <Text style={styles.summaryLabel}>Word Rate</Text>
+              <Text style={styles.summaryValue}>
+                {safeSummary.wordRatePerMinute}
+                <Text style={styles.summaryUnit}>/minute</Text>
+              </Text>
+            </View>
           </View>
-        )}
+
+          {safeSummary.fillerWords.length > 0 && (
+            <View style={styles.fillerSection}>
+              <View style={styles.fillerRow}>
+                {safeSummary.fillerWords.map((item) => (
+                  <Pressable
+                    key={item.word}
+                    style={[
+                      styles.fillerPill,
+                      selectedPill === item.word && styles.fillerPillSelected,
+                    ]}
+                    onPress={() => handlePillPress(item.word)}
+                  >
+                    <View style={styles.fillerCount}>
+                      <Text style={styles.fillerCountText}>{item.count}</Text>
+                    </View>
+
+                    <Text
+                      style={[
+                        styles.fillerWord,
+                        selectedPill === item.word && styles.fillerWordSelected,
+                      ]}
+                    >
+                      {item.word}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+
+              {safeSummary.fillerWords.length > 0 && (
+                <Text style={styles.pillsHint}>
+                  {selectedPill
+                    ? `Showing "${selectedPill}" highlights. Tap again to clear.`
+                    : "Tap a pill to highlight that word in the transcript."}
+                </Text>
+              )}
+            </View>
+          )}
+        </View>
 
         <CollapsibleSection title="Transcript">
-          <Text style={styles.sectionBody}>{evaluationData.transcript}</Text>
+          <HighlightedTranscript
+            text={evaluationData.transcript}
+            fillerWords={fillerWords}
+            selectedWord={selectedPill}
+          />
         </CollapsibleSection>
 
         <CollapsibleSection title="What You Did Well">
@@ -447,5 +549,48 @@ const styles = StyleSheet.create({
   },
   footerBold: {
     fontFamily: "AlbertSans-Bold",
+  },
+  quickSummaryHeader: {
+    backgroundColor: "#F6C99A",
+  },
+
+  quickSummaryContent: {
+    backgroundColor: "#F6C99A",
+    paddingTop: 0,
+  },
+
+  quickSummaryText: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 20,
+  },
+  fillerPillSelected: {
+    backgroundColor: Colors.senary[100],
+    borderColor: Colors.senary[300],
+  },
+
+  fillerWordSelected: {
+    color: Colors.senary[300],
+  },
+
+  pillsHint: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.neutral[500],
+    textAlign: "center",
+  },
+
+  transcriptHighlight: {
+    color: Colors.senary[300],
+    fontFamily: "AlbertSans-Bold",
+  },
+
+  transcriptHighlightSelected: {
+    backgroundColor: Colors.senary[100],
+    color: Colors.senary[400],
+  },
+  fillerSection: {
+    gap: 8,
   },
 });
