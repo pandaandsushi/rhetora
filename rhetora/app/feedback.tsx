@@ -1,6 +1,6 @@
 import { Dimensions, Image, ImageBackground, PanResponder, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import NavBar from "../components/nav-bar";
@@ -36,7 +36,10 @@ const tagLabels: Record<PeerFeedbackPost["tag"], string> = {
 
 export default function Feedback() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"explore" | "my-posts">("explore");
+  const params = useLocalSearchParams<{ tab?: string }>();
+  const [activeTab, setActiveTab] = useState<"explore" | "my-posts">(
+    params.tab === "my-posts" ? "my-posts" : "explore"
+  );
   const [userData, setUserData] = useState(getMockUserData());
   const [ratingOpen, setRatingOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState("Successfully uploaded feedback");
@@ -72,6 +75,16 @@ export default function Feedback() {
   const [sortMode, setSortMode] = useState<"popular" | "recent">(
     "popular",
   );
+  useEffect(() => {
+    if (params.tab === "my-posts") {
+      setActiveTab("my-posts");
+    }
+
+    if (params.tab === "explore") {
+      setActiveTab("explore");
+    }
+  }, [params.tab]);
+  
   useEffect(() => {
     const unsubscribe = subscribeToMockUser((next) => {
       setUserData(next);

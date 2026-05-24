@@ -101,9 +101,15 @@ const earlierNotifications: NotificationItem[] = [
   },
 ];
 
-function NotificationCard({ item }: { item: NotificationItem }) {
+function NotificationCard({
+  item,
+  onPress,
+}: {
+  item: NotificationItem;
+  onPress?: () => void;
+}) {
   return (
-    <View style={styles.card}>
+    <Pressable style={styles.card} onPress={onPress}>
       <Image source={item.avatar} style={styles.cardAvatar} />
       <View style={styles.cardBody}>
         <Text style={styles.cardText}>
@@ -113,7 +119,7 @@ function NotificationCard({ item }: { item: NotificationItem }) {
         <Text style={styles.cardTime}>{item.time}</Text>
       </View>
       {item.unread && <View style={styles.unreadDot} />}
-    </View>
+    </Pressable>
   );
 }
 
@@ -134,21 +140,43 @@ export default function Notifications() {
         <Text style={styles.sectionTitle}>Today</Text>
         <View style={styles.sectionList}>
           {todayNotifications.map((item) => (
-            <NotificationCard key={item.id} item={item} />
+            <NotificationCard key={item.id} item={item} onPress={() =>
+                router.push({
+                  pathname: "/feedback",
+                  params: {
+                    tab: "my-posts",
+                  },
+                })
+              }
+            />
           ))}
         </View>
 
         <Text style={styles.sectionTitle}>Yesterday</Text>
         <View style={styles.sectionList}>
           {yesterdayNotifications.map((item) => (
-            <NotificationCard key={item.id} item={item} />
+            <NotificationCard key={item.id} item={item} onPress={() =>
+              router.push({
+                pathname: "/feedback",
+                params: {
+                  tab: "my-posts",
+                },
+              })
+            } />
           ))}
         </View>
 
         <Text style={styles.sectionTitle}>Earlier</Text>
         <View style={styles.sectionList}>
           {earlierNotifications.map((item) => (
-            <NotificationCard key={item.id} item={item} />
+            <NotificationCard key={item.id} item={item} onPress={() =>
+              router.push({
+                pathname: "/feedback",
+                params: {
+                  tab: "my-posts",
+                },
+              })
+            } />
           ))}
         </View>
       </ScrollView>
