@@ -508,7 +508,7 @@ let mockUserData: MockUserData = {
     email: "john@rhetora.com",
     password: "password",
   },
-  coins: 100,
+  coins: 2000,
   leaderboardRank: 10,
   streakDays: 9,
   equippedAvatarId: "sad-doggo",

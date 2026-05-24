@@ -73,6 +73,7 @@ export default function Shop() {
   const [showObtainedOnly, setShowObtainedOnly] = useState(false);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
+  const [obtainedOpen, setObtainedOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<ShopItem | null>(null);
   const [purchaseError, setPurchaseError] = useState("");
 
@@ -190,22 +191,32 @@ export default function Shop() {
     }
 
     setSuccessOpen(false);
+    setObtainedOpen(false);
   };
 
   const openConfirm = (item: ShopItem) => {
-    if (isObtained(item)) {
-      return;
-    }
     setSelectedItem(item);
     setPurchaseError("");
+
+    if (isObtained(item)) {
+      setObtainedOpen(true);
+      return;
+    }
+
     setConfirmOpen(true);
   };
 
   const closeAllModals = () => {
     setConfirmOpen(false);
     setSuccessOpen(false);
+    setObtainedOpen(false);
     setPurchaseError("");
   };
+  const isEquippableItem = selectedItem?.type === "avatar" || selectedItem?.type === "frame";
+
+  const obtainedModalTitle = isEquippableItem
+    ? "You already have this item. Equip it now?"
+    : "You already unlocked this item.";
 
   const actionLabel = selectedItem?.type === "chapter" || selectedItem?.type === "vr" ? "Open now!" : "Equip now!";
 
@@ -277,21 +288,16 @@ export default function Shop() {
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Are you sure you want to make this purchase?</Text>
             {selectedItem && (
-              <View style={styles.modalItemCard}>
-                {selectedItem.type === "frame" ? (
-                  <View style={styles.modalFramePreview}>
-                    <Image source={equippedAvatar?.image} style={styles.modalAvatarImage} />
-                    <Image source={selectedItem.image} style={styles.modalFrameImage} />
-                  </View>
-                ) : (
-                  <Image source={selectedItem.image} style={styles.modalItemImage} />
-                )}
-                <Text style={styles.modalItemTitle}>{selectedItem.title}</Text>
-                <View style={styles.modalPricePill}>
-                  <Image source={coinImage} style={styles.modalCoinIcon} />
-                  <Text style={styles.modalPriceText}>{selectedItem.price}</Text>
-                </View>
-              </View>
+              <ShopItemCard
+                key={selectedItem.id}
+                title={selectedItem.title}
+                image={selectedItem.image}
+                price={selectedItem.price}
+                obtained={isObtained(selectedItem)}
+                dimmed={isObtained(selectedItem)}
+                variant={selectedItem.type === "frame" ? "frame" : "unlock"}
+                avatarImage={selectedItem.type === "frame" ? equippedAvatar?.image : undefined}
+              />
             )}
             {purchaseError ? <Text style={styles.errorText}>{purchaseError}</Text> : null}
             <View style={styles.modalActions}>
@@ -301,6 +307,48 @@ export default function Shop() {
               <Pressable style={[styles.modalButton, styles.modalConfirm]} onPress={handlePurchase}>
                 <Text style={styles.modalConfirmText}>Yes!</Text>
               </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal visible={obtainedOpen} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>{obtainedModalTitle}</Text>
+
+            {selectedItem && (
+              <View style={styles.modalSuccessItem}>
+                {selectedItem.type === "frame" ? (
+                  <View style={styles.modalFrameSuccessPreview}>
+                    <Image source={equippedAvatar?.image} style={styles.modalAvatarSuccessImage} />
+                    <Image source={selectedItem.image} style={styles.modalFrameSuccessImage} />
+                  </View>
+                ) : (
+                  <Image source={selectedItem.image} style={styles.modalSuccessImage} />
+                )}
+
+                <Text style={styles.modalItemTitle}>{selectedItem.title}</Text>
+              </View>
+            )}
+
+            <View style={styles.modalActions}>
+              <Pressable
+                style={[styles.modalButton, styles.modalCancel]}
+                onPress={() => setObtainedOpen(false)}
+              >
+                <Text style={styles.modalCancelText}>
+                  {isEquippableItem ? "No" : "OK"}
+                </Text>
+              </Pressable>
+
+              {isEquippableItem && (
+                <Pressable
+                  style={[styles.modalButton, styles.modalConfirm]}
+                  onPress={handleEquip}
+                >
+                  <Text style={styles.modalConfirmText}>Equip</Text>
+                </Pressable>
+              )}
             </View>
           </View>
         </View>
@@ -589,8 +637,8 @@ const styles = StyleSheet.create({
   },
   modalFrameSuccessImage: {
     position: "absolute",
-    width: 132,
-    height: 132,
+    width: 150,
+    height: 150,
     resizeMode: "contain",
   },
   confetti: {
