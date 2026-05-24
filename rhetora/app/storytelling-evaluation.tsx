@@ -184,9 +184,6 @@ export default function StorytellingEvaluation() {
       />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.genreLabel}>Genre</Text>
-        <Text style={styles.genreValue}>{safeEvaluation.genre}</Text>
-
         <View style={styles.mediaCard}>
           <View style={styles.mediaPlayButton}>
             <Ionicons name="play" size={26} color={Colors.shade[200]} />
