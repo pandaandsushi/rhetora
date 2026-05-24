@@ -17,8 +17,10 @@ import Svg, { Circle, Line, Path } from "react-native-svg";
 import TopHeader from "../components/top-header";
 import NavBar from "../components/nav-bar";
 import { Colors } from "../constants/colors";
-import { getMockUserData, subscribeToMockUser, type TimePracticeRange } from "../data/mock-user";
-
+import {
+  timePracticeData,
+  type TimePracticeRange,
+} from "../constants/time-practice";
 const bgImage = require("../assets/images/bg-motif.png");
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -71,7 +73,6 @@ const buildAreaPath = (width: number, height: number, values: number[]) => {
 
 export default function TimePractice() {
   const router = useRouter();
-  const [userData, setUserData] = useState(getMockUserData());
   const [activePeriod, setActivePeriod] = useState<PeriodKey>("daily");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedRangeIds, setSelectedRangeIds] = useState<Record<PeriodKey, string>>({
@@ -82,31 +83,22 @@ export default function TimePractice() {
   });
 
   useEffect(() => {
-    const unsubscribe = subscribeToMockUser((next) => {
-      setUserData(next);
-    });
-
-    return unsubscribe;
-  }, []);
-
-  useEffect(() => {
-    const nextRanges = userData.timePractice;
     setSelectedRangeIds((prev) => ({
-      daily: prev.daily || nextRanges.dailyRanges[0]?.id || "",
-      weekly: prev.weekly || nextRanges.weeklyRanges[0]?.id || "",
-      monthly: prev.monthly || nextRanges.monthlyRanges[0]?.id || "",
-      yearly: prev.yearly || nextRanges.yearlyRanges[0]?.id || "",
+      daily: prev.daily || timePracticeData.dailyRanges[0]?.id || "",
+      weekly: prev.weekly || timePracticeData.weeklyRanges[0]?.id || "",
+      monthly: prev.monthly || timePracticeData.monthlyRanges[0]?.id || "",
+      yearly: prev.yearly || timePracticeData.yearlyRanges[0]?.id || "",
     }));
-  }, [userData.timePractice]);
+  }, []);
 
   const rangesByPeriod = useMemo(() => {
     return {
-      daily: userData.timePractice.dailyRanges,
-      weekly: userData.timePractice.weeklyRanges,
-      monthly: userData.timePractice.monthlyRanges,
-      yearly: userData.timePractice.yearlyRanges,
+      daily: timePracticeData.dailyRanges,
+      weekly: timePracticeData.weeklyRanges,
+      monthly: timePracticeData.monthlyRanges,
+      yearly: timePracticeData.yearlyRanges,
     };
-  }, [userData.timePractice]);
+  }, []);
 
   const activeRanges = rangesByPeriod[activePeriod];
   const activeRange = activeRanges.find((range) => range.id === selectedRangeIds[activePeriod]) ??
@@ -123,7 +115,6 @@ export default function TimePractice() {
       ...prev,
       [activePeriod]: rangeId,
     }));
-    setPickerOpen(false);
   };
 
   const renderRangeList = (ranges: TimePracticeRange[]) => (
@@ -194,7 +185,12 @@ export default function TimePractice() {
               <Ionicons name="calendar" size={20} color={Colors.octonary.DEFAULT} />
             </Pressable>
           </View>
-          <Text style={styles.minutesLabel}>minutes</Text>
+          <Text style={styles.minutesLabel}>
+            {activePeriod === "daily" && "minutes per day"}
+            {activePeriod === "weekly" && "minutes per week"}
+            {activePeriod === "monthly" && "minutes per month"}
+            {activePeriod === "yearly" && "minutes per year"}
+          </Text>
           <Svg width={chartWidth} height={170}>
             {[40, 80, 120].map((y) => (
               <Line
@@ -250,10 +246,10 @@ export default function TimePractice() {
           <View style={styles.modalCard}>
             <View style={styles.modalHeaderRow}>
               <Text style={styles.modalTitle}>
-                {activePeriod === "daily" && "Select date range"}
-                {activePeriod === "weekly" && "Select week"}
-                {activePeriod === "monthly" && "Select month"}
-                {activePeriod === "yearly" && "Select year"}
+                {activePeriod === "daily" && "Select week"}
+                {activePeriod === "weekly" && "Select month"}
+                {activePeriod === "monthly" && "Select year"}
+                {activePeriod === "yearly" && "View years"}
               </Text>
               <View style={styles.modalArrows}>
                 <Ionicons name="chevron-back" size={18} color={Colors.octonary.DEFAULT} />
@@ -262,9 +258,9 @@ export default function TimePractice() {
             </View>
 
             {activePeriod === "daily" && renderRangeList(rangesByPeriod.daily)}
-            {activePeriod === "weekly" && renderRangeList(rangesByPeriod.weekly)}
-            {activePeriod === "monthly" && renderRangeGrid(rangesByPeriod.monthly, 3)}
-            {activePeriod === "yearly" && renderRangeGrid(rangesByPeriod.yearly, 2)}
+            {activePeriod === "weekly" && renderRangeGrid(rangesByPeriod.weekly, 2)}
+            {activePeriod === "monthly" && renderRangeGrid(rangesByPeriod.monthly, 2)}
+            {activePeriod === "yearly" && renderRangeList(rangesByPeriod.yearly)}
 
             <Pressable style={styles.modalConfirm} onPress={() => setPickerOpen(false)}>
               <Text style={styles.modalConfirmText}>OK</Text>
