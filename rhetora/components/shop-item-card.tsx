@@ -11,6 +11,7 @@ type ShopItemCardProps = {
   avatarImage?: any;
   variant?: "avatar" | "frame" | "unlock";
   price: number;
+  equipped?: boolean;
   obtained?: boolean;
   dimmed?: boolean;
   onPress?: () => void;
@@ -22,6 +23,7 @@ export default function ShopItemCard({
   avatarImage,
   variant = "avatar",
   price,
+  equipped = false,
   obtained = false,
   dimmed = false,
   onPress,
@@ -40,7 +42,14 @@ export default function ShopItemCard({
       </View>
       <Text style={styles.title}>{title}</Text>
       <View style={styles.pill}>
-        {obtained ? (
+        {equipped ? (
+          <View style={styles.obtainedRow}>
+            <View style={styles.equippedIcon}>
+              <Ionicons name="star" size={13} color={Colors.shade[200]} />
+            </View>
+            <Text style={styles.obtainedText}>Equipped</Text>
+          </View>
+        ) : obtained ? (
           <View style={styles.obtainedRow}>
             <View style={styles.obtainedIcon}>
               <Ionicons name="checkmark" size={14} color={Colors.octonary.DEFAULT} />
@@ -159,5 +168,13 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     borderRadius: 16,
     backgroundColor: "rgba(0, 0, 0, 0.45)",
+  },
+  equippedIcon: {
+    width: 20,
+    height: 20,
+    borderRadius: 6,
+    backgroundColor: Colors.senary[300],
+    alignItems: "center",
+    justifyContent: "center",
   },
 });

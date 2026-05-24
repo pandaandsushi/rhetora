@@ -108,9 +108,21 @@ export default function Shop() {
     }));
   }, []);
 
-  const unlockItems = useMemo(() => {
-    return [...chapterItems, ...vrItems];
-  }, []);
+    const unlockItems = useMemo(() => {
+      return [...chapterItems, ...vrItems];
+    }, []);
+
+    const isEquipped = (item: ShopItem) => {
+    if (item.type === "avatar") {
+      return userData.equippedAvatarId === item.id;
+    }
+
+    if (item.type === "frame") {
+      return userData.equippedFrameId === item.id;
+    }
+
+    return false;
+  };
 
   const isObtained = (item: ShopItem) => {
     if (item.type === "avatar") {
@@ -186,6 +198,7 @@ export default function Shop() {
     if (selectedItem.type === "avatar") {
       updateMockUserData({ equippedAvatarId: selectedItem.id });
     }
+
     if (selectedItem.type === "frame") {
       updateMockUserData({ equippedFrameId: selectedItem.id });
     }
@@ -197,6 +210,10 @@ export default function Shop() {
   const openConfirm = (item: ShopItem) => {
     setSelectedItem(item);
     setPurchaseError("");
+
+    if (isEquipped(item)) {
+      return;
+    }
 
     if (isObtained(item)) {
       setObtainedOpen(true);
@@ -272,8 +289,9 @@ export default function Shop() {
                 title={item.title}
                 image={item.image}
                 price={item.price}
+                equipped={isEquipped(item)}
                 obtained={isObtained(item)}
-                dimmed={isObtained(item)}
+                dimmed={isObtained(item) || isEquipped(item)}
                 variant={item.type === "frame" ? "frame" : "unlock"}
                 avatarImage={item.type === "frame" ? equippedAvatar?.image : undefined}
                 onPress={() => openConfirm(item)}
