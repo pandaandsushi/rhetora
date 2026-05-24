@@ -67,6 +67,7 @@ export default function FeedbackShare() {
   const [hideName, setHideName] = useState(false);
   const [hideFeedback, setHideFeedback] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState("Post created successfully");
 
   const recordings = useMemo(() => getMockUserData().recordings, []);
 
@@ -104,6 +105,7 @@ export default function FeedbackShare() {
       peerFeedbackPosts: [nextPost, ...currentUser.peerFeedbackPosts],
     });
 
+    setToastMessage("Post created successfully");
     setToastVisible(true);
     setTimeout(() => {
       setToastVisible(false);

@@ -39,6 +39,7 @@ export default function Feedback() {
   const [activeTab, setActiveTab] = useState<"explore" | "my-posts">("explore");
   const [userData, setUserData] = useState(getMockUserData());
   const [ratingOpen, setRatingOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("Successfully uploaded feedback");
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [ratings, setRatings] = useState({
     structure: 0,
@@ -48,6 +49,7 @@ export default function Feedback() {
     confidence: 0,
   });
   const [comment, setComment] = useState("");
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [toastVisible, setToastVisible] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
   const [commentsPostId, setCommentsPostId] = useState<string | null>(null);
@@ -99,6 +101,55 @@ export default function Feedback() {
     return userData.peerFeedbackEntries.filter((entry) => entry.postId === postId);
   };
   
+  const handleEditPost = () => {
+    if (!menuPostId) {
+      return;
+    }
+
+    setMenuOpen(false);
+
+    router.push({
+      pathname: "/feedback-share",
+      params: {
+        mode: "edit",
+        postId: menuPostId,
+      },
+    });
+  };
+
+  const handleDeletePost = () => {
+    if (!menuPostId) {
+      return;
+    }
+
+    setMenuOpen(false);
+    setDeleteConfirmOpen(true);
+  };
+
+  const confirmDeletePost = () => {
+    if (!menuPostId) {
+      return;
+    }
+
+    const currentUser = getMockUserData();
+
+    updateMockUserData({
+      peerFeedbackPosts: currentUser.peerFeedbackPosts.filter(
+        (post) => post.id !== menuPostId
+      ),
+      peerFeedbackEntries: currentUser.peerFeedbackEntries.filter(
+        (entry) => entry.postId !== menuPostId
+      ),
+    });
+
+    setDeleteConfirmOpen(false);
+    setMenuPostId(null);
+    setToastMessage("Post deleted successfully");
+    setToastVisible(true);
+
+    setTimeout(() => setToastVisible(false), 2000);
+  };
+
   const visiblePosts = useMemo(() => {
     const basePosts =
       activeTab === "my-posts"
@@ -397,6 +448,7 @@ export default function Feedback() {
                     peerFeedbackEntries: [...currentUser.peerFeedbackEntries, nextEntry],
                   });
                   setRatingOpen(false);
+                  setToastMessage("Feedback submitted successfully");
                   setToastVisible(true);
                   setTimeout(() => setToastVisible(false), 2000);
                 }}
@@ -501,10 +553,11 @@ export default function Feedback() {
         <View style={styles.modalOverlay}>
           <Pressable style={styles.modalBackdrop} onPress={() => setMenuOpen(false)} />
           <View style={styles.menuSheet}>
-            <Pressable style={styles.menuItem}>
+            <Pressable style={styles.menuItem} onPress={handleEditPost}>
               <Text style={styles.menuText}>Edit Post</Text>
             </Pressable>
-            <Pressable style={styles.menuItem}>
+
+            <Pressable style={styles.menuItem} onPress={handleDeletePost}>
               <Text style={styles.menuTextDanger}>Delete Post</Text>
             </Pressable>
             <Pressable style={styles.menuItem} onPress={() => setMenuOpen(false)}>
@@ -644,9 +697,40 @@ export default function Feedback() {
           </View>
         </View>
       )}
+
+      {deleteConfirmOpen && (
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Delete this post?</Text>
+
+            <Text style={styles.deleteMessage}>
+              This post and its received feedback will be removed from Peer Feedback.
+            </Text>
+
+            <View style={styles.modalActions}>
+              <Pressable
+                style={[styles.modalButton, styles.modalButtonGhost]}
+                onPress={() => {
+                  setDeleteConfirmOpen(false);
+                  setMenuPostId(null);
+                }}
+              >
+                <Text style={styles.modalGhostText}>Cancel</Text>
+              </Pressable>
+
+              <Pressable
+                style={[styles.modalButton, styles.deleteButton]}
+                onPress={confirmDeletePost}
+              >
+                <Text style={styles.modalConfirmText}>Delete</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      )}
       <Toast
         visible={toastVisible}
-        message="Successfully uploaded feedback"
+        message={toastMessage}
         variant="success"
       />
     </ImageBackground>
@@ -1158,5 +1242,16 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     alignItems: "center",
     marginTop: -12,
+  },
+  deleteMessage: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 20,
+    textAlign: "center",
+  },
+
+  deleteButton: {
+    backgroundColor: Colors.error[500],
   },
 });
