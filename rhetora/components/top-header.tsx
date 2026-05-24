@@ -23,37 +23,40 @@ export default function TopHeader({
 
   return (
     <View style={[styles.header, isSolid && styles.headerSolid]}>
-      <Pressable
-        onPress={onBack}
-        style={[
-          styles.backButton,
-          isSolid ? styles.backButtonSolid : styles.backButtonTransparent,
-        ]}
-        hitSlop={10}
-        disabled={!onBack}
-      >
-        <Ionicons name="chevron-back" size={24} color={Colors.shade[200]} />
-      </Pressable>
-      
-      <View style={styles.textContainer}>
-        <Text
+      <View style={styles.leftGroup}>
+        <Pressable
+          onPress={onBack}
           style={[
-            styles.headerTitle,
-            isSolid ? styles.textSolid : styles.textTransparent,
+            styles.backButton,
+            isSolid ? styles.backButtonSolid : styles.backButtonTransparent,
           ]}
+          hitSlop={10}
+          disabled={!onBack}
         >
-          {title}
-        </Text>
-        {description && (
+          <Ionicons name="chevron-back" size={24} color={Colors.shade[200]} />
+        </Pressable>
+
+        <View style={styles.textContainer}>
           <Text
             style={[
-              styles.headerDescription,
+              styles.headerTitle,
               isSolid ? styles.textSolid : styles.textTransparent,
             ]}
           >
-            {description}
+            {title}
           </Text>
-        )}
+
+          {description && (
+            <Text
+              style={[
+                styles.headerDescription,
+                isSolid ? styles.textSolid : styles.textTransparent,
+              ]}
+            >
+              {description}
+            </Text>
+          )}
+        </View>
       </View>
 
       {rightElement && (
@@ -69,10 +72,28 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     paddingTop: 40,
     paddingBottom: 20,
     paddingHorizontal: 30,
     gap: 16,
+  },
+  leftGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    flex: 1,
+  },
+
+  textContainer: {
+    flex: 1,
+    justifyContent: "center",
+  },
+
+  rightElementContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginLeft: 12,
   },
   headerSolid: {
     backgroundColor: Colors.senary[300],
@@ -90,10 +111,6 @@ const styles = StyleSheet.create({
   backButtonTransparent: {
     backgroundColor: Colors.senary[300],
   },
-  textContainer: {
-    flex: 1,
-    justifyContent: "center",
-  },
   headerTitle: {
     fontFamily: "Quicksand-Bold",
     fontSize: 18,
@@ -108,9 +125,5 @@ const styles = StyleSheet.create({
   },
   textTransparent: {
     color: Colors.octonary.DEFAULT,
-  },
-  rightElementContainer: {
-    justifyContent: "center",
-    alignItems: "center",
   },
 });

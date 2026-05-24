@@ -125,8 +125,8 @@ const styles = StyleSheet.create({
   },
   frameImage: {
     position: "absolute",
-    width: 68,
-    height: 68,
+    width: 75,
+    height: 75,
     resizeMode: "contain",
   },
   headerText: {

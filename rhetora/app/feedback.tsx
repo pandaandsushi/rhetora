@@ -710,7 +710,6 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.shade[200],
   },
   safeArea: {
-    paddingHorizontal: 20,
     paddingVertical: 10,
   },
   addButton: {
@@ -722,6 +721,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   tabRow: {
+    paddingHorizontal: 20,
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
