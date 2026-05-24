@@ -129,8 +129,8 @@ const mockRecordings: Recording[] = [
     id: "rec-6",
     title: "Recording 2026-04-20",
     dateLabel: "2026-04-20",
-    mode: "Storytelling Practice",
-    thumbnail: require("../assets/images/logorhetoraonly.png"),
+    mode: "VR Mode",
+    thumbnail: require("../assets/images/vr/podium.png"),
     hasVideo: true,
   },
   {

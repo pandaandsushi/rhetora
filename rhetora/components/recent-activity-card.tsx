@@ -1,26 +1,27 @@
-import { StyleSheet, Text, View } from "react-native";
-
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Colors } from "../constants/colors";
 
 type RecentActivityCardProps = {
   title: string;
   subtitle: string;
   timeLabel: string;
+  onPress?: () => void;
 };
 
 export default function RecentActivityCard({
   title,
   subtitle,
   timeLabel,
+  onPress,
 }: RecentActivityCardProps) {
   return (
-    <View style={styles.card}>
+    <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.body}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
       <Text style={styles.time}>{timeLabel}</Text>
-    </View>
+    </Pressable>
   );
 }
 

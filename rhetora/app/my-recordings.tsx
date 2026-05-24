@@ -9,6 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { getEvaluationRouteByMode } from "../utils/get-evaluation-route";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
@@ -119,40 +120,6 @@ export default function MyRecordings() {
     setSelectedDateRange(value);
   };
 
-  const getRecordingRoute = (recording: Recording) => {
-  const normalizedMode = recording.mode.toLowerCase();
-
-  if (normalizedMode.includes("storytelling")) {
-    return "/storytelling-evaluation";
-  }
-
-  if (normalizedMode.includes("story mode")) {
-    return "/story-mode-evaluation";
-  }
-
-  if (normalizedMode.includes("pitch")) {
-    return "/pitch-lab-evaluation";
-  }
-
-  if (normalizedMode.includes("filler")) {
-    return "/filler-free-evaluation";
-  }
-
-  return "/home";
-};
-
-  const handleRecordingPress = (recording: Recording) => {
-    if (selectMode) {
-      router.push({
-        pathname: "/feedback-share",
-        params: { recordingId: recording.id },
-      });
-      return;
-    }
-
-    router.push(getRecordingRoute(recording) as any);
-  };
-
   return (
     <ImageBackground source={bgImage} style={styles.screen} resizeMode="cover">
       <SafeAreaView style={styles.safeArea}>
@@ -203,7 +170,7 @@ export default function MyRecordings() {
                   thumbnail={recording.thumbnail}
                   hasVideo={recording.hasVideo}
                   selected={recording.id === selectedRecordingId}
-                  onPress={() => handleRecordingPress(recording)}
+                  onPress={() => router.push(getRecordingRoute(recording) as any)}
                 />
               ))}
             </View>

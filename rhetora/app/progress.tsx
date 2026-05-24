@@ -10,6 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
+import { getEvaluationRouteByMode } from "../utils/get-evaluation-route";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Circle, Line, Path } from "react-native-svg";
 
@@ -58,14 +59,14 @@ const dashboardData = {
     },
     {
       id: "recent-2",
-      title: "Chapter 1-1",
-      subtitle: "Story Mode",
+      title: "Startup Pitch",
+      subtitle: "The Pitch Lab",
       timeLabel: "Today 12:10",
     },
     {
       id: "recent-3",
-      title: "Impromptu Sprint",
-      subtitle: "Casual Mode",
+      title: "Reduce Filler Words",
+      subtitle: "Filler-Free",
       timeLabel: "Yesterday 12:10",
     },
   ],
@@ -264,6 +265,7 @@ export default function Progress() {
                   title={item.title}
                   subtitle={item.subtitle}
                   timeLabel={item.timeLabel}
+                  onPress={() => router.push(getEvaluationRouteByMode(item.subtitle) as any)}
                 />
               ))}
             </View>

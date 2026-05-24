@@ -1,7 +1,7 @@
 import { ImageBackground, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
+import { getEvaluationRouteByMode } from "../utils/get-evaluation-route";
 import TopHeader from "../components/top-header";
 import NavBar from "../components/nav-bar";
 import RecentActivityCard from "../components/recent-activity-card";
@@ -19,43 +19,43 @@ const recentActivityData = {
     },
     {
       id: "today-2",
-      title: "Chapter 1-1",
-      subtitle: "Story Mode",
+      title: "Product Idea Pitch",
+      subtitle: "The Pitch Lab",
       timeLabel: "Today 12:10",
     },
   ],
   yesterday: [
     {
       id: "yesterday-1",
-      title: "Impromptu Sprint",
-      subtitle: "Casual Mode",
+      title: "Filler Word Practice",
+      subtitle: "Filler-Free",
       timeLabel: "Yesterday 12:10",
     },
     {
       id: "yesterday-2",
-      title: "Impromptu Sprint",
-      subtitle: "Casual Mode",
+      title: "Fantasy Story",
+      subtitle: "Storytelling Practice",
       timeLabel: "Yesterday 12:10",
     },
   ],
   earlier: [
     {
       id: "earlier-1",
-      title: "Impromptu Sprint",
-      subtitle: "Casual Mode",
-      timeLabel: "Yesterday 12:10",
+      title: "Podium Speech",
+      subtitle: "VR Mode",
+      timeLabel: "Last Wednesday 12:10",
     },
     {
       id: "earlier-2",
-      title: "Impromptu Sprint",
-      subtitle: "Casual Mode",
-      timeLabel: "Yesterday 12:10",
+      title: "Chapter 1-1",
+      subtitle: "Story Mode",
+      timeLabel: "Last Tuesday 12:10",
     },
     {
       id: "earlier-3",
-      title: "Impromptu Sprint",
-      subtitle: "Casual Mode",
-      timeLabel: "Yesterday 12:10",
+      title: "Personal Pitch",
+      subtitle: "The Pitch Lab",
+      timeLabel: "Last Monday 12:10",
     },
   ],
 };
@@ -78,6 +78,7 @@ export default function RecentActivity() {
               title={item.title}
               subtitle={item.subtitle}
               timeLabel={item.timeLabel}
+              onPress={() => router.push(getEvaluationRouteByMode(item.subtitle) as any)}
             />
           ))}
         </View>
