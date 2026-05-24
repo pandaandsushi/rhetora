@@ -252,7 +252,7 @@ export default function Feedback() {
               frameImage={frame?.image}
               videoImage={postVideoImage}
               name={post.isMine ? "You" : post.displayName}
-              titleLabel={title.label}
+              title={title}
               message={post.message}
               tag={tagLabels[post.tag]}
               dateLabel={post.dateLabel}

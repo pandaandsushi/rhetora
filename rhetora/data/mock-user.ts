@@ -132,11 +132,11 @@ const mockFeedbackPosts: PeerFeedbackPost[] = [
   },
   {
     id: "post-2",
-    avatarId: "sad-doggo",
+    avatarId: "future",
     frameId: "happy-holiday",
     name: "Jenna Rose",
     hideName: true,
-    titleId: "sweet-victory-spring-2026",
+    titleId: "real-life-scenario",
     message: "Practicing story mode. Feedback is welcome!",
     tag: "storymode",
     dateLabel: "May 16, 2026",

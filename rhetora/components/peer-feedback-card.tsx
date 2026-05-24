@@ -1,6 +1,7 @@
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
+import TitlePill from "../components/title-pill";
+import type { TitleItem } from "../constants/titles";
 import { Colors } from "../constants/colors";
 
 type PeerFeedbackCardProps = {
@@ -8,7 +9,7 @@ type PeerFeedbackCardProps = {
   frameImage?: any;
   videoImage: any;
   name: string;
-  titleLabel: string;
+  title: TitleItem;
   message: string;
   tag: string;
   dateLabel: string;
@@ -26,7 +27,7 @@ export default function PeerFeedbackCard({
   frameImage,
   videoImage,
   name,
-  titleLabel,
+  title,
   message,
   tag,
   dateLabel,
@@ -47,10 +48,7 @@ export default function PeerFeedbackCard({
         </View>
         <View style={styles.headerText}>
           <Text style={styles.nameText}>{name}</Text>
-          <View style={styles.titlePill}>
-            <Ionicons name="trophy" size={14} color={Colors.warning[400]} />
-            <Text style={styles.titleText}>{titleLabel}</Text>
-          </View>
+          <TitlePill title={title} size="sm" />
         </View>
         {showMenu && (
           <Pressable style={styles.menuButton} onPress={onMenuPress}>
@@ -142,23 +140,6 @@ const styles = StyleSheet.create({
   nameText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 18,
-    color: Colors.octonary.DEFAULT,
-  },
-  titlePill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    alignSelf: "flex-start",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: Colors.octonary.DEFAULT,
-    backgroundColor: Colors.warning[200],
-  },
-  titleText: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 12,
     color: Colors.octonary.DEFAULT,
   },
   message: {
