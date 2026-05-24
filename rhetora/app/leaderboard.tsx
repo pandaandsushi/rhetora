@@ -95,7 +95,7 @@ export default function Leaderboard() {
   const [titleVisible, setTitleVisible] = useState(false);
   const [tutorialVisible, setTutorialVisible] = useState(false);
   const rewardAmount = 160;
-  const selectedTitle = titleList[1];
+  const selectedTitle = titleList[3];
   useEffect(() => {
     setRewardStep("congrats");
   }, []);
