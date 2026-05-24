@@ -88,7 +88,6 @@ const styles = StyleSheet.create({
   previewWrap: {
     width: 105,
     maxHeight: 90,
-    borderRadius: 43,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
