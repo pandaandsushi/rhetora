@@ -29,7 +29,7 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "@viro-community/react-viro",
+      "@reactvision/react-viro",
       "expo-router",
       [
         "expo-splash-screen",

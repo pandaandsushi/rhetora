@@ -3,13 +3,12 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { Audio } from "expo-av";
-import * as FileSystem from "expo-file-system/legacy";
 import {
   ViroAmbientLight,
   Viro360Image,
   ViroScene,
   ViroVRSceneNavigator,
-} from "@viro-community/react-viro";
+} from "@reactvision/react-viro";
 
 type ViroSceneProps = {
   sceneNavigator: {
