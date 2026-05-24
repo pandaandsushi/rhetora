@@ -537,6 +537,7 @@ export default function Profile() {
         <View style={styles.editOverlay}>
           <Pressable style={styles.editBackdrop} onPress={() => setMediaDetail(null)} />
           <View style={styles.mediaDetailCard}>
+            <View style={styles.mediaDetailPreview}>
             <ProfileMediaCard
               title={
                 mediaDetail.type === "avatar"
@@ -562,6 +563,7 @@ export default function Profile() {
                 ? (avatarList.find((item) => item.id === mediaDetail.id)?.description ?? "")
                 : (frameList.find((item) => item.id === mediaDetail.id)?.description ?? "")}
             </Text>
+            </View>
             <View style={styles.mediaDetailActions}>
               <Pressable
                 style={[styles.mediaDetailButton, styles.mediaDetailCancel]}
@@ -680,9 +682,6 @@ const styles = StyleSheet.create({
     borderRadius: 70,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 2,
-    borderColor: Colors.octonary.DEFAULT,
-    backgroundColor: Colors.shade[200],
   },
   avatarImage: {
     width: 126,
@@ -691,8 +690,8 @@ const styles = StyleSheet.create({
   },
   avatarFrame: {
     position: "absolute",
-    width: 150,
-    height: 150,
+    width: 170,
+    height: 170,
     resizeMode: "contain",
   },
   avatarEdit: {
@@ -1156,6 +1155,10 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
     alignItems: "center",
     gap: 12,
+  },
+  mediaDetailPreview: {
+    gap:4,
+    alignItems: "center",
   },
   mediaDetailText: {
     fontFamily: "Quicksand-Bold",
