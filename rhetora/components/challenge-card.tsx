@@ -14,6 +14,7 @@ type ChallengeCardProps = {
   claimable?: boolean;
   claimed?: boolean;
   onClaim?: () => void;
+  onNavigate?: () => void;
 };
 
 export default function ChallengeCard({
@@ -24,6 +25,7 @@ export default function ChallengeCard({
   claimable = false,
   claimed = false,
   onClaim,
+  onNavigate,
 }: ChallengeCardProps) {
   const progress = total > 0 ? current / total : 0;
   const showGift = claimable && !claimed;
@@ -58,13 +60,13 @@ export default function ChallengeCard({
           <Ionicons name="checkmark" size={20} color={Colors.octonary.DEFAULT} />
         </View>
       ) : (
-        <View style={styles.chevronWrap}>
+        <Pressable style={styles.chevronWrap} onPress={onNavigate} hitSlop={10}>
           <Ionicons
             name="chevron-forward"
             size={20}
             color={Colors.octonary.DEFAULT}
           />
-        </View>
+        </Pressable>
       )}
 
       {claimed && <View style={styles.overlay} pointerEvents="none" />}

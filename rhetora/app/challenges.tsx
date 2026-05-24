@@ -28,6 +28,7 @@ type Challenge = {
   current: number;
   total: number;
   coinValue: number;
+  route: string;
 };
 
 const dailyChallenges: Challenge[] = [
@@ -37,6 +38,7 @@ const dailyChallenges: Challenge[] = [
     current: 1,
     total: 1,
     coinValue: 160,
+    route: "/progress",
   },
   {
     id: "daily-2",
@@ -44,6 +46,7 @@ const dailyChallenges: Challenge[] = [
     current: 2,
     total: 2,
     coinValue: 160,
+    route: "/casual-mode",
   },
   {
     id: "daily-3",
@@ -51,6 +54,7 @@ const dailyChallenges: Challenge[] = [
     current: 1,
     total: 3,
     coinValue: 160,
+    route: "/feedback",
   },
 ];
 
@@ -61,6 +65,7 @@ const weeklyChallenges: Challenge[] = [
     current: 1,
     total: 3,
     coinValue: 160,
+    route: "/casual-mode",
   },
   {
     id: "weekly-2",
@@ -68,6 +73,7 @@ const weeklyChallenges: Challenge[] = [
     current: 1,
     total: 2,
     coinValue: 160,
+    route: "/casual-mode",
   },
   {
     id: "weekly-3",
@@ -75,6 +81,7 @@ const weeklyChallenges: Challenge[] = [
     current: 1,
     total: 3,
     coinValue: 160,
+    route: "/feedback",
   },
 ];
 
@@ -174,6 +181,7 @@ export default function Challenges() {
                 claimable={claimable}
                 claimed={claimedIds.includes(item.id)}
                 onClaim={() => claim(item.id, item.coinValue)}
+                onNavigate={() => router.push(item.route as any)}
               />
             );
           })}
@@ -201,6 +209,7 @@ export default function Challenges() {
                 claimable={claimable}
                 claimed={claimedIds.includes(item.id)}
                 onClaim={() => claim(item.id, item.coinValue)}
+                onNavigate={() => router.push(item.route as any)}
               />
             );
           })}
