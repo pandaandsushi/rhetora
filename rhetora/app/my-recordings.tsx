@@ -9,7 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { getEvaluationRouteByMode } from "../utils/get-evaluation-route";
+import { getEvaluationRouteByMode } from "./utils/get-evaluation-route";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
@@ -170,7 +170,7 @@ export default function MyRecordings() {
                   thumbnail={recording.thumbnail}
                   hasVideo={recording.hasVideo}
                   selected={recording.id === selectedRecordingId}
-                  onPress={() => router.push(getRecordingRoute(recording) as any)}
+                  onPress={() => router.push(getEvaluationRouteByMode(recording.mode) as any)}
                 />
               ))}
             </View>

@@ -1,7 +1,7 @@
 import { ImageBackground, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { getEvaluationRouteByMode } from "../utils/get-evaluation-route";
+import { getEvaluationRouteByMode } from "./utils/get-evaluation-route";
 import TopHeader from "../components/top-header";
 import NavBar from "../components/nav-bar";
 import RecentActivityCard from "../components/recent-activity-card";

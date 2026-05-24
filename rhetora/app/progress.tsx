@@ -10,7 +10,7 @@ import {
   Text,
   View,
 } from "react-native";
-import { getEvaluationRouteByMode } from "../utils/get-evaluation-route";
+import { getEvaluationRouteByMode } from "./utils/get-evaluation-route";
 import { Ionicons } from "@expo/vector-icons";
 import Svg, { Circle, Line, Path } from "react-native-svg";
 
@@ -193,7 +193,9 @@ export default function Progress() {
 
             <View style={styles.sectionHeaderRow}>
               <Text style={styles.sectionTitle}>Skill Map</Text>
-              <Ionicons name="chevron-forward" size={20} color={Colors.octonary.DEFAULT} />
+              <Pressable onPress={() => router.push("/skill-progress")}>
+                <Ionicons name="chevron-forward" size={20} color={Colors.octonary.DEFAULT} />
+              </Pressable>
             </View>
 
             <View style={styles.chartCard}>
