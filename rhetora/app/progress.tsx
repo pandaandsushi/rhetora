@@ -21,7 +21,7 @@ import { Colors } from "../constants/colors";
 import { avatarList } from "../constants/avatars";
 import { getMockUserData, subscribeToMockUser } from "../data/mock-user";
 import { useRouter } from "expo-router";
-
+import { frameList } from "../constants/frames";
 const bgImage = require("../assets/images/bg-motif.png");
 const coinImage = require("../assets/images/shop/coin.png");
 const micImage = require("../assets/images/dashboard/db-microphone.png");
@@ -126,6 +126,9 @@ export default function Progress() {
 
   const equippedAvatar =
     avatarList.find((item) => item.id === userData.equippedAvatarId) ?? avatarList[0];
+  
+  const equippedFrame =
+    frameList.find((item) => item.id === userData.equippedFrameId) ?? frameList[0];
 
   const radarValues = useMemo(
     () => dashboardData.skillMap.values.map((value) => value * 100),
@@ -147,7 +150,13 @@ export default function Progress() {
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
             <View style={styles.headerRow}>
               <View style={styles.profileRow}>
-                <Image source={equippedAvatar?.image} style={styles.avatar} />
+                <View style={styles.avatarWrap}>
+                  <Image source={equippedAvatar?.image} style={styles.avatar} />
+
+                  {equippedFrame && (
+                    <Image source={equippedFrame.image} style={styles.avatarFrame} />
+                  )}
+                </View>
                 <View>
                   <Text style={styles.greeting}>Good Morning!</Text>
                   <Text style={styles.name}>{userData.profile.fullName}</Text>
@@ -295,7 +304,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingTop: 60,
     paddingBottom: 130,
     gap: 20,
   },
@@ -309,12 +318,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
+    avatarWrap: {
+    width: 58,
+    height: 58,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    borderWidth: 2,
-    borderColor: Colors.octonary.DEFAULT,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+
+  avatarFrame: {
+    position: "absolute",
+    width: 64,
+    height: 64,
+    resizeMode: "contain",
   },
   greeting: {
     fontFamily: "AlbertSans-Regular",

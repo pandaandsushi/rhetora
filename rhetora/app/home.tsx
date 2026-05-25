@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-
+import { frameList } from "../constants/frames";
 import NavBar from "../components/nav-bar";
 import ProgressBar from "../components/progress-bar";
 import { Colors } from "../constants/colors";
@@ -67,6 +67,8 @@ export default function Home() {
   const equippedAvatar =
     avatarList.find((item) => item.id === userData.equippedAvatarId) ?? avatarList[0];
 
+  const equippedFrame =
+    frameList.find((item) => item.id === userData.equippedFrameId) ?? frameList[0];
   const completedCount = useMemo(() => {
     return challengePreview.filter((item) => item.current >= item.total).length;
   }, []);
@@ -86,7 +88,13 @@ export default function Home() {
           >
             <View style={styles.headerRow}>
               <View style={styles.profileRow}>
-                <Image source={equippedAvatar?.image} style={styles.avatar} />
+                <View style={styles.avatarWrap}>
+                  <Image source={equippedAvatar?.image} style={styles.avatar} />
+
+                  {equippedFrame && (
+                    <Image source={equippedFrame.image} style={styles.avatarFrame} />
+                  )}
+                </View>
                 <View>
                   <Text style={styles.greeting}>Good Morning!</Text>
                   <Text style={styles.name}>{userData.profile.fullName}</Text>
@@ -311,12 +319,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
+  avatarWrap: {
+    width: 58,
+    height: 58,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+
   avatar: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    borderWidth: 2,
-    borderColor: Colors.octonary.DEFAULT,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+  },
+
+  avatarFrame: {
+    position: "absolute",
+    width: 64,
+    height: 64,
+    resizeMode: "contain",
   },
   greeting: {
     fontFamily: "AlbertSans-Regular",
