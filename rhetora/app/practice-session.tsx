@@ -174,10 +174,38 @@ export default function PracticeSession() {
     }
   };
 
-  const handleRestart = () => {
-    setRemainingSeconds(initialTotalSeconds);
-    setIsPaused(false);
+  const discardRecording = async () => {
+    if (!recordingRef.current) {
+      return;
+    }
+
+    try {
+      await recordingRef.current.stopAndUnloadAsync();
+    } catch (err) {
+      console.warn("Failed to discard recording", err);
+    } finally {
+      recordingRef.current = null;
+    }
+  };
+
+  const handleRestart = async () => {
+    if (isProcessing) {
+      return;
+    }
+
     setRestartVisible(false);
+    setIsPaused(true);
+
+    await discardRecording();
+
+    submitRef.current = false;
+    setTimeUpVisible(false);
+    setFinishVisible(false);
+    setRemainingSeconds(initialTotalSeconds);
+
+    await startRecording();
+
+    setIsPaused(false);
   };
 
   const handleFinish = () => {

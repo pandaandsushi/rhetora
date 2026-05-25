@@ -17,6 +17,7 @@ import { Colors } from "../constants/colors";
 import TopHeader from "../components/top-header";
 import storyModeFallback from "./story-mode-fallback.json";
 
+const confettiImage = require("../assets/images/confetti.png");
 const bgImage = require("../assets/images/bg-motif.png");
 const timeToFocusBadge = require("../assets/images/badge/5.png");
 const mediaImage = require("../assets/images/storymode/maelle.png");
@@ -283,6 +284,11 @@ export default function StoryModeEvaluation() {
         onRequestClose={() => setShowBadgeModal(false)}
       >
         <View style={styles.modalOverlay}>
+          <Image
+            source={confettiImage}
+            style={styles.confetti}
+            pointerEvents="none"
+          />
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>You've just earned a new badge!</Text>
             <View style={styles.modalBadgeWrap}>
@@ -652,5 +658,15 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
     color: Colors.shade[200],
+  },
+  confetti: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
 });
