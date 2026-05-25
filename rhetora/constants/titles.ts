@@ -117,4 +117,22 @@ export const titleList: TitleItem[] = [
     borderColor: "#000000",
     requirements: "Complete All 6 Challenges in a day, 7 days in a row",
   },
+  {
+    id: "streak-master",
+    label: "Streak Master",
+    illustration: require("../assets/images/title/9.png"),
+    gradientColors: ["#ffedcb", "#fabe9d"],
+    textColor: "#1B1B1B",
+    borderColor: "#000000",
+    requirements: "Reach 20 days streak",
+  },
+  {
+    id: "super-streak-master",
+    label: "Super Streak Master",
+    illustration: require("../assets/images/title/9.png"),
+    gradientColors: ["#ffffff", "#f6d37a"],
+    textColor: "#1B1B1B",
+    borderColor: "#000000",
+    requirements: "Reach 100 days streak",
+  }
 ];
