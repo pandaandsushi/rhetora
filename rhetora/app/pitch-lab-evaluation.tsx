@@ -1,4 +1,4 @@
-import { ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ImageBackground, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useMemo, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,7 +8,7 @@ import { Colors } from "../constants/colors";
 import TopHeader from "../components/top-header";
 import SkillRadar from "../components/skill-radar";
 import pitchFallback from "./pitchlab-fallback.json";
-
+const mediaImage = require("../assets/images/storymode/maelle.png");
 const bgImage = require("../assets/images/bg-motif.png");
 
 type PitchEvaluation = typeof pitchFallback;
@@ -83,6 +83,10 @@ export default function PitchLabEvaluation() {
         <Text style={styles.promptInstruction}>{safeEvaluation.prompt.instruction}</Text>
 
         <View style={styles.mediaCard}>
+          <Image source={mediaImage} style={styles.mediaImage} />
+
+          <View style={styles.mediaOverlay} />
+
           <View style={styles.mediaPlayButton}>
             <Ionicons name="play" size={26} color={Colors.shade[200]} />
           </View>
@@ -223,14 +227,28 @@ const styles = StyleSheet.create({
   mediaCard: {
     height: 180,
     borderRadius: 18,
-    backgroundColor: "rgba(0, 0, 0, 0.25)",
+    backgroundColor: "rgba(0,0,0,0.20)",
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
+
+  mediaImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+
+  mediaOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.25)",
+  },
+
   mediaPlayButton: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: Colors.senary[300],
     alignItems: "center",
     justifyContent: "center",

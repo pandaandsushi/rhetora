@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   ImageBackground,
+  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -16,7 +17,7 @@ import { Colors } from "../constants/colors";
 import TopHeader from "../components/top-header";
 import SkillRadar from "../components/skill-radar";
 import fillerFreeFallback from "./filler-free-fallback.json";
-
+const mediaImage = require("../assets/images/storymode/maelle.png");
 const bgImage = require("../assets/images/bg-motif.png");
 
 type FillerCount = Record<string, number>;
@@ -161,6 +162,10 @@ export default function FillerFreeEvaluation() {
 
         {/* Video placeholder */}
         <View style={styles.mediaCard}>
+          <Image source={mediaImage} style={styles.mediaImage} />
+
+          <View style={styles.mediaOverlay} />
+
           <View style={styles.mediaPlayButton}>
             <Ionicons name="play" size={26} color={Colors.shade[200]} />
           </View>
@@ -332,16 +337,30 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   mediaCard: {
-    height: 160,
+    height: 180,
     borderRadius: 18,
     backgroundColor: "rgba(0,0,0,0.20)",
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
+
+  mediaImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+
+  mediaOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.25)",
+  },
+
   mediaPlayButton: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     backgroundColor: Colors.senary[300],
     alignItems: "center",
     justifyContent: "center",
