@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import {
   ImageBackground,
+  Image,
+  Modal,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -16,7 +18,8 @@ import TopHeader from "../components/top-header";
 import storyModeFallback from "./story-mode-fallback.json";
 
 const bgImage = require("../assets/images/bg-motif.png");
-
+const timeToFocusBadge = require("../assets/images/badge/5.png");
+const mediaImage = require("../assets/images/storymode/maelle.png");
 type FillerCount = Record<string, number>;
 
 type Evaluation = {
@@ -91,6 +94,7 @@ export default function StoryModeEvaluation() {
   }>();
 
   const [selectedPill, setSelectedPill] = useState<string | null>(null);
+  const [showBadgeModal, setShowBadgeModal] = useState(false);
 
   const sessionData = useMemo<SessionData>(() => {
     if (!params.data) return { evaluation: storyModeFallback };
@@ -143,6 +147,10 @@ export default function StoryModeEvaluation() {
         </View>
 
         <View style={styles.mediaCard}>
+          <Image source={mediaImage} style={styles.mediaImage} />
+
+          <View style={styles.mediaOverlay} />
+
           <View style={styles.mediaPlayButton}>
             <Ionicons name="play" size={26} color={Colors.shade[200]} />
           </View>
@@ -157,7 +165,7 @@ export default function StoryModeEvaluation() {
             {evaluation.quickSummary ?? "Great effort! Review your performance below."}
           </Text>
 
-          <View style={styles.summaryCard}>
+          {/* <View style={styles.summaryCard}>
             <View style={styles.summaryStat}>
               <Text style={styles.summaryLabel}>Total Filler Words</Text>
               <Text style={styles.summaryValue}>{totalFillerWords}</Text>
@@ -170,7 +178,7 @@ export default function StoryModeEvaluation() {
                 <Text style={styles.summaryUnit}> /minute</Text>
               </Text>
             </View>
-          </View>
+          </View> */}
 
           {fillerPills.length > 0 && (
             <View style={styles.pillsSection}>
@@ -258,7 +266,7 @@ export default function StoryModeEvaluation() {
           </CollapsibleSection>
         )}
 
-        <Pressable style={styles.primaryButton} onPress={() => router.replace("/home")}>
+        <Pressable style={styles.primaryButton} onPress={() => setShowBadgeModal(true)}>
           <Text style={styles.primaryButtonText}>Okay</Text>
         </Pressable>
 
@@ -267,6 +275,53 @@ export default function StoryModeEvaluation() {
           <Text style={styles.footerBold}>My Recordings</Text>
         </Text>
       </ScrollView>
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={showBadgeModal}
+        onRequestClose={() => setShowBadgeModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>You've just earned a new badge!</Text>
+            <View style={styles.modalBadgeWrap}>
+              <View style={styles.modalBadgeImageWrap}>
+                <ImageBackground
+                  source={timeToFocusBadge}
+                  style={styles.modalBadgeImage}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text style={styles.modalBadgeName}>Time to Focus</Text>
+              <Text style={styles.modalBadgeSubtitle}>
+                Finish a Story Mode Exercise 1 time
+              </Text>
+            </View>
+
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.modalSecondaryButton}
+                onPress={() => {
+                  setShowBadgeModal(false);
+                  router.replace("/profile");
+                }}
+              >
+                <Text style={styles.modalSecondaryButtonText}>View Profile</Text>
+              </Pressable>
+              <Pressable
+                style={styles.modalPrimaryButton}
+                onPress={() => {
+                  setShowBadgeModal(false);
+                  router.replace("/home");
+                }}
+              >
+                <Text style={styles.modalPrimaryButtonText}>Cool!</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ImageBackground>
   );
 }
@@ -304,7 +359,21 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.20)",
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
+
+  mediaImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+  },
+
+  mediaOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.25)",
+  },
+
   mediaPlayButton: {
     width: 64,
     height: 64,
@@ -501,5 +570,87 @@ const styles = StyleSheet.create({
   },
   footerBold: {
     fontFamily: "AlbertSans-Bold",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.45)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  modalCard: {
+    width: "100%",
+    borderRadius: 22,
+    backgroundColor: Colors.shade[200],
+    paddingHorizontal: 22,
+    paddingVertical: 24,
+    alignItems: "center",
+    gap: 16,
+  },
+  modalTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 20,
+    color: Colors.octonary.DEFAULT,
+    textAlign: "center",
+  },
+  modalBadgeWrap: {
+    alignItems: "center",
+    gap: 8,
+  },
+  modalBadgeImageWrap: {
+    width: 170,
+    height: 140,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalBadgeImage: {
+    width: 170,
+    height: 140,
+  },
+  modalBadgeName: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+    textAlign: "center",
+  },
+  modalBadgeSubtitle: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 13,
+    color: Colors.octonary.DEFAULT,
+    textAlign: "center",
+  },
+  modalActions: {
+    width: "100%",
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 8,
+  },
+  modalSecondaryButton: {
+    flex: 1,
+    height: 50,
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.senary[300],
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.shade[200],
+  },
+  modalSecondaryButtonText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.senary[300],
+  },
+  modalPrimaryButton: {
+    flex: 1,
+    height: 50,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.senary[300],
+  },
+  modalPrimaryButtonText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.shade[200],
   },
 });
