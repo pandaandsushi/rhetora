@@ -192,6 +192,11 @@ export default function Profile() {
       textColor: Colors.neutral[500],
     };
   };
+
+  const selectedTitle = titleList.find((item) => item.id === titleDetailId);
+  const selectedTitleMeta = titleDetailId ? titleMeta.get(titleDetailId) : null;
+  const selectedTitleObtained = selectedTitleMeta?.obtained ?? false;
+  const selectedTitleIsEquipped = equippedTitleId === titleDetailId;
   return (
     <View style={styles.screen}>
         <SafeAreaView style={styles.safeArea}>
@@ -453,24 +458,44 @@ export default function Profile() {
               {titleList.find((item) => item.id === titleDetailId)?.requirements}
             </Text>
             <View style={styles.titleDetailActions}>
-              <Pressable
-                style={[styles.titleDetailButton, styles.titleDetailCancel]}
-                onPress={() => setTitleDetailId(null)}
-              >
-                <Text style={styles.titleDetailCancelText}>Cancel</Text>
-              </Pressable>
-              <Pressable
-                style={[styles.titleDetailButton, styles.titleDetailEquip]}
-                onPress={() => {
-                  const nextTitleId = titleDetailId ?? equippedTitleId;
-                  updateMockUserData({ equippedTitleId: nextTitleId });
-                  setTitleDetailId(null);
-                }}
-              >
-                <Text style={styles.titleDetailEquipText}>
-                  {equippedTitleId === titleDetailId ? "Equipped" : "Equip"}
-                </Text>
-              </Pressable>
+              {!selectedTitleObtained ? (
+                <Pressable
+                  style={[styles.titleDetailButton, styles.titleDetailEquip]}
+                  onPress={() => setTitleDetailId(null)}
+                >
+                  <Text style={styles.titleDetailEquipText}>Okay</Text>
+                </Pressable>
+              ) : (
+                <>
+                  <Pressable
+                    style={[styles.titleDetailButton, styles.titleDetailCancel]}
+                    onPress={() => setTitleDetailId(null)}
+                  >
+                    <Text style={styles.titleDetailCancelText}>Cancel</Text>
+                  </Pressable>
+
+                  <Pressable
+                    disabled={selectedTitleIsEquipped}
+                    style={[
+                      styles.titleDetailButton,
+                      styles.titleDetailEquip,
+                      selectedTitleIsEquipped && styles.titleDetailEquipDisabled,
+                    ]}
+                    onPress={() => {
+                      if (!titleDetailId || selectedTitleIsEquipped) {
+                        return;
+                      }
+
+                      updateMockUserData({ equippedTitleId: titleDetailId });
+                      setTitleDetailId(null);
+                    }}
+                  >
+                    <Text style={styles.titleDetailEquipText}>
+                      {selectedTitleIsEquipped ? "Equipped" : "Equip"}
+                    </Text>
+                  </Pressable>
+                </>
+              )}
             </View>
           </View>
         </View>
@@ -1280,5 +1305,8 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 14,
     color: Colors.shade[200],
+  },
+  titleDetailEquipDisabled: {
+    backgroundColor: Colors.neutral[300],
   },
 });
