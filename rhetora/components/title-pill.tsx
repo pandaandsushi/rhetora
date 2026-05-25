@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
   sm: {
     wrapper: {
       height: 28,
-      width: 168,
+      width: 150,
     },
     pill: {
       height: 28,

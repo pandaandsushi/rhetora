@@ -116,24 +116,23 @@ export default function Profile() {
   }, []);
 
   const sortedTitles = useMemo(() => {
-    const list = [...titleList];
-    const getMeta = (id: string) => titleMeta.get(id) ?? { obtained: false };
+  const getMeta = (id: string) => titleMeta.get(id) ?? { obtained: false };
 
-    return list.sort((a, b) => {
+  const filteredList =
+    titleSort === "obtained"
+      ? titleList.filter((title) => getMeta(title.id).obtained)
+      : [...titleList];
+
+    return filteredList.sort((a, b) => {
       const metaA = getMeta(a.id);
       const metaB = getMeta(b.id);
 
       if (titleSort === "recent") {
         const dateA = metaA.obtainedAt ?? -1;
         const dateB = metaB.obtainedAt ?? -1;
+
         if (dateA !== dateB) {
           return dateB - dateA;
-        }
-      }
-
-      if (titleSort === "obtained") {
-        if (metaA.obtained !== metaB.obtained) {
-          return metaA.obtained ? -1 : 1;
         }
       }
 
@@ -181,6 +180,18 @@ export default function Profile() {
   const equippedAvatar = avatarList.find((item) => item.id === equippedAvatarId) ?? avatarList[0];
   const equippedFrame = frameList.find((item) => item.id === equippedFrameId) ?? frameList[0];
 
+  const getDisplayTitle = (title: (typeof titleList)[number], obtained: boolean) => {
+    if (obtained) {
+      return title;
+    }
+
+    return {
+      ...title,
+      gradientColors: [Colors.neutral[200], Colors.neutral[200]],
+      borderColor: Colors.octonary.DEFAULT,
+      textColor: Colors.neutral[500],
+    };
+  };
   return (
     <View style={styles.screen}>
         <SafeAreaView style={styles.safeArea}>
@@ -401,12 +412,15 @@ export default function Profile() {
                 return (
                   <Pressable
                     key={title.id}
-                    style={[styles.titleItem, !isObtained && styles.titleItemLocked]}
+                    style={styles.titleItem}
                     onPress={() => {
                       setTitleDetailId(title.id);
                     }}
                   >
-                    <TitlePill title={title} />
+                    <TitlePill title={getDisplayTitle(title, isObtained)} />
+
+                    {!isObtained && <View style={styles.titleLockedOverlay} pointerEvents="none" />}
+
                     {isEquipped && (
                       <View style={styles.titleEquipped}>
                         <Ionicons name="checkmark" size={15} color={Colors.shade[100]} />
@@ -432,7 +446,9 @@ export default function Profile() {
               size="md"
             />
             <Text style={styles.titleDetailHeading}>Requirement:</Text>
-            <Text style={styles.titleDetailText}>Obtain 5 badges</Text>
+            <Text style={styles.titleDetailText}>
+              {titleList.find((item) => item.id === titleDetailId)?.requirements}
+            </Text>
             <View style={styles.titleDetailActions}>
               <Pressable
                 style={[styles.titleDetailButton, styles.titleDetailCancel]}
@@ -1013,20 +1029,31 @@ const styles = StyleSheet.create({
     color: Colors.octonary.DEFAULT,
   },
   titleGrid: {
+    paddingTop: 8,
     paddingBottom: 30,
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 20,
+    justifyContent: "space-between",
+    rowGap: 20,
     paddingHorizontal: 8,
   },
+
   titleItem: {
-    width: "47%",
+    width: "48%",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 6,
+    position: "relative",
   },
-  titleItemLocked: {
-    opacity: 0.35,
+
+  titleLockedOverlay: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 6,
+    bottom: 6,
+    borderRadius: 999,
+    backgroundColor: "rgba(255,255,255,0.18)",
   },
   titleEquipped: {
     position: "absolute",

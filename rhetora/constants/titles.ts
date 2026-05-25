@@ -5,6 +5,7 @@ export type TitleItem = {
   gradientColors: [string, string];
   textColor: string;
   borderColor: string;
+  requirements: string;
 };
 
 export const titleList: TitleItem[] = [
@@ -15,6 +16,7 @@ export const titleList: TitleItem[] = [
     gradientColors: ["#94f1a6", "#fffbb9"],
     textColor: "#1B1B1B",
     borderColor: "#000000",
+    requirements: "Top 3 in leaderboard Spring 2026",
   },
   {
     id: "sweet-victory-summer-2026",
@@ -23,6 +25,7 @@ export const titleList: TitleItem[] = [
     gradientColors: ["#ffc66a", "#ff946d"],
     textColor: "#1B1B1B",
     borderColor: "#000000",
+    requirements: "Top 3 in leaderboard Summer 2026",
   },
   {
     id: "sweet-victory-autumn-2026",
@@ -31,6 +34,7 @@ export const titleList: TitleItem[] = [
     gradientColors: ["#bb5446", "#ff623f"],
     textColor: "#ffffff",
     borderColor: "#000000",
+    requirements: "Top 3 in leaderboard Autumn 2026",
   },
   {
     id: "sweet-victory-winter-2026",
@@ -39,6 +43,7 @@ export const titleList: TitleItem[] = [
     gradientColors: ["#aae7ff", "#76caff"],
     textColor: "#000000",
     borderColor: "#000000",
+    requirements: "Top 3 in leaderboard Winter 2026",
   },
   {
     id: "real-life-scenario",
@@ -47,6 +52,7 @@ export const titleList: TitleItem[] = [
     gradientColors: ["#E9C8FF", "#C68EFF"],
     textColor: "#1B1B1B",
     borderColor: "#000000",
+    requirements: "Complete 1 VR Mode exercise",
   },
   {
     id: "im-focused",
@@ -55,6 +61,7 @@ export const titleList: TitleItem[] = [
     gradientColors: ["#FFD9DC", "#F7AEB5"],
     textColor: "#1B1B1B",
     borderColor: "#000000",
+    requirements: "Complete at least 1 Challenge in a day, 7 days in a row",
   },
   {
     id: "im-a-star",
@@ -63,6 +70,7 @@ export const titleList: TitleItem[] = [
     gradientColors: ["#FFF8A6", "#F3E97B"],
     textColor: "#1B1B1B",
     borderColor: "#000000",
+    requirements: "Finish Daily Challenges 50 times",
   },
   {
     id: "professional",
@@ -71,6 +79,7 @@ export const titleList: TitleItem[] = [
     gradientColors: ["#E4E8F8", "#C9CDF4"],
     textColor: "#1B1B1B",
     borderColor: "#000000",
+    requirements: "Complete 10 Story Mode exercises",
   },
   {
     id: "future-of-ai",
@@ -79,6 +88,7 @@ export const titleList: TitleItem[] = [
     gradientColors: ["#EACBFF", "#E6B7DC"],
     textColor: "#1B1B1B",
     borderColor: "#000000",
+    requirements: "Complete 20 VR Mode exercises",
   },
   {
     id: "full-of-ideas",
@@ -87,6 +97,7 @@ export const titleList: TitleItem[] = [
     gradientColors: ["#FFC58F", "#F3AE74"],
     textColor: "#1B1B1B",
     borderColor: "#000000",
+    requirements: "Complete 15 Storytelling Mode exercises",
   },
   {
     id: "dazzling-speaker",
@@ -95,5 +106,15 @@ export const titleList: TitleItem[] = [
     gradientColors: ["#F6C5F4", "#E27BE3"],
     textColor: "#1B1B1B",
     borderColor: "#000000",
+    requirements: "Complete 100 exercises",
+  },
+  {
+    id: "super-focused",
+    label: "Super Focused",
+    illustration: require("../assets/images/title/3.png"),
+    gradientColors: ["#FFD9DC", "#F7AEB5"],
+    textColor: "#1B1B1B",
+    borderColor: "#000000",
+    requirements: "Complete All 6 Challenges in a day, 7 days in a row",
   },
 ];
