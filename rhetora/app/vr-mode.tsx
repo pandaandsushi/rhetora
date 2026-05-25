@@ -90,8 +90,11 @@ export default function VrMode() {
     setTutorialIndex((prev) => prev + 1);
   };
 
-  const isUnlocked = (scenarioId: string) => userData.unlockedVrIds.includes(scenarioId);
+  const isUnlocked = (scenarioId: string) => {
+    const scenario = vrScenarios.find((item) => item.id === scenarioId);
 
+    return scenario?.price === 0 || userData.unlockedVrIds.includes(scenarioId);
+  };
   const handleScenarioPress = (scenarioId: string) => {
     if (!isUnlocked(scenarioId)) {
       setUnlockScenarioId(scenarioId);
@@ -230,7 +233,7 @@ export default function VrMode() {
               <Text style={styles.modalSubtitle}>Unlock with</Text>
               <Image source={coinImage} style={styles.modalCoin} />
               <Text style={styles.modalSubtitle}>
-                {vrScenarios.find((item) => item.id === unlockScenarioId)?.price ?? 0}
+                {vrScenarios.find((item) => item.id === unlockScenarioId)?.price ?? 0} ?
               </Text>
             </View>
             <View style={styles.modalPreview}>
