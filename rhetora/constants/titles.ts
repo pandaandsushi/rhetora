@@ -10,7 +10,7 @@ export type TitleItem = {
 export const titleList: TitleItem[] = [
   {
     id: "sweet-victory-spring-2026",
-    label: "Sweet Victory Spring 2026",
+    label: "Sweet Victory \n Spring 2026",
     illustration: require("../assets/images/title/1.png"),
     gradientColors: ["#94f1a6", "#fffbb9"],
     textColor: "#1B1B1B",
@@ -18,7 +18,7 @@ export const titleList: TitleItem[] = [
   },
   {
     id: "sweet-victory-summer-2026",
-    label: "Sweet Victory Summer 2026",
+    label: "Sweet Victory \n Summer 2026",
     illustration: require("../assets/images/title/1.png"),
     gradientColors: ["#ffc66a", "#ff946d"],
     textColor: "#1B1B1B",
@@ -26,7 +26,7 @@ export const titleList: TitleItem[] = [
   },
   {
     id: "sweet-victory-autumn-2026",
-    label: "Sweet Victory Autumn 2026",
+    label: "Sweet Victory \n Autumn 2026",
     illustration: require("../assets/images/title/1.png"),
     gradientColors: ["#bb5446", "#ff623f"],
     textColor: "#ffffff",
@@ -34,7 +34,7 @@ export const titleList: TitleItem[] = [
   },
   {
     id: "sweet-victory-winter-2026",
-    label: "Sweet Victory Winter 2026",
+    label: "Sweet Victory \n Winter 2026",
     illustration: require("../assets/images/title/1.png"),
     gradientColors: ["#aae7ff", "#76caff"],
     textColor: "#000000",

@@ -22,7 +22,7 @@ export const frameList: FrameItem[] = [
     id: "happy-holiday",
     title: "Happy Holiday",
     description: "Celebrate the season with warm cheer.",
-    image: require("../assets/images/frame/frame-3.png"),
+    image: require("../assets/images/frame/frame-1.png"),
   },
   {
     id: "rose-garden",
