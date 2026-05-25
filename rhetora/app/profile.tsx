@@ -417,7 +417,10 @@ export default function Profile() {
                       setTitleDetailId(title.id);
                     }}
                   >
-                    <TitlePill title={getDisplayTitle(title, isObtained)} />
+                    <TitlePill
+                      title={getDisplayTitle(title, isObtained)}
+                      locked={!isObtained}
+                    />
 
                     {!isObtained && <View style={styles.titleLockedOverlay} pointerEvents="none" />}
 

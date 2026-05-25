@@ -1,14 +1,19 @@
 import { Image, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-
+import { Colors } from "../constants/colors";
 import type { TitleItem } from "../constants/titles";
 
 type TitlePillProps = {
   title: TitleItem;
   size?: "sm" | "md";
+  locked?: boolean;
 };
 
-export default function TitlePill({ title, size = "sm" }: TitlePillProps) {
+export default function TitlePill({
+  title,
+  size = "sm",
+  locked = false,
+}: TitlePillProps) {
   const sizeStyles = size === "md" ? styles.md : styles.sm;
 
   return (
@@ -34,7 +39,14 @@ export default function TitlePill({ title, size = "sm" }: TitlePillProps) {
         </LinearGradient>
       </View>
       <View style={[styles.iconWrap, sizeStyles.iconWrap]}>
-        <Image source={title.illustration} style={[styles.icon, sizeStyles.icon]} />
+        <Image
+          source={title.illustration}
+          style={[
+            styles.icon,
+            sizeStyles.icon,
+            locked && styles.iconLocked,
+          ]}
+        />
       </View>
     </View>
   );
@@ -44,6 +56,9 @@ const styles = StyleSheet.create({
   wrapper: {
     position: "relative",
     width: "100%",
+  },
+  iconLocked: {
+    tintColor: Colors.neutral[400],
   },
   pill: {
     borderWidth: 2,
