@@ -245,7 +245,7 @@ export default function Home() {
             <View style={styles.sectionGroup}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Let's Practice!</Text>
-                <Pressable onPress={() => {}}>
+                <Pressable onPress={() => router.push("/practice")}>
                   <Ionicons
                     name="chevron-forward"
                     size={20}
