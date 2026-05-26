@@ -37,7 +37,7 @@ export default function ChangePassword() {
         <View style={styles.content}>
           <Text style={styles.title}>Change Password</Text>
           <Text style={styles.subtitle}>
-            Must be 8 characters, 1 number, and 1 special character
+            Must be 8 characters, 1 number, {"\n"} and 1 special character
           </Text>
 
           <View style={styles.fieldGroup}>
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   card: {
-    marginTop: -28,
+    marginTop: -35,
     backgroundColor: Colors.shade[200],
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,

@@ -120,6 +120,7 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   card: {
+    marginTop: -28,
     backgroundColor: Colors.warning[50],
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,

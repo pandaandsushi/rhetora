@@ -49,7 +49,7 @@ export default function EnterCode() {
         <View style={styles.content}>
           <Text style={styles.title}>Enter Code</Text>
           <Text style={styles.subtitle}>
-            Enter the verification code we have sent you on the email
+            Enter the verification code we have {"\n"} sent you on the email
           </Text>
 
           <View style={styles.codeRow}>
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   card: {
-    marginTop: -28,
+    marginTop: -35,
     backgroundColor: Colors.shade[200],
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
@@ -135,7 +135,9 @@ const styles = StyleSheet.create({
   codeRow: {
     marginTop: 28,
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: 16,
+    alignItems: "center",
+    justifyContent: "center",
   },
   codeBox: {
     width: 64,
