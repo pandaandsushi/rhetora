@@ -85,8 +85,7 @@ export default function PitchLab() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.heroRow}>
           <Text style={styles.heroText}>
-            Deliver a short pitch that is clear,
-            structured, & persuasive.
+            Deliver a short pitch that is clear, {"\n"} structured, & persuasive.
           </Text>
         </View>
 

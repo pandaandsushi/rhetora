@@ -45,7 +45,7 @@ export default function StoryRecap() {
           <View style={styles.statsRow}>
             <View style={styles.statItem}>
               <Ionicons name="time" size={16} color={Colors.neutral[500]} />
-              <Text style={styles.statText}>10 min(s)</Text>
+              <Text style={styles.statText}>3 min(s)</Text>
             </View>
             <View style={styles.statDivider} />
             <View style={styles.statItem}>

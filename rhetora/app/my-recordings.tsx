@@ -13,6 +13,7 @@ import { getEvaluationRouteByMode } from "./utils/get-evaluation-route";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
+import NavBar from "../components/nav-bar";
 
 import { Colors } from "../constants/colors";
 import TopHeader from "@/components/top-header";
@@ -138,7 +139,8 @@ export default function MyRecordings() {
           </Pressable>
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        <View style={styles.recordingsWrap}>
+
           <View style={styles.searchRow}>
             <View style={styles.searchInputWrap}>
               <TextInput
@@ -154,6 +156,8 @@ export default function MyRecordings() {
               <Ionicons name="options-outline" size={20} color={Colors.octonary.DEFAULT} />
             </Pressable>
           </View>
+
+        <ScrollView contentContainerStyle={styles.content} style={styles.scrollArea} showsVerticalScrollIndicator={false}>
 
           {showNoResults ? (
             <View style={styles.noResultsWrap}>
@@ -176,6 +180,7 @@ export default function MyRecordings() {
             </View>
           )}
         </ScrollView>
+      </View>
       )}
 
       {filterOpen && !showEmpty && (
@@ -244,6 +249,9 @@ export default function MyRecordings() {
           </View>
         </View>
       )}
+      <View style={styles.navWrap}>
+        <NavBar activeKey="profile" />
+      </View>
     </ImageBackground>
   );
 }
@@ -256,15 +264,26 @@ const styles = StyleSheet.create({
   safeArea: {
     backgroundColor: "transparent",
   },
+  recordingsWrap: {
+    flex: 1,
+  },
+
+  scrollArea: {
+    flex: 1,
+  },
+
   content: {
     paddingHorizontal: 20,
-    paddingVertical: 40,
+    paddingTop: 8,
+    paddingBottom: 100,
     gap: 18,
   },
   searchRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
   },
   searchInputWrap: {
     flex: 1,
@@ -437,5 +456,12 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
     color: Colors.shade[200],
+  },
+  navWrap: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingBottom: 10,
   },
 });

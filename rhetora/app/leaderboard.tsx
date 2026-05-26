@@ -765,9 +765,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: Colors.shade[200],
     paddingHorizontal: 24,
-    paddingVertical: 60,
+    paddingVertical: 24,
     alignItems: "center",
-    gap: 44,
+    gap: 24,
   },
   modalTitle: {
     fontFamily: "Quicksand-Bold",

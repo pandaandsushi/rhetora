@@ -204,6 +204,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    marginBottom: 14,
     },
   rowLabel: {
     fontFamily: "Quicksand-Bold",
@@ -215,8 +216,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.octonary.DEFAULT,
     lineHeight: 24,
-    marginTop: -10,
-    marginBottom: 36,
+    marginBottom: 14,
     },
   sectionLabel: {
     fontFamily: "AlbertSans-Regular",
@@ -250,8 +250,6 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 4,
     overflow: "hidden",
-    marginTop: 14,
-    paddingVertical: 10,
     },
   dropdownItem: {
     marginHorizontal: 14,

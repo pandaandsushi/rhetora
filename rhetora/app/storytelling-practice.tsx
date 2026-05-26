@@ -116,7 +116,7 @@ export default function StorytellingPractice() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.heroRow}>
           <Text style={styles.heroText}>
-            Tell a short story with a clear beginning, middle, and end.
+            Tell a short story with a {"\n"} clear beginning, middle, and end.
           </Text>
         </View>
 

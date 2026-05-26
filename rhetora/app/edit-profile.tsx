@@ -199,8 +199,8 @@ const styles = StyleSheet.create({
   },
   avatarFrame: {
     position: "absolute",
-    width: 168,
-    height: 168,
+    width: 190,
+    height: 190,
     resizeMode: "contain",
   },
   fieldGroup: {

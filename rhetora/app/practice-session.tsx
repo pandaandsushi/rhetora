@@ -18,7 +18,7 @@ import { BACKEND_URL } from "../constants/api";
 import { Colors } from "../constants/colors";
 import PracticeCameraPanel from "../components/practice-camera-panel";
 import TopHeader from "../components/top-header";
-const DEFAULT_TOTAL_SECONDS = 1 * 60;
+const DEFAULT_TOTAL_SECONDS = 3 * 60;
 const logoRhetora = require("../assets/images/logorhetora.png");
 export default function PracticeSession() {
   const router = useRouter();
