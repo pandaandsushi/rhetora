@@ -50,7 +50,7 @@ const dailyChallenges: Challenge[] = [
   },
   {
     id: "daily-3",
-    title: "Give 3 feedbacks to other's\nperformance",
+    title: "Give 3 feedbacks to other's performance",
     current: 1,
     total: 3,
     coinValue: 160,
@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     color: Colors.octonary.DEFAULT,
   },
   cardList: {
-    gap: 14,
+    gap: 8,
   },
   claimWrap: {
     position: "absolute",

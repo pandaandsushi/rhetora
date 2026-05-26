@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.turquoise[300],
     backgroundColor: Colors.shade[200],
-    paddingVertical: 14,
+    paddingVertical: 4,
     paddingHorizontal: 16,
     gap: 12,
   },
@@ -119,7 +119,6 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   coinText: {
-    marginTop: 6,
     fontFamily: "Quicksand-Bold",
     fontSize: 14,
     color: Colors.octonary.DEFAULT,
@@ -130,7 +129,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 15,
+    fontSize: 14,
     color: Colors.octonary.DEFAULT,
   },
   progressRow: {
