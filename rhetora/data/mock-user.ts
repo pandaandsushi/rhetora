@@ -70,7 +70,7 @@ const mockRecordings: Recording[] = [
     title: "Recording 2026-05-03",
     dateLabel: "2026-05-03",
     mode: "Story Mode",
-    thumbnail: require("../assets/images/storymode/ch1/first-day.png"),
+    thumbnail: require("../assets/images/storymode/maelle.png"),
     hasVideo: true,
   },
   {
@@ -78,7 +78,7 @@ const mockRecordings: Recording[] = [
     title: "Recording 2026-05-03",
     dateLabel: "2026-05-03",
     mode: "Story Mode",
-    thumbnail: require("../assets/images/storymode/ch1/mia-classroom-mic.png"),
+    thumbnail: require("../assets/images/storymode/maelle.png"),
     hasVideo: true,
   },
   {
@@ -142,7 +142,7 @@ const mockFeedbackPosts: PeerFeedbackPost[] = [
     message: "Hi, this is my result for practicing Filler-Free today! What do you guys think?",
     tag: "fillerfree",
     dateLabel: "May 17, 2026",
-    feedbackVisible: true,
+    feedbackVisible: false,
   },
   {
     id: "post-2",
@@ -166,7 +166,7 @@ const mockFeedbackPosts: PeerFeedbackPost[] = [
     message: "Hi everyone! This is my first time trying story mode. Feel free to give me feedback. Please be kind and thank you!",
     tag: "storymode",
     dateLabel: "May 15, 2026",
-    feedbackVisible: false,
+    feedbackVisible: true,
     isMine: true,
   },
 ];
@@ -222,10 +222,44 @@ let mockUserData: MockUserData = {
         confidence: 5,
       },
       comment: "Good work!",
+      likes: 1,
+      dislikes: 4,
+      createdAt: "2026-05-17T07:10:00.000Z",
+    },
+    {
+      id: "feedback-3",
+      postId: "post-3",
+      authorName: "Jill Doe",
+      authorAvatarId: "hmph",
+      ratings: {
+        structure: 5,
+        fluency: 5,
+        conciseness: 5,
+        criticalThinking: 5,
+        confidence: 5,
+      },
+      comment: "Good work! I think you can be more confident and speak louder to make it better.",
       likes: 3,
       dislikes: 0,
       createdAt: "2026-05-17T07:10:00.000Z",
     },
+    {
+      id: "feedback-4",
+      postId: "post-3",
+      authorName: "Anne",
+      authorAvatarId: "hmph",
+      ratings: {
+        structure: 5,
+        fluency: 5,
+        conciseness: 5,
+        criticalThinking: 5,
+        confidence: 5,
+      },
+      comment: "Cool, need some improvement on your confidence but overall good job for your first time!",
+      likes: 3,
+      dislikes: 0,
+      createdAt: "2026-05-17T07:10:00.000Z",
+    }
   ],
 };
 

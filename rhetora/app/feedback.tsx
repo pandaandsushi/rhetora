@@ -21,7 +21,7 @@ import {
 
 const bgImage = require("../assets/images/bg-motif.png");
 
-const postVideoImage = require("../assets/images/storymode/ch1/first-day.png");
+const postVideoImage = require("../assets/images/storymode/maelle.png");
 
 const { height: screenHeight } = Dimensions.get("window");
 const MIN_SHEET_HEIGHT = 260;
