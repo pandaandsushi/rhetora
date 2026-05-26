@@ -94,7 +94,7 @@ export default function FeedbackShare() {
       name: currentUser.profile.fullName,
       hideName,
       titleId: currentUser.equippedTitleId,
-      message: description.trim() || "New recording",
+      message: description.trim() || "Hi, this is my result for practicing today! What do you guys think?",
       tag: tagFromMode(selectedRecording.mode),
       dateLabel: formatPostDate(now),
       feedbackVisible: !hideFeedback,
@@ -128,22 +128,22 @@ export default function FeedbackShare() {
         />
       </SafeAreaView>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.previewCard}>
-          <Image
-            source={previewRecording?.thumbnail ?? fallbackPreview}
-            style={styles.previewImage}
-            resizeMode={previewRecording?.hasVideo ? "cover" : "contain"}
-          />
-          <View style={styles.previewOverlay}>
-            <View style={styles.playButton}>
-              <Ionicons name="play" size={30} color={Colors.shade[200]} />
+      <View style={styles.pageBody}>
+        <View style={styles.fixedTopContent}>
+          <View style={styles.previewCard}>
+            <Image
+              source={previewRecording?.thumbnail ?? fallbackPreview}
+              style={styles.previewImage}
+              resizeMode={previewRecording?.hasVideo ? "cover" : "contain"}
+            />
+            <View style={styles.previewOverlay}>
+              <View style={styles.playButton}>
+                <Ionicons name="play" size={30} color={Colors.shade[200]} />
+              </View>
             </View>
           </View>
-        </View>
 
-        {step === "select" ? (
-          <View style={styles.selectSection}>
+          {step === "select" && (
             <View style={styles.selectHeader}>
               <Text style={styles.selectTitle}>Select Recording</Text>
               <Pressable
@@ -160,41 +160,34 @@ export default function FeedbackShare() {
                 <Text style={styles.selectLink}>View all recordings</Text>
               </Pressable>
             </View>
+          )}
+        </View>
 
-            <View style={styles.recordingList}>
-              {recordings.map((recording) => (
-                <RecordingCard
-                  key={recording.id}
-                  title={recording.title}
-                  dateLabel={recording.dateLabel}
-                  mode={recording.mode}
-                  thumbnail={recording.thumbnail}
-                  hasVideo={recording.hasVideo}
-                  selected={recording.id === selectedRecordingId}
-                  onPress={() => setSelectedRecordingId(recording.id)}
-                />
-              ))}
-            </View>
-
-            <View style={styles.actionRow}>
-              <Pressable style={[styles.actionButton, styles.actionGhost]} onPress={() => router.back()}>
-                <Text style={styles.actionGhostText}>Back</Text>
-              </Pressable>
-              <Pressable
-                style={[
-                  styles.actionButton,
-                  styles.actionPrimary,
-                  !selectedRecordingId && styles.actionDisabled,
-                ]}
-                onPress={() => setStep("details")}
-                disabled={!selectedRecordingId}
-              >
-                <Text style={styles.actionPrimaryText}>Next</Text>
-              </Pressable>
-            </View>
-          </View>
+        {step === "select" ? (
+          <ScrollView
+            style={styles.scrollArea}
+            contentContainerStyle={styles.recordingList}
+            showsVerticalScrollIndicator={false}
+          >
+            {recordings.map((recording) => (
+              <RecordingCard
+                key={recording.id}
+                title={recording.title}
+                dateLabel={recording.dateLabel}
+                mode={recording.mode}
+                thumbnail={recording.thumbnail}
+                hasVideo={recording.hasVideo}
+                selected={recording.id === selectedRecordingId}
+                onPress={() => setSelectedRecordingId(recording.id)}
+              />
+            ))}
+          </ScrollView>
         ) : (
-          <View style={styles.detailsSection}>
+          <ScrollView
+            style={styles.scrollArea}
+            contentContainerStyle={styles.detailsSection}
+            showsVerticalScrollIndicator={false}
+          >
             <Text style={styles.fieldLabel}>Description *</Text>
             <TextInput
               value={description}
@@ -218,18 +211,50 @@ export default function FeedbackShare() {
                 <View style={[styles.toggleThumb, hideFeedback && styles.toggleThumbOn]} />
               </View>
             </Pressable>
+          </ScrollView>
+        )}
 
-            <View style={styles.actionRow}>
-              <Pressable style={[styles.actionButton, styles.actionGhost]} onPress={() => setStep("select")}>
+        <View style={styles.fixedBottomActions}>
+          {step === "select" ? (
+            <>
+              <Pressable
+                style={[styles.actionButton, styles.actionGhost]}
+                onPress={() => router.back()}
+              >
                 <Text style={styles.actionGhostText}>Back</Text>
               </Pressable>
-              <Pressable style={[styles.actionButton, styles.actionPrimary]} onPress={handleShare}>
+
+              <Pressable
+                style={[
+                  styles.actionButton,
+                  styles.actionPrimary,
+                  !selectedRecordingId && styles.actionDisabled,
+                ]}
+                onPress={() => setStep("details")}
+                disabled={!selectedRecordingId}
+              >
+                <Text style={styles.actionPrimaryText}>Next</Text>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Pressable
+                style={[styles.actionButton, styles.actionGhost]}
+                onPress={() => setStep("select")}
+              >
+                <Text style={styles.actionGhostText}>Back</Text>
+              </Pressable>
+
+              <Pressable
+                style={[styles.actionButton, styles.actionPrimary]}
+                onPress={handleShare}
+              >
                 <Text style={styles.actionPrimaryText}>Share</Text>
               </Pressable>
-            </View>
-          </View>
-        )}
-      </ScrollView>
+            </>
+          )}
+        </View>
+      </View>
 
       <Toast visible={toastVisible} message="Your post has been shared" variant="success" />
     </ImageBackground>
@@ -240,11 +265,6 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: Colors.shade[200],
-  },
-  content: {
-    paddingHorizontal: 20,
-    paddingVertical: 32,
-    gap: 20,
   },
   previewCard: {
     borderRadius: 24,
@@ -269,9 +289,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  selectSection: {
-    gap: 18,
-  },
   selectHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -293,6 +310,7 @@ const styles = StyleSheet.create({
   },
   detailsSection: {
     gap: 18,
+    paddingBottom: 24,
   },
   fieldLabel: {
     fontFamily: "AlbertSans-SemiBold",
@@ -374,5 +392,34 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
     color: Colors.shade[200],
+  },
+  pageBody: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 24,
+    paddingBottom: 100,
+  },
+
+  fixedTopContent: {
+    gap: 20,
+    marginBottom: 18,
+  },
+
+  scrollArea: {
+    flex: 1,
+  },
+
+  recordingList: {
+    gap: 14,
+    paddingBottom: 20,
+  },
+
+  fixedBottomActions: {
+    position: "absolute",
+    left: 20,
+    right: 20,
+    bottom: 28,
+    flexDirection: "row",
+    gap: 12,
   },
 });
