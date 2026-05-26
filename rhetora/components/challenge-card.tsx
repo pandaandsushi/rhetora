@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   },
   body: {
     flex: 1,
-    gap: 8,
+    gap: 4,
   },
   title: {
     fontFamily: "Quicksand-Bold",

@@ -257,12 +257,11 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     position: "absolute",
-    bottom: -40,
+    bottom: -45,
     left: 0,
-    right: 0,
     width: "100%",
-    height: 320,
-    resizeMode: "contain",
+    height: 500,
+    resizeMode: "cover",
     opacity: 0.5,
   },
   safeArea: {
