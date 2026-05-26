@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Image,
   ImageBackground,
@@ -29,31 +29,38 @@ const episodes = [
     id: "ep-1",
     title: "A Fresh Start",
     image: episodeOneImage,
-    locked: false,
+    price: 0,
   },
   {
     id: "ep-2",
     title: "Breaking the Ice",
     image: episodeTwoImage,
-    locked: true,
+    price: 160,
   },
   {
     id: "ep-3",
     title: "Small Talk",
     image: episodeThreeImage,
-    locked: true,
+    price: 160,
   },
 ];
 
 export default function StoryEpisodes() {
   const router = useRouter();
   const [unlockVisible, setUnlockVisible] = useState(false);
-  const [selectedEpisode, setSelectedEpisode] = useState(episodes[1]);
-
-  const handleLockedPress = (episode: typeof episodes[number]) => {
+  const [selectedEpisode, setSelectedEpisode] = useState<(typeof episodes)[number] | null>(null);
+  const [unlockedEpisodeIds, setUnlockedEpisodeIds] = useState<string[]>(["ep-1"]);
+  const handleLockedPress = (episode: (typeof episodeList)[number]) => {
     setSelectedEpisode(episode);
     setUnlockVisible(true);
   };
+
+  const episodeList = useMemo(() => {
+    return episodes.map((episode) => ({
+      ...episode,
+      locked: !unlockedEpisodeIds.includes(episode.id),
+    }));
+  }, [unlockedEpisodeIds]);
 
   return (
     <View style={styles.screen}>
@@ -68,7 +75,7 @@ export default function StoryEpisodes() {
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
             <View style={styles.timelineLine} />
 
-            {episodes.map((episode) => (
+            {episodeList.map((episode) => (
               <View key={episode.id} style={styles.episodeRow}>
                 <View style={styles.dotContainer}>
                   {episode.locked ? (
@@ -108,17 +115,19 @@ export default function StoryEpisodes() {
             <View style={styles.modalRow}>
               <Text style={styles.modalSubtitle}>Unlock with</Text>
               <Image source={coinImage} style={styles.modalCoin} />
-              <Text style={styles.modalSubtitle}>160  ?</Text>
+              <Text style={styles.modalSubtitle}>{selectedEpisode?.price ?? 160} ?</Text>
             </View>
 
             <View style={styles.modalPreview}>
-              <ImageBackground source={selectedEpisode.image} style={styles.modalImage} resizeMode="cover">
-                <LinearGradient
-                  colors={["transparent", "rgba(0, 0, 0, 0.8)"]}
-                  style={styles.modalGradient}
-                />
-                <Text style={styles.modalEpisodeTitle}>{selectedEpisode.title}</Text>
-              </ImageBackground>
+              {selectedEpisode && (
+                <ImageBackground source={selectedEpisode.image} style={styles.modalImage} resizeMode="cover">
+                  <LinearGradient
+                    colors={["transparent", "rgba(0, 0, 0, 0.8)"]}
+                    style={styles.modalGradient}
+                  />
+                  <Text style={styles.modalEpisodeTitle}>{selectedEpisode.title}</Text>
+                </ImageBackground>
+              )}
             </View>
 
             <View style={styles.modalButtonRow}>
@@ -132,6 +141,14 @@ export default function StoryEpisodes() {
               <Pressable
                 style={[styles.modalButton, styles.modalButtonUnlock]}
                 onPress={() => {
+                  if (!selectedEpisode) {
+                    return;
+                  }
+
+                  setUnlockedEpisodeIds((prev) =>
+                    prev.includes(selectedEpisode.id) ? prev : [...prev, selectedEpisode.id]
+                  );
+
                   setUnlockVisible(false);
                 }}
               >
