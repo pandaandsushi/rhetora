@@ -71,7 +71,7 @@ export default function StoryPlayer() {
   };
 
 
-  const handleSkip = () => router.push("/practice-setup");
+  const handleSkip = () => router.push("/story-recap");
 
   return (
     <View style={styles.screen}>
@@ -94,7 +94,7 @@ export default function StoryPlayer() {
             <View style={styles.textBox}>
               <Text style={styles.storyText}>{scene.text}</Text>
               {scene.isFinal ? (
-                <Pressable style={styles.startButton} onPress={() => router.push("/practice-setup")}>
+                <Pressable style={styles.startButton} onPress={() => router.push("/story-recap")}>
                   <Text style={styles.startButtonText}>Start</Text>
                 </Pressable>
               ) : (
@@ -120,10 +120,9 @@ const styles = StyleSheet.create({
   },
   character: {
     position: "absolute",
-    bottom: 0,
+    bottom: -10,
     alignSelf: "center",
-    width: "100%",
-    height: "75%",
+    width: "130%",
     resizeMode: "contain",
     zIndex: 1,
   },
