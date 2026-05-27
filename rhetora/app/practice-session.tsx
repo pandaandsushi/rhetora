@@ -37,7 +37,7 @@ export default function PracticeSession() {
       return parsedTotal;
     }
     const h = parseInt(hours ?? "0", 10) || 0;
-    const m = parseInt(minutes ?? "10", 10) || 0;
+    const m = parseInt(minutes ?? "3", 10) || 0;
     const s = parseInt(seconds ?? "0", 10) || 0;
     const combined = h * 3600 + m * 60 + s;
     return combined > 0 ? combined : DEFAULT_TOTAL_SECONDS;

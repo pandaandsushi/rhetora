@@ -361,9 +361,9 @@ export default function StorytellingSession() {
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <View style={styles.cameraWrapper}>
-          {/* <PracticeCameraPanel
+          <PracticeCameraPanel
             initialCameraOn={cameraOn === "true"}
-            micMonitorEnabled={phase !== "recording" && phase !== "processing"}
+            micMonitorEnabled={false}
             placeholder={
               <Image
                 source={logoRhetora}
@@ -371,7 +371,7 @@ export default function StorytellingSession() {
                 resizeMode="contain"
               />
             }
-          /> */}
+          />
         </View>
 
         <View style={styles.controlsRow}>

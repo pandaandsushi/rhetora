@@ -210,7 +210,7 @@ export default function Home() {
               </ImageBackground>
             </Pressable>
 
-            {/* <View style={styles.sectionGroup}>
+            <View style={styles.sectionGroup}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Limited time story!</Text>
                 <Pressable onPress={() => router.push("/event")}>
@@ -224,7 +224,6 @@ export default function Home() {
 
               <Pressable
                 style={styles.eventCard}
-                onPress={() => router.push("/event")}
               >
                 <Image source={eventImage} style={styles.eventImage} />
                 <View style={styles.eventLabelWrap}>
@@ -240,7 +239,7 @@ export default function Home() {
                   <Text style={styles.eventBadgeText}>1D 20:54:18 left</Text>
                 </View>
               </Pressable>
-            </View> */}
+            </View>
 
             <View style={styles.sectionGroup}>
               <View style={styles.sectionHeader}>

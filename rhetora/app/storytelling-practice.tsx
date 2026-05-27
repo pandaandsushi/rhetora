@@ -120,13 +120,14 @@ export default function StorytellingPractice() {
           </Text>
         </View>
 
-        {/* <PracticeCameraPanel showStatus placeholder={
+        <PracticeCameraPanel showStatus placeholder={
           <Image
             source={logoRhetora}
             style={{ width: 90, height: 90 }}
             resizeMode="contain"
           />
-        } /> */}
+          } 
+        />
 
         <Pressable
           style={styles.tutorialCard}

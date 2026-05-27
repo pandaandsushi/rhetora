@@ -34,11 +34,11 @@ export default function Practice() {
             contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
           >
-            {/* <View style={styles.sectionHeader}>
+            <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Limited Time Story!</Text>
             </View>
 
-            <Pressable style={styles.eventCard} onPress={() => router.push("/event")}>
+            <Pressable style={styles.eventCard}>
               <Image source={eventImage} style={styles.eventImage} />
               <View style={styles.eventLabelWrap}>
                 <Text style={styles.eventChapter}>Chapter 1</Text>
@@ -48,11 +48,11 @@ export default function Practice() {
                 <Ionicons name="time-outline" size={14} color={Colors.octonary.DEFAULT} />
                 <Text style={styles.eventBadgeText}>1D 20:54:18 left</Text>
               </View>
-            </Pressable> */}
+            </Pressable>
 
-            {/* <View style={styles.sectionHeader}>
+            \<View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Main Mode</Text>
-            </View> */}
+            </View>
 
             <Pressable
               style={styles.modeCard}
