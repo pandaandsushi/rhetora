@@ -192,9 +192,9 @@ export default function VrReady() {
             <Text style={styles.startButtonText}>Start</Text>
           </Pressable>
 
-          <Pressable style={styles.testButton} onPress={() => setMicActive((prev) => !prev)}>
+          {/* <Pressable style={styles.testButton} onPress={() => setMicActive((prev) => !prev)}>
             <Text style={styles.testButtonText}>Test Microphone</Text>
-          </Pressable>
+          </Pressable> */}
 
           {micActive && (
             <View style={styles.micStatusRow}>
