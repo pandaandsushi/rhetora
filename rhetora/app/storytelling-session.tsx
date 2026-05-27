@@ -52,7 +52,8 @@ export default function StorytellingSession() {
   const [turns, setTurns] = useState<StoryTurn[]>([]);
   const [currentTurn, setCurrentTurn] = useState(1);
   
-  const [restartVisible, setRestartVisible] = useState(false);
+  const [retryTurnVisible, setRetryTurnVisible] = useState(false);
+  const [restartSessionVisible, setRestartSessionVisible] = useState(false);
   const [timeUpVisible, setTimeUpVisible] = useState(false);
 
   const [aiPrompt, setAiPrompt] = useState("Loading...");
@@ -78,44 +79,78 @@ export default function StorytellingSession() {
     return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
   }, [remainingSeconds]);
 
+  const discardCurrentRecording = async () => {
+    clearTurnTimer();
+
+    if (!recordingRef.current) {
+      return;
+    }
+
+    try {
+      await recordingRef.current.stopAndUnloadAsync();
+    } catch (error) {
+      console.warn("[Story] Failed to discard recording", error);
+    } finally {
+      recordingRef.current = null;
+    }
+  };
+
+  const loadInitialPrompt = async () => {
+  try {
+    const response = await fetch(`${BACKEND_URL}/storytelling/initial`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ genre }),
+    });
+
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+
+    const data = await response.json();
+
+    const aiTurn: StoryTurn = {
+      id: `ai-${Date.now()}`,
+      speaker: "ai",
+      text: data.text,
+      createdAt: new Date().toISOString(),
+    };
+
+    setTurns([aiTurn]);
+    setAiPrompt(data.text);
+  } catch (error) {
+    console.warn("Failed to load initial prompt", error);
+
+    const fallbackText = "Start the story with your imagination.";
+    const aiTurn: StoryTurn = {
+      id: `ai-${Date.now()}`,
+      speaker: "ai",
+      text: fallbackText,
+      createdAt: new Date().toISOString(),
+    };
+
+    setTurns([aiTurn]);
+    setAiPrompt(fallbackText);
+  }
+};
+
+  const handleRestartSession = async () => {
+    await discardCurrentRecording();
+
+    submitRef.current = false;
+    setRestartSessionVisible(false);
+    setTimeUpVisible(false);
+    setRemainingSeconds(timePerTurnSeconds);
+    setCurrentTurn(1);
+    setTurns([]);
+    setAiPrompt("Loading...");
+    setPhase("ai");
+
+    await loadInitialPrompt();
+  };
+
   useEffect(() => {
-    let isMounted = true;
-
-    const loadInitialPrompt = async () => {
-      try {
-        const response = await fetch(`${BACKEND_URL}/storytelling/initial`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ genre }),
-        });
-        if (!response.ok) {
-          throw new Error(await response.text());
-        }
-        const data = await response.json();
-        if (!isMounted) {
-          return;
-        }
-        const aiTurn: StoryTurn = {
-          id: `ai-${Date.now()}`,
-          speaker: "ai",
-          text: data.text,
-          createdAt: new Date().toISOString(),
-        };
-        setTurns([aiTurn]);
-        setAiPrompt(data.text);
-      } catch (error) {
-        console.warn("Failed to load initial prompt", error);
-        if (isMounted) {
-          setAiPrompt("Start the story with your imagination.");
-        }
-      }
-    };
-
     loadInitialPrompt();
-
-    return () => {
-      isMounted = false;
-    };
   }, [genre]);
 
   const clearTurnTimer = () => {
@@ -274,7 +309,7 @@ export default function StorytellingSession() {
         setAiPrompt(data.nextPrompt);
       }
 
-      const nextTurnIndex = currentTurn + 2;
+      const nextTurnIndex = currentTurn + 1;
       if (nextTurnIndex > maxTurnCount || !data.nextPrompt) {
         setPhase("finished");
         await finalizeEvaluation(nextTurns, data.metrics);
@@ -316,10 +351,14 @@ export default function StorytellingSession() {
     }
   };
 
-  const handleRestart = () => {
+  const handleRetryTurn = async () => {
+    await discardCurrentRecording();
+
+    submitRef.current = false;
     setRemainingSeconds(timePerTurnSeconds);
+    setTimeUpVisible(false);
     setPhase("ai");
-    setRestartVisible(false);
+    setRetryTurnVisible(false);
   };
 
   const handleStartTalking = async () => {
@@ -403,7 +442,22 @@ export default function StorytellingSession() {
           </View>
 
           <View style={styles.actionButtonsWrap}>
-            <Pressable style={styles.actionButton} onPress={() => setRestartVisible(true)}>
+            <Pressable
+              style={styles.actionButton}
+              onPress={() => setRetryTurnVisible(true)}
+              disabled={phase === "processing" || phase === "finished"}
+            >
+              <View style={styles.actionIconWrapLight}>
+                <Ionicons name="reload" size={24} color={Colors.octonary.DEFAULT} />
+              </View>
+              <Text style={styles.actionLabel}>Retry Turn</Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.actionButton}
+              onPress={() => setRestartSessionVisible(true)}
+              disabled={phase === "processing" || phase === "finished"}
+            >
               <View style={styles.actionIconWrap}>
                 <Ionicons name="refresh" size={24} color={Colors.shade[200]} />
               </View>
@@ -413,6 +467,10 @@ export default function StorytellingSession() {
         </View>
 
         <View style={styles.storyPromptContainer}>
+          <Text style={styles.turnLabel}>
+            {phase === "recording" ? "Your Turn" : "AI's Turn"}
+          </Text>
+
           <Text style={styles.storyPromptText}>{aiPrompt}</Text>
         </View>
 
@@ -433,16 +491,47 @@ export default function StorytellingSession() {
         )}
       </ScrollView>
 
-      <Modal transparent animationType="fade" visible={restartVisible}>
+      <Modal transparent animationType="fade" visible={retryTurnVisible}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>Are you sure you want to restart this session?</Text>
+            <Text style={styles.modalTitle}>Retry your current turn?</Text>
+            <Text style={styles.modalSubtitle}>
+              Your current recording for this turn will be discarded.
+            </Text>
+
             <View style={styles.modalActions}>
-              <Pressable style={styles.modalGhostButton} onPress={() => setRestartVisible(false)}>
+              <Pressable
+                style={styles.modalGhostButton}
+                onPress={() => setRetryTurnVisible(false)}
+              >
                 <Text style={styles.modalGhostText}>Cancel</Text>
               </Pressable>
-              <Pressable style={styles.modalConfirmButton} onPress={handleRestart}>
-                <Text style={styles.modalConfirmText}>Confirm</Text>
+
+              <Pressable style={styles.modalConfirmButton} onPress={handleRetryTurn}>
+                <Text style={styles.modalConfirmText}>Retry</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal transparent animationType="fade" visible={restartSessionVisible}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Restart the whole session?</Text>
+            <Text style={styles.modalSubtitle}>
+              All story turns in this session will be reset.
+            </Text>
+
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.modalGhostButton}
+                onPress={() => setRestartSessionVisible(false)}
+              >
+                <Text style={styles.modalGhostText}>Cancel</Text>
+              </Pressable>
+
+              <Pressable style={styles.modalConfirmButton} onPress={handleRestartSession}>
+                <Text style={styles.modalConfirmText}>Restart</Text>
               </Pressable>
             </View>
           </View>
@@ -497,29 +586,31 @@ const styles = StyleSheet.create({
     fontSize: 26,
     color: Colors.octonary.DEFAULT,
   },
-  actionButtonsWrap: {
-    flexDirection: "row",
-    gap: 20,
-  },
   actionButton: {
     alignItems: "center",
     gap: 10,
   },
   actionIconWrap: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     backgroundColor: Colors.error[500],
     alignItems: "center",
     justifyContent: "center",
   },
+
   actionIconWrapLight: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 54,
+    height: 54,
+    borderRadius: 27,
     backgroundColor: Colors.warning[100],
     alignItems: "center",
     justifyContent: "center",
+  },
+
+  actionButtonsWrap: {
+    flexDirection: "row",
+    gap: 14,
   },
   actionLabel: {
     fontFamily: "AlbertSans-Bold",
@@ -621,5 +712,19 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 14,
     color: Colors.shade[200],
+  },
+  turnLabel: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 15,
+    color: Colors.quinary[300],
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  modalSubtitle: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+    textAlign: "center",
+    lineHeight: 20,
   },
 });
