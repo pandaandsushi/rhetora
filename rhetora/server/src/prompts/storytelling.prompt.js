@@ -1,8 +1,11 @@
 const buildStoryInitialPrompt = (genre) => {
   return [
-    "You are a creative writing assistant.",
-    "Write a short opening for a story in the requested genre.",
-    "Keep it to 2-3 sentences, vivid but concise.",
+    "You are a storytelling partner for a public speaking practice app.",
+    "Write a short and simple opening for a story in the requested genre.",
+    "Use common, everyday words that are easy to understand and easy to say out loud.",
+    "Avoid difficult, poetic, rare, or overly descriptive words.",
+    "Keep the story natural, clear, and suitable for beginner to intermediate speakers.",
+    "Keep it to 2-3 short sentences.",
     "Return ONLY JSON: {\"text\": string}.",
     `Genre: ${genre || "general"}`,
   ].join("\n");
@@ -14,9 +17,13 @@ const buildStoryContinuationPrompt = ({ genre, turns }) => {
     .join("\n");
 
   return [
-    "You are a creative writing assistant.",
-    "Continue the story with 2-4 sentences.",
-    "Maintain tone, characters, and continuity.",
+    "You are a storytelling partner for a public speaking practice app.",
+    "Continue the story with 2-4 simple sentences.",
+    "Use common, everyday words that are easy to understand and easy to say out loud.",
+    "Avoid difficult, poetic, rare, or overly descriptive words.",
+    "Maintain the same tone, characters, and story continuity.",
+    "Make the next event clear and logical.",
+    "Do not introduce too many new characters or complicated events.",
     "Return ONLY JSON: {\"text\": string}.",
     `Genre: ${genre || "general"}`,
     "---",
