@@ -113,12 +113,16 @@ export default function FillerFreeEvaluation() {
   const question = params.question ?? fillerFreeFallback.question;
 
   const fillerWords: string[] = useMemo(() => {
-    try {
-      return JSON.parse(params.fillerWords ?? "[]");
-    } catch {
-      return [];
+    if (params.fillerWords) {
+      try {
+        return JSON.parse(params.fillerWords);
+      } catch {
+        return [];
+      }
     }
-  }, [params.fillerWords]);
+
+    return Object.keys(sessionData.fillerCounts ?? {});
+  }, [params.fillerWords, sessionData.fillerCounts]);
 
   const fillerCounts: FillerCount = sessionData.fillerCounts ?? {};
   const transcript = sessionData.transcript ?? "";

@@ -5,7 +5,7 @@ import * as ScreenOrientation from "expo-screen-orientation";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import CollapsibleSection from "../components/collapsible-section";
 import { Colors } from "../constants/colors";
-import feedbackData from "./feedbackdata.json";
+import feedbackData from "./vr-fallback.json";
 import TopHeader from "@/components/top-header";
 const bgImage = require("../assets/images/bg-motif.png");
 const scenarioImages = {
