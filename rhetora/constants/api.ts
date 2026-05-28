@@ -1,1 +1,1 @@
-export const BACKEND_URL = "http://192.168.1.5:5050";
+export const BACKEND_URL = "https://brainier-mi-nonexhaustible.ngrok-free.dev";
