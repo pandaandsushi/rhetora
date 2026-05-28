@@ -98,11 +98,20 @@ export default function StoryModeEvaluation() {
   const [showBadgeModal, setShowBadgeModal] = useState(false);
 
   const sessionData = useMemo<SessionData>(() => {
-    if (!params.data) return { evaluation: storyModeFallback };
+    if (!params.data) {
+      return {
+        transcript: storyModeFallback.transcript,
+        evaluation: storyModeFallback,
+      };
+    }
+
     try {
       return JSON.parse(params.data);
     } catch {
-      return { evaluation: storyModeFallback };
+      return {
+        transcript: storyModeFallback.transcript,
+        evaluation: storyModeFallback,
+      };
     }
   }, [params.data]);
 

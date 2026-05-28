@@ -794,12 +794,12 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 18,
+    fontSize: 16,
     color: Colors.octonary.DEFAULT,
   },
   statLabel: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
+    fontSize: 16,
     color: Colors.octonary.DEFAULT,
   },
   statImage: {

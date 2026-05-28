@@ -1,40 +1,41 @@
 {
-  "quickSummary": "Good job! You effectively introduced yourself and maintained a steady speaking pace.",
+  "quickSummary": "Nice work! Your introduction was clear, organized, and easy to understand. You shared relevant details about yourself and showed good effort in keeping your speech connected.",
+  "transcript": "Hi everyone, my name is Mia. I am a student at XYZ University, majoring in Computer Science. I have always been passionate about technology and programming. In my free time, I enjoy hiking and exploring new places. I also love cooking and trying out new recipes. I'm excited to be here and look forward to getting to know all of you better.",
   "whatYouDidWell": [
-    "You introduced yourself in a structured and easy-to-follow way",
-    "Your content feels relevant and meaningful",
-    "Your explanation of your interests is clear and specific",
-    "You maintained a consistent speaking pace overall"
+    "You started with a clear self-introduction that helped the audience understand who you are",
+    "You organized your ideas in a logical order, making your speech easy to follow",
+    "You included personal details that made your introduction feel more authentic",
+    "You explained your interests and background with enough detail to help the audience connect with you"
   ],
   "structureAnalysis": [
     {
       "point": "Opening",
-      "excerpt": "\"Hi everyone, my name is Alex...\"",
-      "feedback": "Strong and appropriate opening"
+      "excerpt": "\"Hi everyone, my name is Mia...\"",
+      "feedback": "This is a clear and friendly opening. It helps the audience immediately understand who is speaking."
     },
     {
       "point": "Middle",
-      "excerpt": "You clearly explained your academic background and current interests.",
-      "feedback": "This provides a solid foundation for others to connect with you."
+      "excerpt": "You explained your background, interests, and what you enjoy doing.",
+      "feedback": "The middle part gives useful context about yourself. To make it stronger, you can connect each idea more smoothly so the speech feels more natural."
     },
     {
       "point": "Ending",
-      "excerpt": "The introduction ends without a clear closing statement.",
-      "feedback": "This is a great opportunity to leave a stronger impression."
+      "excerpt": "The introduction ends after sharing your interests.",
+      "feedback": "The ending is understandable, but it could be more memorable with a short closing sentence that leaves a positive final impression."
     }
   ],
   "recommendedActions": [
     {
-      "title": "Filler words (um, uh, like)",
-      "description": "These appear when you are thinking about what to say next. This is completely normal. Instead of filling the silence, try taking a short pause. Pauses actually make you sound more confident."
+      "title": "Add smoother transitions",
+      "description": "Try using simple transition phrases such as 'Aside from that,' 'Another thing about me is,' or 'That is why I am interested in...' These phrases can help your ideas flow more naturally from one point to the next."
     },
     {
-      "title": "Stronger ending",
-      "description": "Your introduction would feel more complete with a simple closing sentence. For example: 'I'm excited to be here and look forward to learning with all of you.'"
+      "title": "Create a stronger closing",
+      "description": "End your introduction with a short sentence that feels complete. For example: 'I'm excited to share more and learn together with all of you.' This helps your speech feel more polished."
     },
     {
-      "title": "Confidence in transitions",
-      "description": "When moving between ideas, take a brief pause before continuing."
+      "title": "Speak with more expression",
+      "description": "Your content is already clear, but adding slight changes in tone can make your introduction sound more engaging. Emphasize important words and smile naturally when sharing something personal."
     }
   ]
 }
