@@ -91,6 +91,7 @@ export default function RecentActivity() {
               title={item.title}
               subtitle={item.subtitle}
               timeLabel={item.timeLabel}
+              onPress={() => router.push(getEvaluationRouteByMode(item.subtitle) as any)}
             />
           ))}
         </View>
@@ -103,6 +104,7 @@ export default function RecentActivity() {
               title={item.title}
               subtitle={item.subtitle}
               timeLabel={item.timeLabel}
+              onPress={() => router.push(getEvaluationRouteByMode(item.subtitle) as any)}
             />
           ))}
         </View>

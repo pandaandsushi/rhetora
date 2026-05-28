@@ -198,7 +198,6 @@ export default function Home() {
               <ImageBackground
                 source={shopBgImage}
                 style={styles.shopCard}
-                imageStyle={[ { opacity: 0.5 }]}
               >
                 <View style={styles.shopTextWrap}>
                   <Text style={styles.shopTitle}>Shop</Text>
@@ -213,13 +212,6 @@ export default function Home() {
             <View style={styles.sectionGroup}>
               <View style={styles.sectionHeader}>
                 <Text style={styles.sectionTitle}>Limited time story!</Text>
-                <Pressable onPress={() => router.push("/event")}>
-                  <Ionicons
-                    name="chevron-forward"
-                    size={20}
-                    color={Colors.octonary.DEFAULT}
-                  />
-                </Pressable>
               </View>
 
               <Pressable
@@ -339,7 +331,7 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
+    fontSize: 14,
     color: Colors.octonary.DEFAULT,
   },
   name: {
@@ -420,7 +412,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 11,
+    fontSize: 16,
     color: Colors.octonary.DEFAULT,
   },
   statImage: {
@@ -464,7 +456,7 @@ const styles = StyleSheet.create({
   },
   sectionSubtitle: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
+    fontSize: 14,
     color: Colors.octonary.DEFAULT,
   },
   inlineCoin: {
@@ -497,7 +489,7 @@ const styles = StyleSheet.create({
   challengeTitle: {
     flex: 1,
     fontFamily: "AlbertSans-SemiBold",
-    fontSize: 10,
+    fontSize: 12,
     color: Colors.octonary.DEFAULT,
   },
   challengeCount: {
@@ -529,7 +521,7 @@ const styles = StyleSheet.create({
   },
   shopSubtitle: {
     fontFamily: "AlbertSans-Medium",
-    fontSize: 10,
+    fontSize: 12,
     lineHeight: 14,
     color: Colors.octonary.DEFAULT,
   },
@@ -579,7 +571,7 @@ const styles = StyleSheet.create({
   },
   eventBadgeText: {
     fontFamily: "AlbertSans-Bold",
-    fontSize: 12,
+    fontSize: 14,
     color: Colors.octonary.DEFAULT,
   },
   modeRow: {

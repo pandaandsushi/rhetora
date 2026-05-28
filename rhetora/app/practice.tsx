@@ -50,7 +50,7 @@ export default function Practice() {
               </View>
             </Pressable>
 
-            \<View style={styles.sectionHeader}>
+            <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Main Mode</Text>
             </View>
 
