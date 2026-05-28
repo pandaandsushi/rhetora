@@ -46,13 +46,13 @@ const vrScenarios = [
     id: "vr-meeting",
     title: "Meeting Room",
     image: vrMeetingImage,
-    price: 120,
+    price: 240,
   },
   {
     id: "vr-podium",
     title: "Podium",
     image: vrPodiumImage,
-    price: 120,
+    price: 240,
   },
 ];
 
