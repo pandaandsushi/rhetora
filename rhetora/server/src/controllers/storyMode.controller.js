@@ -21,7 +21,6 @@ const evaluateSession = async (req, res) => {
 
     const result = await evaluateStoryModeSession(fileBuffer, { episodeTitle });
 
-    // Clean up temp file if disk storage was used
     if (file.path) {
       fs.unlink(file.path, () => {});
     }
