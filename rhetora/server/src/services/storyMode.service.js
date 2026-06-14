@@ -2,7 +2,7 @@ import { transcribeBuffer } from "./deepgram.service.js";
 import { callLLM } from "./llm.service.js";
 import { buildStoryModeEvaluationPrompt } from "../prompts/storyMode.prompt.js";
 
-const evaluateStoryModeSession = async (file, { episodeTitle }) => {
+const evaluateStoryModeSession = async (file, { episodeTitle, llmOptions = {} }) => {
   const result = await transcribeBuffer(file);
   
   const prompt = buildStoryModeEvaluationPrompt({
@@ -11,7 +11,7 @@ const evaluateStoryModeSession = async (file, { episodeTitle }) => {
     metrics: result.metrics,
   });
 
-  const evaluation = await callLLM(prompt);
+  const evaluation = await callLLM(prompt, llmOptions);
 
   return {
     evaluation,

@@ -1,10 +1,12 @@
 import { GROQ_API_KEY, GROQ_MODEL } from "../config/env.js";
 import parseModelJson from "../utils/parseModelJson.js";
 
-const callGroq = async (prompt) => {
+const callGroq = async (prompt, options = {}) => {
   if (!GROQ_API_KEY) {
     throw new Error("GROQ_API_KEY is not set");
   }
+
+  const model = options.model || GROQ_MODEL || "llama-3.3-70b-versatile";
 
   const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
     method: "POST",
@@ -13,7 +15,7 @@ const callGroq = async (prompt) => {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: GROQ_MODEL || "llama-3.3-70b-versatile",
+      model,
       messages: [
         {
           role: "system",

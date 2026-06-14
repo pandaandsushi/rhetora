@@ -1,13 +1,15 @@
 import { GOOGLE_AI_API_KEY, GOOGLE_AI_MODEL } from "../config/env.js";
 import parseModelJson from "../utils/parseModelJson.js";
 
-const callGemini = async (prompt) => {
+const callGemini = async (prompt, options = {}) => {
   if (!GOOGLE_AI_API_KEY) {
     throw new Error("GOOGLE_AI_API_KEY is not set");
   }
 
+  const model = options.model || GOOGLE_AI_MODEL;
+
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GOOGLE_AI_MODEL}:generateContent?key=${GOOGLE_AI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GOOGLE_AI_API_KEY}`,
     {
       method: "POST",
       headers: {
@@ -29,6 +31,10 @@ const callGemini = async (prompt) => {
 
   const data = await response.json();
   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  
+  console.log("=== GEMINI RAW RESPONSE ===");
+  console.log(text);
+  
   const parsed = parseModelJson(text);
 
   if (!parsed) {

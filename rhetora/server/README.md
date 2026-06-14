@@ -3,14 +3,41 @@
 ## Setup
 
 1. Copy `.env.example` to `.env` and set `DEEPGRAM_API_KEY`.
-2. Install dependencies:
+2. Configure at least one LLM provider key (`GOOGLE_AI_API_KEY`, `GROQ_API_KEY`, or `OPENROUTER_API_KEY`).
+3. Optional: set default LLM routing in `.env`:
+   - `LLM_PROVIDER=auto|gemini|groq|openrouter`
+   - `LLM_FALLBACK_ORDER=gemini,groq,openrouter` (used when provider is `auto`)
+   - `OPENROUTER_MODEL=deepseek-v4-flash:free`
+4. Install dependencies:
    ```bash
    npm install
    ```
-3. Start server:
+5. Start server:
    ```bash
    npm run dev
    ```
+
+## LLM Provider/Model Selection
+
+All LLM-backed endpoints now support request-level overrides via any of:
+
+- JSON/multipart fields: `llmProvider`, `llmModel`
+- Query params: `?llmProvider=openrouter&llmModel=deepseek-v4-flash:free`
+- Headers: `x-llm-provider`, `x-llm-model`
+
+Supported providers: `gemini`, `groq`, `openrouter`, `auto`.
+
+Examples:
+
+```bash
+curl -X POST http://localhost:5050/storytelling/initial \
+  -H "Content-Type: application/json" \
+  -d '{"genre":"horror","llmProvider":"openrouter","llmModel":"deepseek-v4-flash:free"}'
+
+curl -X POST "http://localhost:5050/pitch/initial?llmProvider=groq&llmModel=llama-3.3-70b-versatile" \
+  -H "Content-Type: application/json" \
+  -d '{"pitchType":"Product Idea"}'
+```
 
 ## Endpoints
 
@@ -57,5 +84,7 @@ curl -X POST http://localhost:5050/pitch/evaluate \
    -F "audio=@./sample.m4a" \
    -F "pitchType=Product Idea" \
    -F "promptTitle=Pitch a productivity app" \
-   -F "promptInstruction=Explain what it does and why it matters"
+   -F "promptInstruction=Explain what it does and why it matters" \
+   -F "llmProvider=openrouter" \
+   -F "llmModel=deepseek-v4-flash:free"
 ```

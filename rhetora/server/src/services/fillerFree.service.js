@@ -74,18 +74,19 @@ const getRandomFallbackQuestion = () => {
   return FALLBACK_QUESTIONS[index];
 };
 
-const getFillerFreeQuestion = async () => {
+const getFillerFreeQuestion = async (llmOptions = {}) => {
   try {
+    console.log("[FillerFree] Generating question with LLM...");
     const prompt = buildFillerFreeQuestionPrompt();
-    const result = await callLLM(prompt);
+    const result = await callLLM(prompt, llmOptions);
     return { question: result.question ?? getRandomFallbackQuestion() };
   } catch (error) {
-    console.warn("[FillerFree] Gemini question generation failed, using fallback:", error?.message);
+    console.warn("[FillerFree] LLM question generation failed, using fallback:", error?.message);
     return { question: getRandomFallbackQuestion() };
   }
 };
 
-const evaluateFillerFree = async ({ file, fillerWords, question }) => {
+const evaluateFillerFree = async ({ file, fillerWords, question, llmOptions = {} }) => {
   // Step 1: Transcribe (Deepgram)
   const result = await transcribeBuffer(file);
   const { transcript, words } = result;
@@ -108,9 +109,9 @@ const evaluateFillerFree = async ({ file, fillerWords, question }) => {
       fillerCounts,
       metrics,
     });
-    evaluation = await callLLM(prompt);
+    evaluation = await callLLM(prompt, llmOptions);
   } catch (error) {
-    console.warn("[FillerFree] Gemini evaluation failed, using fallback:", error?.message);
+    console.warn("[FillerFree] LLM evaluation failed, using fallback:", error?.message);
     evaluation = buildFallbackEvaluation();
   }
 

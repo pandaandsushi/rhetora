@@ -1,5 +1,6 @@
 import { evaluateStoryModeSession } from "../services/storyMode.service.js";
-import fs from "fs";
+import fs from "node:fs";
+import { getLlmOptionsFromRequest } from "../utils/llmOptions.js";
 
 const evaluateSession = async (req, res) => {
   try {
@@ -19,7 +20,10 @@ const evaluateSession = async (req, res) => {
       mimetype: file.mimetype,
     };
 
-    const result = await evaluateStoryModeSession(fileBuffer, { episodeTitle });
+    const result = await evaluateStoryModeSession(fileBuffer, {
+      episodeTitle,
+      llmOptions: getLlmOptionsFromRequest(req),
+    });
 
     if (file.path) {
       fs.unlink(file.path, () => {});

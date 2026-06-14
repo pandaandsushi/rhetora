@@ -8,6 +8,12 @@ export const GOOGLE_AI_API_KEY = process.env.GOOGLE_AI_API_KEY;
 export const GOOGLE_AI_MODEL = process.env.GOOGLE_AI_MODEL || "gemini-2.5-flash";
 export const GROQ_API_KEY = process.env.GROQ_API_KEY;
 export const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.1-8b-instant";
+export const OPENROUTER_API_KEY = process.env.OPENROUTER_API_KEY;
+export const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "deepseek/deepseek-v4-flash:free";
+export const OPENROUTER_SITE_URL = process.env.OPENROUTER_SITE_URL;
+export const OPENROUTER_APP_NAME = process.env.OPENROUTER_APP_NAME || "Rhetora";
+export const LLM_PROVIDER = process.env.LLM_PROVIDER || "auto";
+export const LLM_FALLBACK_ORDER = process.env.LLM_FALLBACK_ORDER || "gemini,groq,openrouter";
 
 export const DEEPGRAM_PARAMS = {
   model: process.env.DEEPGRAM_MODEL || "nova-3",

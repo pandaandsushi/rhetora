@@ -1,9 +1,11 @@
 import { evaluatePitch, getPitchPrompt } from "../services/pitch.service.js";
+import { getLlmOptionsFromRequest } from "../utils/llmOptions.js";
 
 const getPitchPromptController = async (req, res) => {
   try {
     const { pitchType } = req.body || {};
-    const result = await getPitchPrompt(pitchType);
+    const llmOptions = getLlmOptionsFromRequest(req);
+    const result = await getPitchPrompt(pitchType, llmOptions);
     return res.json(result);
   } catch (error) {
     return res.status(500).json({ error: error?.message ?? "Unknown error" });
@@ -24,11 +26,13 @@ const evaluatePitchController = async (req, res) => {
       title: promptTitle,
       instruction: promptInstruction,
     };
+    const llmOptions = getLlmOptionsFromRequest(req);
 
     const result = await evaluatePitch({
       file: req.file,
       pitchType,
       prompt,
+      llmOptions,
     });
 
     return res.json(result);

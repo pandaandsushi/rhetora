@@ -6,13 +6,13 @@ import {
   buildStoryEvaluationPrompt,
 } from "../prompts/storytelling.prompt.js";
 
-const getInitialStoryPrompt = async (genre) => {
+const getInitialStoryPrompt = async (genre, llmOptions = {}) => {
   const prompt = buildStoryInitialPrompt(genre);
-  const result = await callLLM(prompt);
+  const result = await callLLM(prompt, llmOptions);
   return { text: result.text };
 };
 
-const processStoryTurn = async ({ file, genre, currentTurn, maxTurns, turns }) => {
+const processStoryTurn = async ({ file, genre, currentTurn, maxTurns, turns, llmOptions = {} }) => {
   const result = await transcribeBuffer(file);
   const userTurn = {
     id: `user-${Date.now()}`,
@@ -34,7 +34,7 @@ const processStoryTurn = async ({ file, genre, currentTurn, maxTurns, turns }) =
   }
 
   const prompt = buildStoryContinuationPrompt({ genre, turns: nextTurns });
-  const continuation = await callLLM(prompt);
+  const continuation = await callLLM(prompt, llmOptions);
   const aiTurn = {
     id: `ai-${Date.now()}`,
     speaker: "ai",
@@ -50,9 +50,9 @@ const processStoryTurn = async ({ file, genre, currentTurn, maxTurns, turns }) =
   };
 };
 
-const evaluateStory = async ({ turns, genre, metrics }) => {
+const evaluateStory = async ({ turns, genre, metrics, llmOptions = {} }) => {
   const prompt = buildStoryEvaluationPrompt({ genre, turns, metrics });
-  const result = await callLLM(prompt);
+  const result = await callLLM(prompt, llmOptions);
   return { evaluation: result };
 };
 

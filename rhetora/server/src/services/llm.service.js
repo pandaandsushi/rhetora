@@ -1,28 +1,73 @@
 import { callGemini } from "./gemini.service.js";
 import { callGroq } from "./groq.service.js";
+import { callOpenRouter } from "./openrouter.service.js";
+import { LLM_FALLBACK_ORDER, LLM_PROVIDER } from "../config/env.js";
+
+const SUPPORTED_PROVIDERS = ["gemini", "groq", "openrouter"];
+
+const normalizeProvider = (provider) => (provider || "").toString().trim().toLowerCase();
+
+const parseFallbackProviders = (value) => {
+  const sequence = (value || "")
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean)
+    .filter((item, index, arr) => arr.indexOf(item) === index)
+    .filter((item) => SUPPORTED_PROVIDERS.includes(item));
+
+  return sequence.length > 0 ? sequence : ["gemini", "groq", "openrouter"];
+};
+
+const callByProvider = async (provider, prompt, options) => {
+  if (provider === "gemini") {
+    return callGemini(prompt, options);
+  }
+
+  if (provider === "groq") {
+    return callGroq(prompt, options);
+  }
+
+  if (provider === "openrouter") {
+    return callOpenRouter(prompt, options);
+  }
+
+  throw new Error(`Unsupported LLM provider: ${provider}`);
+};
 
 /**
- * Calls the LLM with a Gemini → Groq cascade.
- * Throws only if both fail — callers should handle the throw
+ * Calls the LLM using an explicit provider selection or fallback cascade.
+ * Throws only if all configured providers fail — callers should handle the throw
  * and apply their own domain-specific fallback data.
  */
-const callLLM = async (prompt) => {
-  // 1. Try Gemini
-  try {
-    const result = await callGemini(prompt);
-    return result;
-  } catch (geminiError) {
-    console.warn("[LLM] Gemini failed, falling back to Groq:", geminiError?.message);
+const callLLM = async (prompt, options = {}) => {
+  const requestedProvider = normalizeProvider(options.provider || LLM_PROVIDER || "auto");
+  const selectedProvider = requestedProvider || "auto";
+
+  if (selectedProvider !== "auto" && !SUPPORTED_PROVIDERS.includes(selectedProvider)) {
+    throw new Error(
+      `Unsupported llmProvider "${selectedProvider}". Supported providers: ${SUPPORTED_PROVIDERS.join(", ")}, auto`,
+    );
   }
 
-  // 2. Try Groq
-  try {
-    const result = await callGroq(prompt);
-    return result;
-  } catch (groqError) {
-    console.warn("[LLM] Groq also failed:", groqError?.message);
-    throw new Error(`Both Gemini and Groq failed. Last error: ${groqError?.message}`);
+  if (selectedProvider !== "auto") {
+    return callByProvider(selectedProvider, prompt, options);
   }
+
+  const fallbackProviders = parseFallbackProviders(LLM_FALLBACK_ORDER);
+  const failures = [];
+
+  for (const provider of fallbackProviders) {
+    try {
+      const result = await callByProvider(provider, prompt, options);
+      return result;
+    } catch (error) {
+      const message = error?.message || "Unknown error";
+      failures.push(`${provider}: ${message}`);
+      console.warn(`[LLM] ${provider} failed in auto mode:`, message);
+    }
+  }
+
+  throw new Error(`All LLM providers failed. ${failures.join(" | ")}`);
 };
 
 export { callLLM };

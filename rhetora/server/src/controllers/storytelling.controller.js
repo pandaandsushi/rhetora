@@ -3,11 +3,13 @@ import {
   getInitialStoryPrompt,
   processStoryTurn,
 } from "../services/storytelling.service.js";
+import { getLlmOptionsFromRequest } from "../utils/llmOptions.js";
 
 const getInitialStory = async (req, res) => {
   try {
     const { genre } = req.body || {};
-    const result = await getInitialStoryPrompt(genre);
+    const llmOptions = getLlmOptionsFromRequest(req);
+    const result = await getInitialStoryPrompt(genre, llmOptions);
     console.log("=== STORY OPENING ===");
     console.log(result.text);
     return res.json(result);
@@ -40,6 +42,7 @@ const submitStoryTurn = async (req, res) => {
       currentTurn,
       maxTurns,
       turns,
+      llmOptions: getLlmOptionsFromRequest(req),
     });
 
     console.log(`=== USER TURN ${currentTurn} ===`);
@@ -63,7 +66,12 @@ const evaluateStorySession = async (req, res) => {
   try {
     const { turns = [], genre = "" } = req.body || {};
     const metrics = req.body?.metrics || {};
-    const result = await evaluateStory({ turns, genre, metrics });
+    const result = await evaluateStory({
+      turns,
+      genre,
+      metrics,
+      llmOptions: getLlmOptionsFromRequest(req),
+    });
     return res.json(result);
   } catch (error) {
     return res.status(500).json({ error: error?.message ?? "Unknown error" });

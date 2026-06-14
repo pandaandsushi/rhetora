@@ -1,8 +1,10 @@
 import { getFillerFreeQuestion, evaluateFillerFree } from "../services/fillerFree.service.js";
+import { getLlmOptionsFromRequest } from "../utils/llmOptions.js";
 
 const getQuestion = async (req, res) => {
   try {
-    const result = await getFillerFreeQuestion();
+    const llmOptions = getLlmOptionsFromRequest(req);
+    const result = await getFillerFreeQuestion(llmOptions);
     return res.json(result);
   } catch (error) {
     console.error("[FillerFree] getQuestion error:", error);
@@ -32,6 +34,7 @@ const evaluate = async (req, res) => {
       file: req.file,
       fillerWords,
       question,
+      llmOptions: getLlmOptionsFromRequest(req),
     });
 
     console.log("[FillerFree] Evaluation complete");

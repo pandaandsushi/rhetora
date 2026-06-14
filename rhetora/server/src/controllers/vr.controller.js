@@ -1,4 +1,5 @@
 import { evaluateVrSession } from "../services/vrFeedback.service.js";
+import { getLlmOptionsFromRequest } from "../utils/llmOptions.js";
 
 const evaluateVr = async (req, res) => {
   try {
@@ -8,8 +9,9 @@ const evaluateVr = async (req, res) => {
 
     const scenario = req.body?.scenario || "";
     const audience = req.body?.audience || "";
+    const llmOptions = getLlmOptionsFromRequest(req);
 
-    const result = await evaluateVrSession(req.file, { scenario, audience });
+    const result = await evaluateVrSession(req.file, { scenario, audience, llmOptions });
     return res.json(result);
   } catch (error) {
     return res.status(500).json({ error: error?.message ?? "Unknown error" });
