@@ -71,7 +71,6 @@ export default function FillerFree() {
 
   const handleStart = () => {
     const rawSeconds = parseTimeToSeconds(timeValue) || 60;
-    // Clamp to max 1 minute (60 seconds)
     const totalSeconds = Math.min(rawSeconds, 60);
     router.push({
       pathname: "/filler-free-session",

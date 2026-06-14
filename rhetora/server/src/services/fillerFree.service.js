@@ -6,7 +6,6 @@ import {
   buildFillerFreeEvaluationPrompt,
 } from "../prompts/fillerFree.prompt.js";
 
-// Fallback pool of questions when Gemini is unavailable
 const FALLBACK_QUESTIONS = [
   "What is your favorite way to spend your free time?",
   "Describe a place you love to visit and what makes it special.",
@@ -87,11 +86,9 @@ const getFillerFreeQuestion = async (llmOptions = {}) => {
 };
 
 const evaluateFillerFree = async ({ file, fillerWords, question, llmOptions = {} }) => {
-  // Step 1: Transcribe (Deepgram)
   const result = await transcribeBuffer(file);
   const { transcript, words } = result;
 
-  // Step 2: Build metrics using user-supplied filler words
   const durationSeconds = result.metrics.durationSeconds;
   const metrics = buildSpeechMetrics(words, durationSeconds, fillerWords);
 
@@ -100,7 +97,6 @@ const evaluateFillerFree = async ({ file, fillerWords, question, llmOptions = {}
     fillerCounts[item.word] = item.count;
   }
 
-  // Step 3: Ask Gemini for evaluation (with fallback)
   let evaluation;
   try {
     const prompt = buildFillerFreeEvaluationPrompt({

@@ -11,7 +11,6 @@ const normalizeWord = (word) => word.toLowerCase().replace(/[^a-z\s]/g, "").trim
 wss.on("connection", (ws, req) => {
   console.log("[FillerFree WS] Client connected");
 
-  // Parse filler words from query string
   const url = new URL(req.url, `http://localhost:${PORT}`);
   const fillerWordsParam = url.searchParams.get("fillerWords") ?? "";
   const fillerSet = new Set(
@@ -23,7 +22,6 @@ wss.on("connection", (ws, req) => {
 
   console.log("[FillerFree WS] Tracking filler words:", [...fillerSet]);
 
-  // Open Deepgram streaming WebSocket
   const dgParams = new URLSearchParams({
     model: DEEPGRAM_PARAMS.model,
     smart_format: "true",
@@ -57,7 +55,6 @@ wss.on("connection", (ws, req) => {
       const alternative = msg?.channel?.alternatives?.[0];
       const words = alternative?.words ?? [];
 
-      // Scan words for fillers
       const detectedInChunk = {};
       for (const w of words) {
         const raw = w?.word ?? w?.punctuated_word ?? "";
@@ -68,11 +65,9 @@ wss.on("connection", (ws, req) => {
       }
 
       if (msg.is_final && Object.keys(detectedInChunk).length > 0) {
-        // Accumulate counts
         for (const [word, count] of Object.entries(detectedInChunk)) {
           fillerCounts[word] = (fillerCounts[word] ?? 0) + count;
         }
-        // Send update to client
         ws.send(
           JSON.stringify({
             type: "filler_update",
@@ -81,7 +76,6 @@ wss.on("connection", (ws, req) => {
         );
       }
 
-      // Forward transcript for final segments
       if (msg.is_final && alternative?.transcript) {
         ws.send(
           JSON.stringify({
@@ -110,7 +104,6 @@ wss.on("connection", (ws, req) => {
     }
   });
 
-  // Forward binary audio chunks from client → Deepgram
   ws.on("message", (data, isBinary) => {
     if (isBinary && dgWs.readyState === WebSocket.OPEN) {
       dgWs.send(data);
@@ -123,7 +116,6 @@ wss.on("connection", (ws, req) => {
           }
         }
       } catch {
-        // ignore non-JSON text frames
       }
     }
   });

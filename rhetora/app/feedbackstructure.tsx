@@ -21,7 +21,7 @@ type VREvaluationResult = {
 
   skillBreakdown: {
     skill: "Confidence" | "Clarity" | "Engagement" | "Structure" | "Fluency";
-    score: number; // 0-100
+    score: number;
     level: "Needs Improvement" | "Fair" | "Good" | "Excellent";
     reason: string;
   }[];

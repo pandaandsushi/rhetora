@@ -24,7 +24,6 @@ import fillerFreeFallback from "./filler-free-fallback.json";
 
 const logoRhetora = require("../assets/images/logorhetora.png");
 
-// Animated pill component for each detected filler word
 function FillerPill({ word, count, animate }: { word: string; count: number; animate: boolean }) {
   const scale = useRef(new Animated.Value(1)).current;
 
@@ -68,7 +67,6 @@ export default function FillerFreeSession() {
     }
   }, [fillerWords]);
 
-  // State
   const [question, setQuestion] = useState("Loading your question...");
   const [questionLoaded, setQuestionLoaded] = useState(false);
   const [remainingSeconds, setRemainingSeconds] = useState(initialTotalSeconds);
@@ -81,7 +79,6 @@ export default function FillerFreeSession() {
   const [lastUpdatedWord, setLastUpdatedWord] = useState<string | null>(null);
   const [wsReady, setWsReady] = useState(false);
 
-  // Refs
   const recordingRef = useRef<Audio.Recording | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -89,7 +86,6 @@ export default function FillerFreeSession() {
   const lastAudioUriRef = useRef<string | null>(null);
   const fullTranscriptRef = useRef<string>("");
 
-  // Timer ring calculation
   const progress = initialTotalSeconds > 0 ? remainingSeconds / initialTotalSeconds : 0;
   const ringSize = 110;
   const ringStroke = 8;
@@ -118,7 +114,6 @@ export default function FillerFreeSession() {
         }
         wsRef.current.close();
       } catch {
-        // ignore
       }
       wsRef.current = null;
     }
@@ -128,7 +123,6 @@ export default function FillerFreeSession() {
     }
   };
 
-  // Open WebSocket to backend for real-time filler detection
   const openWebSocket = useCallback(() => {
     const fillerParam = parsedFillerWords.join(",");
     const wsUrl = BACKEND_URL.replace(/^http/, "ws") + `/filler-free/stream?fillerWords=${encodeURIComponent(fillerParam)}`;
@@ -146,7 +140,6 @@ export default function FillerFreeSession() {
           setWsReady(true);
         } else if (msg.type === "filler_update") {
           const incoming = msg.fillerCounts as Record<string, number>;
-          // Find which word was just bumped
           setFillerCounts((prev) => {
             let changedWord: string | null = null;
             for (const [w, c] of Object.entries(incoming)) {
@@ -164,7 +157,6 @@ export default function FillerFreeSession() {
           setFillerCounts(incoming);
         }
       } catch {
-        // ignore
       }
     };
 
@@ -261,7 +253,6 @@ export default function FillerFreeSession() {
   }, []);
 
   const handleStartSession = async () => {
-    // Open WS first
     openWebSocket();
 
     const started = await startRecording();
@@ -273,18 +264,15 @@ export default function FillerFreeSession() {
 
   const handlePauseResume = async () => {
     if (isPaused) {
-      // Resume: restart recording + timer
       setIsPaused(false);
       openWebSocket();
       await startRecording();
       startTimer();
     } else {
-      // Pause: stop recording + timer (but keep WS open to flush)
       setIsPaused(true);
       clearTimerInterval();
       const uri = await stopRecording();
       if (uri) lastAudioUriRef.current = uri;
-      // Signal WS to close stream
       closeWebSocket();
     }
   };
@@ -305,7 +293,6 @@ export default function FillerFreeSession() {
     fullTranscriptRef.current = "";
     lastAudioUriRef.current = null;
 
-    // Start fresh
     await handleStartSession();
   };
 
@@ -354,7 +341,6 @@ export default function FillerFreeSession() {
       });
     } catch (error) {
       console.warn("[FillerFree] Evaluation failed, using fallback", error);
-      // Use the real-time WS data if we have it, otherwise fall back to dummy data
       const hasWsData = fullTranscriptRef.current.length > 0 || Object.keys(fillerCounts).length > 0;
       const fallbackData = hasWsData
         ? {
@@ -384,7 +370,6 @@ export default function FillerFreeSession() {
     }
   };
 
-  // Fetch question and auto-start session on mount
   useEffect(() => {
     let isMounted = true;
 
@@ -421,14 +406,12 @@ export default function FillerFreeSession() {
     };
   }, []);
 
-  // Auto-start session once question is loaded
   useEffect(() => {
     if (questionLoaded && !sessionStarted) {
       handleStartSession();
     }
   }, [questionLoaded]);
 
-  // Sorted filler words for display (always show all tracked words, even count=0)
   const fillerPills = useMemo(() => {
     return parsedFillerWords.map((word) => ({
       word,
@@ -461,7 +444,6 @@ export default function FillerFreeSession() {
           }
         />
 
-        {/* Timer + Controls */}
         <View style={styles.controlsRow}>
           <View style={styles.timerCircle}>
             <Svg width={ringSize} height={ringSize} style={styles.timerSvg}>
@@ -511,12 +493,10 @@ export default function FillerFreeSession() {
           </View>
         </View>
 
-        {/* Question */}
         <View style={styles.questionContainer}>
           <Text style={styles.questionText}>{question}</Text>
         </View>
 
-        {/* Filler Word Pills */}
         {hasAnyFillers && (
           <View style={styles.pillsRow}>
             {fillerPills
@@ -532,7 +512,6 @@ export default function FillerFreeSession() {
           </View>
         )}
 
-        {/* Finish Button */}
         {sessionStarted && (
           <Pressable
             style={[styles.finishButton, isSubmitting && styles.finishButtonDisabled]}
@@ -546,7 +525,6 @@ export default function FillerFreeSession() {
         )}
       </ScrollView>
 
-      {/* Confirm Finish Modal */}
       <Modal transparent animationType="fade" visible={finishVisible}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>

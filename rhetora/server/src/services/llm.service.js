@@ -34,11 +34,6 @@ const callByProvider = async (provider, prompt, options) => {
   throw new Error(`Unsupported LLM provider: ${provider}`);
 };
 
-/**
- * Calls the LLM using an explicit provider selection or fallback cascade.
- * Throws only if all configured providers fail — callers should handle the throw
- * and apply their own domain-specific fallback data.
- */
 const callLLM = async (prompt, options = {}) => {
   const requestedProvider = normalizeProvider(options.provider || LLM_PROVIDER || "auto");
   const selectedProvider = requestedProvider || "auto";

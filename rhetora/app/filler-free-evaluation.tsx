@@ -42,7 +42,6 @@ type SessionData = {
   evaluation?: Evaluation;
 };
 
-// Renders transcript text with filler words highlighted
 function HighlightedTranscript({
   text,
   fillerWords,
@@ -56,7 +55,6 @@ function HighlightedTranscript({
     return <Text style={styles.transcriptText}>No transcript available.</Text>;
   }
 
-  // Build a regex that matches any tracked filler word
   const escapedWords = fillerWords.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
   const pattern = new RegExp(`\\b(${escapedWords.join("|")})\\b`, "gi");
   const parts = text.split(pattern);
@@ -140,12 +138,10 @@ export default function FillerFreeEvaluation() {
   const skillLabels = skillBreakdown.map((s) => s.skill);
   const skillScores = skillBreakdown.map((s) => s.score);
 
-  // Pills: show all tracked filler words that appeared
   const fillerPills = fillerWords
     .map((word) => ({ word, count: fillerCounts[word.toLowerCase()] ?? 0 }))
     .filter((p) => p.count > 0);
 
-  // Effective highlighted word: if pill selected, highlight that word; else highlight all
   const effectiveHighlightWord = selectedPill;
 
   const handlePillPress = (word: string) => {
@@ -161,10 +157,8 @@ export default function FillerFreeEvaluation() {
       />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Question */}
         <Text style={styles.questionText}>{question}</Text>
 
-        {/* Video placeholder */}
         <View style={styles.mediaCard}>
           <Image source={mediaImage} style={styles.mediaImage} />
 
@@ -175,7 +169,6 @@ export default function FillerFreeEvaluation() {
           </View>
         </View>
 
-        {/* Quick Summary */}
         <CollapsibleSection
           title="Quick Summary"
           headerStyle={styles.quickSummaryHeader}
@@ -186,7 +179,6 @@ export default function FillerFreeEvaluation() {
           </Text>
         </CollapsibleSection>
 
-        {/* Stats */}
         <View style={styles.summaryCard}>
           <View style={styles.summaryStat}>
             <Text style={styles.summaryLabel}>Total Filler Words</Text>
@@ -202,7 +194,6 @@ export default function FillerFreeEvaluation() {
           </View>
         </View>
 
-        {/* Filler Word Pills */}
         {fillerPills.length > 0 && (
           <View style={styles.pillsSection}>
             <View style={styles.pillsRow}>
@@ -237,7 +228,6 @@ export default function FillerFreeEvaluation() {
           </View>
         )}
 
-        {/* Transcript */}
         <CollapsibleSection title="Transcript">
           <HighlightedTranscript
             text={transcript}
@@ -246,7 +236,6 @@ export default function FillerFreeEvaluation() {
           />
         </CollapsibleSection>
 
-        {/* Skill Breakdown */}
         {skillBreakdown.length > 0 && (
           <>
             <Pressable style={styles.skillHeader} onPress={() => setSkillsModalOpen(true)}>
@@ -260,7 +249,6 @@ export default function FillerFreeEvaluation() {
           </>
         )}
 
-        {/* Recommended Actions */}
         {recommendedActions.length > 0 && (
           <CollapsibleSection
             title="Recommended Actions"
@@ -277,7 +265,6 @@ export default function FillerFreeEvaluation() {
           </CollapsibleSection>
         )}
 
-        {/* Okay Button */}
         <Pressable style={styles.primaryButton} onPress={() => router.replace("/home")}>
           <Text style={styles.primaryButtonText}>Okay</Text>
         </Pressable>
