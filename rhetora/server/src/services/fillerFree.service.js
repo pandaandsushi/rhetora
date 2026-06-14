@@ -18,8 +18,22 @@ const FALLBACK_QUESTIONS = [
   "What is one thing you would change about your daily routine?",
   "Describe your favorite season and why you enjoy it.",
 ];
+const USE_HARDCODED_LLM_TEST_INPUT = true;
 
-// Fallback evaluation when Gemini is unavailable but Deepgram succeeded
+const HARDCODED_FILLER_FREE_TEST_INPUT = {
+  question: "What is your favorite hobby and why do you enjoy it?",
+  transcript:
+    "My favorite hobby is playing video games. I find it really relaxing and a great way to unwind after a long day. I especially enjoy story-driven games that allow me to immerse myself in different worlds and narratives. Sometimes I play with friends, which adds a fun social aspect to it. Currently, I'm playing Stardew Valley, and it's been a fantastic experience. I love to get to know the characters and build up my farm.",
+  metrics: {
+    durationSeconds: 47,
+    wordRatePerMinute: 102,
+    totalFillerWords: 2,
+    fillerWords: [
+      { word: "um", count: 1 },
+      { word: "like", count: 1 },
+    ],
+  },
+};
 const buildFallbackEvaluation = () => ({
   quickSummary:
     "Great effort! AI evaluation is temporarily unavailable, but your filler word counts and transcript are accurate. Review the example tips below to improve your fluency.",
@@ -85,16 +99,38 @@ const getFillerFreeQuestion = async (llmOptions = {}) => {
   }
 };
 
-const evaluateFillerFree = async ({ file, fillerWords, question, llmOptions = {} }) => {
-  const result = await transcribeBuffer(file);
-  const { transcript, words } = result;
+const evaluateFillerFree = async ({
+  file,
+  fillerWords,
+  question,
+  llmOptions = {},
+}) => {
+  let transcript;
+  let metrics;
+  let fillerCounts = {};
 
-  const durationSeconds = result.metrics.durationSeconds;
-  const metrics = buildSpeechMetrics(words, durationSeconds, fillerWords);
+  if (USE_HARDCODED_LLM_TEST_INPUT) {
+    transcript = HARDCODED_FILLER_FREE_TEST_INPUT.transcript;
+    metrics = HARDCODED_FILLER_FREE_TEST_INPUT.metrics;
+    question = HARDCODED_FILLER_FREE_TEST_INPUT.question;
 
-  const fillerCounts = {};
-  for (const item of metrics.fillerWords) {
-    fillerCounts[item.word] = item.count;
+    for (const item of metrics.fillerWords) {
+      fillerCounts[item.word] = item.count;
+    }
+
+    console.log("[FillerFree] Using hardcoded LLM comparison input");
+  } else {
+    const result = await transcribeBuffer(file);
+    const { words } = result;
+
+    transcript = result.transcript;
+
+    const durationSeconds = result.metrics.durationSeconds;
+    metrics = buildSpeechMetrics(words, durationSeconds, fillerWords);
+
+    for (const item of metrics.fillerWords) {
+      fillerCounts[item.word] = item.count;
+    }
   }
 
   let evaluation;
@@ -105,13 +141,18 @@ const evaluateFillerFree = async ({ file, fillerWords, question, llmOptions = {}
       fillerCounts,
       metrics,
     });
+
     evaluation = await callLLM(prompt, llmOptions);
   } catch (error) {
-    console.warn("[FillerFree] LLM evaluation failed, using fallback:", error?.message);
+    console.warn(
+      "[FillerFree] LLM evaluation failed, using fallback:",
+      error?.message
+    );
     evaluation = buildFallbackEvaluation();
   }
 
   return {
+    question,
     transcript,
     fillerCounts,
     wordRatePerMinute: metrics.wordRatePerMinute,

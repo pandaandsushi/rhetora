@@ -93,8 +93,8 @@ const buildFillerFreeEvaluationPrompt = ({ question, transcript, fillerCounts, m
     "- Reference specific evidence from the transcript when possible.",
     "",
     // 8. Input
-    `Question asked: ${question}`,
-    `Transcript: ${transcript}`,
+    `Question asked: What is your favorite way to spend your free time`,
+    `Transcript: My favorite hobby is playing video games. I find it really relaxing and a great way to unwind after a long day. I especially enjoy story-driven games that allow me to immerse myself in different worlds and narratives. Sometimes I play with friends, which adds a fun social aspect to it. Currently, I'm playing Stardew Valley, and it's been a fantastic experience. I love to get to know the characters and build up my farm.`,
     `Filler word counts: ${JSON.stringify(fillerCounts)}`,
     `Metrics: ${JSON.stringify(metrics)}`,
   ].join("\n");
