@@ -64,7 +64,7 @@ export default function FillerFreeSession() {
     try {
       return JSON.parse(fillerWords ?? "[]");
     } catch {
-      return ["um", "like", "so", "right"];
+      return ["well", "like", "so", "right"];
     }
   }, [fillerWords]);
 

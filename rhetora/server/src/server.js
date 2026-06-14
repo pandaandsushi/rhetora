@@ -144,6 +144,6 @@ wss.on("connection", (ws, req) => {
   });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`Rhetora backend listening on port ${PORT} (HTTP + WebSocket)`);
 });

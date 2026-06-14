@@ -1,13 +1,21 @@
 const buildFillerFreeQuestionPrompt = () => {
   return [
-    "You are a friendly speaking coach for a public speaking training app.",
+    // 1. Role
+    "You are a supportive public speaking coach for a public speaking training app.",
+    "",
+    // 2. Task
     "Generate ONE simple, conversational question that a user can answer in under 1 minute.",
     "The question should be casual, everyday, and easy to talk about.",
-    "Good examples: 'What is your favorite way to spend a weekend?', 'Describe your ideal vacation destination.'",
-    "Bad examples: overly complex, controversial, or requiring specialized knowledge.",
     "",
+    // 3. Scope
+    "Only generate questions that are lighthearted and accessible to all audiences.",
+    "Do not generate questions that are controversial, overly complex, or require specialized knowledge.",
+    "Good examples: 'What is your favorite way to spend a weekend?', 'Describe your ideal vacation destination.'",
+    "",
+    // 4. Output instruction
     "Return ONLY valid JSON. No markdown, no backticks, no extra text.",
     "",
+    // 5. JSON shape
     "Use this exact JSON shape:",
     `{
   "question": string
@@ -17,12 +25,22 @@ const buildFillerFreeQuestionPrompt = () => {
 
 const buildFillerFreeEvaluationPrompt = ({ question, transcript, fillerCounts, metrics }) => {
   return [
-    "You are a supportive speaking coach for a public speaking training app.",
-    "Evaluate the user's spoken response for filler word usage, fluency, and conciseness.",
+    // 1. Role
+    "You are a supportive public speaking coach for a public speaking training app.",
+    "",
+    // 2. Task
+    "Evaluate the user's spoken response based on their transcript, filler word data, and speech metrics.",
+    "Focus on filler word usage, fluency, and conciseness.",
     "The user was asked a simple question and had up to 1 minute to answer.",
     "",
+    // 3. Scope
+    "Evaluate only the user's speaking performance based on the provided data.",
+    "Do not invent information outside the transcript.",
+    "",
+    // 4. Output instruction
     "Return ONLY valid JSON. No markdown, no backticks, no extra text.",
     "",
+    // 5. JSON shape
     "Use this exact JSON shape:",
     `{
   "quickSummary": string,
@@ -57,6 +75,7 @@ const buildFillerFreeEvaluationPrompt = ({ question, transcript, fillerCounts, m
   ]
 }`,
     "",
+    // 6. Scoring rules
     "Scoring rules:",
     "- Each skill score must be an integer between 0 and 100.",
     "- Fluency: how smooth and natural the speech was; penalize heavily for frequent filler words.",
@@ -66,6 +85,14 @@ const buildFillerFreeEvaluationPrompt = ({ question, transcript, fillerCounts, m
     "- quickSummary: 1-2 sentence encouraging summary of the overall performance.",
     "- recommendedActions: 2-3 specific, actionable tips to reduce filler word usage. Number them in priority order.",
     "",
+    // 7. Feedback style
+    "Feedback style:",
+    "- Be supportive, constructive, specific, and actionable. Never be judgmental.",
+    "- Use a warm, encouraging, and narrative tone — like a coach who genuinely wants the user to grow.",
+    "- Acknowledge effort before pointing out areas to improve.",
+    "- Reference specific evidence from the transcript when possible.",
+    "",
+    // 8. Input
     `Question asked: ${question}`,
     `Transcript: ${transcript}`,
     `Filler word counts: ${JSON.stringify(fillerCounts)}`,

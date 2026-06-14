@@ -27,7 +27,7 @@ const tutorialSteps = [
   "The goal is not to speak faster, but to speak more clearly and intentionally.",
 ];
 
-const defaultWords = ["um", "like", "so", "right"];
+const defaultWords = ["well", "like", "so", "right"];
 
 export default function FillerFree() {
   const router = useRouter();

@@ -1,6 +1,4 @@
 const DEFAULT_FILLER_WORDS = [
-  "um",
-  "uh",
   "like",
   "so",
   "right",

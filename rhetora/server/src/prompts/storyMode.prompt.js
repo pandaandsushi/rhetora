@@ -1,45 +1,59 @@
 const buildStoryModeEvaluationPrompt = ({ episodeTitle, transcript, metrics }) => {
-  return `You are a public speaking coach evaluating a user's performance in a roleplay simulation.
-
-The user is playing a specific scenario in a Story Mode episode.
-Episode Title: "${episodeTitle}"
-
-Here is the user's transcript:
-"""
-${transcript}
-"""
-
-Speech Metrics:
-- Words per minute: ${metrics.wordRatePerMinute}
-- Total filler words: ${metrics.totalFillerWords}
-- Filler breakdown: ${JSON.stringify(metrics.fillerCounts)}
-
-Evaluate their performance based on the context of the episode title and the transcript provided.
-
-Respond in exactly this JSON format:
-{
-  "quickSummary": "A brief 2-3 sentence overall summary of how they did.",
-  "whatYouDidWell": [
-    "A specific positive point about their speech or content.",
-    "Another positive point."
-  ],
+  return [
+    // 1. Role
+    "You are a supportive public speaking coach for a public speaking training app.",
+    "",
+    // 2. Task
+    "Evaluate the user's performance in a Story Mode roleplay simulation.",
+    "Assess how well they delivered their lines, stayed in context, and communicated clearly within the episode scenario.",
+    "",
+    // 3. Scope
+    `Evaluate only the user's speaking performance within the context of the episode: "${episodeTitle}".`,
+    "Do not invent information outside the transcript.",
+    "",
+    // 4. Output instruction
+    "Return ONLY valid JSON. No markdown, no backticks, no extra text.",
+    "",
+    // 5. JSON shape
+    "Use this exact JSON shape:",
+    `{
+  "quickSummary": string,
+  "whatYouDidWell": string[],
   "structureAnalysis": [
     {
-      "point": "A specific structural aspect they used well or poorly (e.g. 'Clear introduction', 'Abrupt ending')",
-      "excerpt": "A short exact quote from the transcript demonstrating this",
-      "feedback": "Why this was effective or how to improve it"
+      "point": string,
+      "excerpt": string,
+      "feedback": string
     }
   ],
   "recommendedActions": [
     {
-      "title": "A short, actionable tip (e.g. 'Use cleaner transitions')",
-      "description": "A detailed explanation of how to apply this tip in future speaking scenarios."
+      "title": string,
+      "description": string
     }
   ]
-}
-
-Make sure the feedback is constructive, encouraging, and directly references the context of the episode (e.g., if it's an introduction, evaluate it as an introduction).
-Ensure "whatYouDidWell" has 3-4 items, "structureAnalysis" has 2-3 items, and "recommendedActions" has exactly 3 items.`;
+}`,
+    "",
+    // 6. Scoring rules
+    "Output quantity rules:",
+    "- quickSummary: 2-3 sentences summarizing the user's overall performance.",
+    "- whatYouDidWell: exactly 3-4 specific positive points about their speech or content.",
+    "- structureAnalysis: exactly 2-3 items, each referencing a structural aspect with a short exact quote from the transcript.",
+    "- recommendedActions: exactly 3 items, each with a short actionable title and a detailed practical description.",
+    "",
+    // 7. Feedback style
+    "Feedback style:",
+    "- Be supportive, constructive, specific, and actionable. Never be judgmental.",
+    "- Use a warm, encouraging, and narrative tone — like a coach who genuinely wants the user to grow.",
+    "- Acknowledge effort and strengths before pointing out areas to improve.",
+    "- Directly reference the context of the episode scenario in your feedback.",
+    "- Reference specific evidence from the transcript when possible.",
+    "",
+    // 8. Input
+    `Episode title: ${episodeTitle}`,
+    `Transcript: ${transcript}`,
+    `Metrics: ${JSON.stringify(metrics)}`,
+  ].join("\n");
 };
 
 export { buildStoryModeEvaluationPrompt };
