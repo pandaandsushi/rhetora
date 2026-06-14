@@ -23,7 +23,7 @@ const USE_HARDCODED_LLM_TEST_INPUT = true;
 const HARDCODED_FILLER_FREE_TEST_INPUT = {
   question: "What is your favorite hobby and why do you enjoy it?",
   transcript:
-    "My favorite hobby is playing video games. I find it really relaxing and a great way to unwind after a long day. I especially enjoy story-driven games that allow me to immerse myself in different worlds and narratives. Sometimes I play with friends, which adds a fun social aspect to it. Currently, I'm playing Stardew Valley, and it's been a fantastic experience. I love to get to know the characters and build up my farm.",
+    "My favorite hobby is playing video games. Like, I find it really relaxing and a great way to unwind after a long day. I especially enjoy story-driven games that allow me to immerse myself in different worlds and narratives. Well, sometimes I play with friends, which adds a fun social aspect to it. Currently, I'm playing Stardew Valley, and it's been a fantastic experience. Well yeah, I love to get to know the characters and build up my farm.",
   metrics: {
     durationSeconds: 47,
     wordRatePerMinute: 102,
