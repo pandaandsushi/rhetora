@@ -279,7 +279,8 @@ export default function StorytellingEvaluation() {
           <Text style={styles.primaryButtonText}>Okay</Text>
         </Pressable>
         <Text style={styles.footerNote}>
-            Result will be saved and can be viewed in <Text style={styles.footerBold}>My Recordings</Text>
+            AI feedback may contain mistakes. {"\n"}
+            <Text style={styles.footerBold}>Please review your transcript and feedback.</Text>
         </Text>
       </ScrollView>
 

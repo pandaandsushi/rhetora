@@ -7,9 +7,9 @@ import {
 } from "../prompts/fillerFree.prompt.js";
 
 const FALLBACK_QUESTIONS = [
-  "What is your favorite way to spend your free time?",
   "Describe a place you love to visit and what makes it special.",
   "What is one skill you have always wanted to learn and why?",
+  "What is your favorite way to spend your free time?",
   "Tell me about a memorable meal you have had recently.",
   "What does your ideal weekend look like?",
   "Describe a book, movie, or show that you recently enjoyed.",
@@ -17,6 +17,11 @@ const FALLBACK_QUESTIONS = [
   "Talk about a hobby that you enjoy and how you got into it.",
   "What is one thing you would change about your daily routine?",
   "Describe your favorite season and why you enjoy it.",
+  "What is a goal you have for the next year and how do you plan to achieve it?",
+  "Tell me about a person who has had a positive impact on your life.",
+  "What is a recent accomplishment you are proud of and why?",
+  "What is something new you have learned recently and how did you learn it?",
+  "What is your favorite type of music and how does it make you feel?",
 ];
 
 // Fallback evaluation when Gemini is unavailable but Deepgram succeeded
@@ -74,15 +79,8 @@ const getRandomFallbackQuestion = () => {
 };
 
 const getFillerFreeQuestion = async (llmOptions = {}) => {
-  try {
-    console.log("[FillerFree] Generating question with LLM...");
-    const prompt = buildFillerFreeQuestionPrompt();
-    const result = await callLLM(prompt, llmOptions);
-    return { question: result.question ?? getRandomFallbackQuestion() };
-  } catch (error) {
-    console.warn("[FillerFree] LLM question generation failed, using fallback:", error?.message);
-    return { question: getRandomFallbackQuestion() };
-  }
+  const index = Math.floor(Math.random() * FALLBACK_QUESTIONS.length);
+  return { question: FALLBACK_QUESTIONS[index] };
 };
 
 const evaluateFillerFree = async ({ file, fillerWords, question, llmOptions = {} }) => {
