@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import {
   Dimensions,
   ImageBackground,
+  Modal,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -22,6 +23,7 @@ import {
   skillTabs,
   type PeriodKey,
   type SkillKey,
+  type SkillProgressRange, // ← tambahkan export tipe ini di constants/skill-progress
 } from "../constants/skill-progress";
 const bgImage = require("../assets/images/bg-motif.png");
 
@@ -30,7 +32,6 @@ const chartWidth = Math.min(screenWidth - 80, 320);
 
 const buildLinePath = (width: number, height: number, values: number[]) => {
   const padding = 16;
-  
   const maxValue = Math.max(...values, 1);
   const xStep = (width - padding * 2) / Math.max(values.length - 1, 1);
   const yScale = (height - padding * 2) / maxValue;
@@ -69,8 +70,35 @@ export default function SkillProgress() {
   const router = useRouter();
   const [activeSkill, setActiveSkill] = useState<SkillKey>("fillerWords");
   const [activePeriod, setActivePeriod] = useState<PeriodKey>("daily");
+  const [pickerOpen, setPickerOpen] = useState(false);
 
-  const activeData = skillProgressData[activeSkill][activePeriod];
+  // ─── state untuk menyimpan range yang dipilih per period ───────────────────
+  const [selectedRangeIds, setSelectedRangeIds] = useState<Record<PeriodKey, string>>({
+    daily: "",
+    weekly: "",
+    monthly: "",
+    yearly: "",
+  });
+
+  // ─── kumpulan range per period dari data skill yang aktif ──────────────────
+  const rangesByPeriod = useMemo(() => {
+    const data = skillProgressData[activeSkill];
+    return {
+      daily:   data.dailyRanges   ?? [],
+      weekly:  data.weeklyRanges  ?? [],
+      monthly: data.monthlyRanges ?? [],
+      yearly:  data.yearlyRanges  ?? [],
+    };
+  }, [activeSkill]);
+
+  // ─── cari range aktif; fallback ke index 0 ────────────────────────────────
+  const activeRanges = rangesByPeriod[activePeriod];
+  const activeRange =
+    activeRanges.find((r) => r.id === selectedRangeIds[activePeriod]) ??
+    activeRanges[0];
+
+  // ─── ambil data chart dari range yang aktif ───────────────────────────────
+  const activeData = activeRange ?? skillProgressData[activeSkill][activePeriod];
   const chartValues = activeData.points.map((point) => point.score);
   const chartLabels = activeData.points.map((point) => point.label);
 
@@ -78,10 +106,63 @@ export default function SkillProgress() {
     () => buildLinePath(chartWidth, 170, chartValues),
     [chartValues]
   );
-
   const areaPath = useMemo(
     () => buildAreaPath(chartWidth, 170, chartValues),
     [chartValues]
+  );
+
+  const handleSelectRange = (rangeId: string) => {
+    setSelectedRangeIds((prev) => ({ ...prev, [activePeriod]: rangeId }));
+  };
+
+  // ─── saat ganti skill, reset selectedRangeIds supaya default ke index 0 ───
+  const handleSelectSkill = (skill: SkillKey) => {
+    setActiveSkill(skill);
+    setSelectedRangeIds({ daily: "", weekly: "", monthly: "", yearly: "" });
+  };
+
+  // ─── render list vertikal (daily & yearly) ────────────────────────────────
+  const renderRangeList = (ranges: SkillProgressRange[]) => (
+    <View style={styles.rangeList}>
+      {ranges.map((range) => {
+        const isSelected = range.id === selectedRangeIds[activePeriod];
+        return (
+          <Pressable
+            key={range.id}
+            style={[styles.rangeButton, isSelected && styles.rangeButtonActive]}
+            onPress={() => handleSelectRange(range.id)}
+          >
+            <Text style={[styles.rangeButtonText, isSelected && styles.rangeButtonTextActive]}>
+              {range.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+
+  // ─── render grid (weekly & monthly) ──────────────────────────────────────
+  const renderRangeGrid = (ranges: SkillProgressRange[], columns: number) => (
+    <View style={styles.rangeGrid}>
+      {ranges.map((range) => {
+        const isSelected = range.id === selectedRangeIds[activePeriod];
+        return (
+          <Pressable
+            key={range.id}
+            style={[
+              styles.rangeTile,
+              { width: `${100 / columns - 4}%` },
+              isSelected && styles.rangeTileActive,
+            ]}
+            onPress={() => handleSelectRange(range.id)}
+          >
+            <Text style={[styles.rangeTileText, isSelected && styles.rangeTileTextActive]}>
+              {range.label}
+            </Text>
+          </Pressable>
+        );
+      })}
+    </View>
   );
 
   return (
@@ -95,6 +176,7 @@ export default function SkillProgress() {
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+        {/* ── skill pills ── */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -102,12 +184,11 @@ export default function SkillProgress() {
         >
           {skillTabs.map((skill) => {
             const isActive = skill.key === activeSkill;
-
             return (
               <Pressable
                 key={skill.key}
                 style={[styles.skillPill, isActive && styles.skillPillActive]}
-                onPress={() => setActiveSkill(skill.key)}
+                onPress={() => handleSelectSkill(skill.key)}
               >
                 <Text style={[styles.skillPillText, isActive && styles.skillPillTextActive]}>
                   {skill.label}
@@ -117,6 +198,7 @@ export default function SkillProgress() {
           })}
         </ScrollView>
 
+        {/* ── period tabs ── */}
         <View style={styles.tabRow}>
           {periodTabs.map((tab) => {
             const isActive = tab.key === activePeriod;
@@ -131,10 +213,14 @@ export default function SkillProgress() {
           })}
         </View>
 
+        {/* ── chart card ── */}
         <View style={styles.chartCard}>
           <View style={styles.rangeHeader}>
             <Text style={styles.rangeLabel}>{activeData.label}</Text>
-            <Ionicons name="calendar" size={20} color={Colors.octonary.DEFAULT} />
+            {/* ← onPress sekarang membuka modal */}
+            <Pressable onPress={() => setPickerOpen(true)}>
+              <Ionicons name="calendar" size={20} color={Colors.octonary.DEFAULT} />
+            </Pressable>
           </View>
 
           <Text style={styles.minutesLabel}>score</Text>
@@ -152,10 +238,8 @@ export default function SkillProgress() {
                 strokeDasharray="4 4"
               />
             ))}
-
             <Path d={areaPath} fill="rgba(231, 116, 116, 0.22)" />
             <Path d={linePath} stroke={Colors.senary[300]} strokeWidth={2} fill="none" />
-
             {chartValues.map((value, index) => {
               const padding = 16;
               const maxValue = Math.max(...chartValues, 1);
@@ -164,15 +248,8 @@ export default function SkillProgress() {
               const yScale = (170 - padding * 2) / maxValue;
               const x = padding + index * xStep;
               const y = 170 - padding - value * yScale;
-
               return (
-                <Circle
-                  key={`dot-${index}`}
-                  cx={x}
-                  cy={y}
-                  r={3}
-                  fill={Colors.senary[300]}
-                />
+                <Circle key={`dot-${index}`} cx={x} cy={y} r={3} fill={Colors.senary[300]} />
               );
             })}
           </Svg>
@@ -186,8 +263,8 @@ export default function SkillProgress() {
           </View>
         </View>
 
+        {/* ── overview ── */}
         <Text style={styles.overviewTitle}>OVERVIEW</Text>
-
         <View style={styles.overviewList}>
           {activeData.overview.map((line) => (
             <Text key={line} style={styles.overviewText}>
@@ -200,6 +277,35 @@ export default function SkillProgress() {
       <View style={styles.navWrap}>
         <NavBar activeKey="progress" />
       </View>
+
+      {/* ── modal date picker ── */}
+      <Modal transparent visible={pickerOpen} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <View style={styles.modalHeaderRow}>
+              <Text style={styles.modalTitle}>
+                {activePeriod === "daily" && "Select week"}
+                {activePeriod === "weekly" && "Select month"}
+                {activePeriod === "monthly" && "Select year"}
+                {activePeriod === "yearly" && "View years"}
+              </Text>
+              <View style={styles.modalArrows}>
+                <Ionicons name="chevron-back" size={18} color={Colors.octonary.DEFAULT} />
+                <Ionicons name="chevron-forward" size={18} color={Colors.octonary.DEFAULT} />
+              </View>
+            </View>
+
+            {activePeriod === "daily"   && renderRangeList(rangesByPeriod.daily)}
+            {activePeriod === "weekly"  && renderRangeGrid(rangesByPeriod.weekly, 2)}
+            {activePeriod === "monthly" && renderRangeGrid(rangesByPeriod.monthly, 2)}
+            {activePeriod === "yearly"  && renderRangeList(rangesByPeriod.yearly)}
+
+            <Pressable style={styles.modalConfirm} onPress={() => setPickerOpen(false)}>
+              <Text style={styles.modalConfirmText}>OK</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </ImageBackground>
   );
 }
@@ -312,5 +418,92 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     paddingBottom: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+  },
+  modalCard: {
+    width: "100%",
+    borderRadius: 20,
+    backgroundColor: Colors.shade[200],
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    gap: 16,
+  },
+  modalHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  modalTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
+    color: Colors.octonary.DEFAULT,
+  },
+  modalArrows: {
+    flexDirection: "row",
+    gap: 10,
+  },
+  rangeList: {
+    gap: 12,
+  },
+  rangeButton: {
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.neutral[300],
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+  },
+  rangeButtonActive: {
+    borderColor: Colors.senary[300],
+    backgroundColor: Colors.senary[100],
+  },
+  rangeButtonText: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+  },
+  rangeButtonTextActive: {
+    color: Colors.octonary.DEFAULT,
+  },
+  rangeGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
+    justifyContent: "space-between",
+  },
+  rangeTile: {
+    borderRadius: 14,
+    borderWidth: 1.5,
+    borderColor: Colors.neutral[300],
+    paddingVertical: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  rangeTileActive: {
+    borderColor: Colors.senary[300],
+    backgroundColor: Colors.senary[300],
+  },
+  rangeTileText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+  },
+  rangeTileTextActive: {
+    color: Colors.shade[200],
+  },
+  modalConfirm: {
+    alignSelf: "center",
+    paddingVertical: 6,
+  },
+  modalConfirmText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.senary[300],
+    textDecorationLine: "underline",
   },
 });
