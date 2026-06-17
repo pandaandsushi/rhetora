@@ -149,7 +149,13 @@ export default function Progress() {
         <SafeAreaView style={styles.safeArea}>
           <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
             <View style={styles.headerRow}>
-              <View style={styles.profileRow}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.profileRow,
+                  pressed && styles.profileRowPressed,
+                ]}
+                onPress={() => router.push("/profile")}
+              >
                 <View style={styles.avatarWrap}>
                   <Image source={equippedAvatar?.image} style={styles.avatar} />
 
@@ -157,11 +163,12 @@ export default function Progress() {
                     <Image source={equippedFrame.image} style={styles.avatarFrame} />
                   )}
                 </View>
+
                 <View>
                   <Text style={styles.greeting}>Good Morning!</Text>
                   <Text style={styles.name}>{userData.profile.fullName}</Text>
                 </View>
-              </View>
+              </Pressable>
 
               <View style={styles.headerActions}>
                 <View style={styles.coinPill}>
@@ -312,6 +319,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+  },
+  profileRowPressed: {
+    opacity: 0.75,
   },
   profileRow: {
     flexDirection: "row",
