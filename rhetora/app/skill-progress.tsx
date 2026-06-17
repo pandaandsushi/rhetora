@@ -23,7 +23,7 @@ import {
   skillTabs,
   type PeriodKey,
   type SkillKey,
-  type SkillProgressRange, // ← tambahkan export tipe ini di constants/skill-progress
+  type SkillProgressRange,
 } from "../constants/skill-progress";
 const bgImage = require("../assets/images/bg-motif.png");
 
@@ -72,7 +72,6 @@ export default function SkillProgress() {
   const [activePeriod, setActivePeriod] = useState<PeriodKey>("daily");
   const [pickerOpen, setPickerOpen] = useState(false);
 
-  // ─── state untuk menyimpan range yang dipilih per period ───────────────────
   const [selectedRangeIds, setSelectedRangeIds] = useState<Record<PeriodKey, string>>({
     daily: "",
     weekly: "",
@@ -80,7 +79,6 @@ export default function SkillProgress() {
     yearly: "",
   });
 
-  // ─── kumpulan range per period dari data skill yang aktif ──────────────────
   const rangesByPeriod = useMemo(() => {
     const data = skillProgressData[activeSkill];
     return {
@@ -91,13 +89,11 @@ export default function SkillProgress() {
     };
   }, [activeSkill]);
 
-  // ─── cari range aktif; fallback ke index 0 ────────────────────────────────
   const activeRanges = rangesByPeriod[activePeriod];
   const activeRange =
     activeRanges.find((r) => r.id === selectedRangeIds[activePeriod]) ??
     activeRanges[0];
 
-  // ─── ambil data chart dari range yang aktif ───────────────────────────────
   const activeData = activeRange ?? skillProgressData[activeSkill][activePeriod];
   const chartValues = activeData.points.map((point) => point.score);
   const chartLabels = activeData.points.map((point) => point.label);
@@ -115,13 +111,11 @@ export default function SkillProgress() {
     setSelectedRangeIds((prev) => ({ ...prev, [activePeriod]: rangeId }));
   };
 
-  // ─── saat ganti skill, reset selectedRangeIds supaya default ke index 0 ───
   const handleSelectSkill = (skill: SkillKey) => {
     setActiveSkill(skill);
     setSelectedRangeIds({ daily: "", weekly: "", monthly: "", yearly: "" });
   };
 
-  // ─── render list vertikal (daily & yearly) ────────────────────────────────
   const renderRangeList = (ranges: SkillProgressRange[]) => (
     <View style={styles.rangeList}>
       {ranges.map((range) => {
@@ -141,7 +135,6 @@ export default function SkillProgress() {
     </View>
   );
 
-  // ─── render grid (weekly & monthly) ──────────────────────────────────────
   const renderRangeGrid = (ranges: SkillProgressRange[], columns: number) => (
     <View style={styles.rangeGrid}>
       {ranges.map((range) => {
@@ -176,7 +169,6 @@ export default function SkillProgress() {
       </SafeAreaView>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* ── skill pills ── */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -198,7 +190,6 @@ export default function SkillProgress() {
           })}
         </ScrollView>
 
-        {/* ── period tabs ── */}
         <View style={styles.tabRow}>
           {periodTabs.map((tab) => {
             const isActive = tab.key === activePeriod;
@@ -213,11 +204,9 @@ export default function SkillProgress() {
           })}
         </View>
 
-        {/* ── chart card ── */}
         <View style={styles.chartCard}>
           <View style={styles.rangeHeader}>
             <Text style={styles.rangeLabel}>{activeData.label}</Text>
-            {/* ← onPress sekarang membuka modal */}
             <Pressable onPress={() => setPickerOpen(true)}>
               <Ionicons name="calendar" size={20} color={Colors.octonary.DEFAULT} />
             </Pressable>
@@ -263,7 +252,6 @@ export default function SkillProgress() {
           </View>
         </View>
 
-        {/* ── overview ── */}
         <Text style={styles.overviewTitle}>OVERVIEW</Text>
         <View style={styles.overviewList}>
           {activeData.overview.map((line) => (
@@ -278,7 +266,6 @@ export default function SkillProgress() {
         <NavBar activeKey="progress" />
       </View>
 
-      {/* ── modal date picker ── */}
       <Modal transparent visible={pickerOpen} animationType="fade">
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
