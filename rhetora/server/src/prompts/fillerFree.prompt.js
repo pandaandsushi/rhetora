@@ -23,14 +23,19 @@ const buildFillerFreeQuestionPrompt = () => {
   ].join("\n");
 };
 
-const buildFillerFreeEvaluationPrompt = ({ question, transcript, fillerCounts, metrics }) => {
+const buildFillerFreeEvaluationPrompt = ({
+  question,
+  transcript,
+  fillerCounts,
+  metrics,
+}) => {
   return [
     // 1. Role
     "You are a supportive public speaking coach for a public speaking training app.",
     "",
     // 2. Task
     "Evaluate the user's spoken response based on their transcript, filler word data, and speech metrics.",
-    "Focus on filler word usage, fluency, and conciseness.",
+    "Focus on fluency, filler word usage, and confidence.",
     "The user was asked a simple question and had up to 1 minute to answer.",
     "",
     // 3. Scope
@@ -53,7 +58,7 @@ const buildFillerFreeEvaluationPrompt = ({ question, transcript, fillerCounts, m
       "improvementTip": string
     },
     {
-      "skill": "Conciseness",
+      "skill": "Filler Words",
       "score": number,
       "level": "Needs Improvement" | "Fair" | "Good" | "Excellent",
       "reason": string,
@@ -78,19 +83,19 @@ const buildFillerFreeEvaluationPrompt = ({ question, transcript, fillerCounts, m
     // 6. Scoring rules
     "Scoring rules:",
     "- Each skill score must be an integer between 0 and 100.",
-    "- Fluency: how smooth and natural the speech was; penalize heavily for frequent filler words.",
-    "- Conciseness: how focused and on-topic the answer was.",
-    "- Confidence: overall assertiveness, clarity, and directness.",
+    "- Fluency: measures how smooth, natural, and steady the speech sounds based on the transcript and speech metrics. Penalize for frequent hesitation, broken flow, or unnatural pacing.",
+    "- Filler Words: measures how well the user controls filler word usage. Use the provided filler word counts and total filler words as the main evidence. Fewer filler words should result in a higher score.",
+    "- Confidence: measures overall assertiveness, clarity, and directness based on the transcript, word choice, and delivery indicators from the metrics.",
     "- Level: 0-49 = Needs Improvement, 50-69 = Fair, 70-84 = Good, 85-100 = Excellent.",
     "- quickSummary: 1-2 sentence encouraging summary of the overall performance.",
-    "- recommendedActions: 2-3 specific, actionable tips to reduce filler word usage. Number them in priority order.",
+    "- recommendedActions: 2-3 specific, actionable tips to reduce filler word usage and improve speaking control. Number them in priority order.",
     "",
     // 7. Feedback style
     "Feedback style:",
     "- Be supportive, constructive, specific, and actionable. Never be judgmental.",
     "- Use a warm, encouraging, and narrative tone — like a coach who genuinely wants the user to grow.",
     "- Acknowledge effort before pointing out areas to improve.",
-    "- Reference specific evidence from the transcript when possible.",
+    "- Reference specific evidence from the transcript, filler word counts, or metrics when possible.",
     "",
     // 8. Input
     `Question asked: ${question}`,
