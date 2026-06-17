@@ -394,44 +394,46 @@ export default function PitchLabSession() {
         </View>
 
         {!promptLoading && (
+          <View style={styles.collapsibleWrap}>
             <CollapsibleSection title="Pitch Tips">
-                {!!promptDetails.tips.hook && (
+              {!!promptDetails.tips.hook && (
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Hook</Text>
-                    <Text style={styles.detailValue}>{promptDetails.tips.hook}</Text>
+                  <Text style={styles.detailLabel}>Hook</Text>
+                  <Text style={styles.detailValue}>{promptDetails.tips.hook}</Text>
                 </View>
-                )}
+              )}
 
-                {!!promptDetails.tips.problem && (
+              {!!promptDetails.tips.problem && (
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Problem</Text>
-                    <Text style={styles.detailValue}>{promptDetails.tips.problem}</Text>
+                  <Text style={styles.detailLabel}>Problem</Text>
+                  <Text style={styles.detailValue}>{promptDetails.tips.problem}</Text>
                 </View>
-                )}
+              )}
 
-                {!!promptDetails.tips.solution && (
+              {!!promptDetails.tips.solution && (
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Solution</Text>
-                    <Text style={styles.detailValue}>{promptDetails.tips.solution}</Text>
+                  <Text style={styles.detailLabel}>Solution</Text>
+                  <Text style={styles.detailValue}>{promptDetails.tips.solution}</Text>
                 </View>
-                )}
+              )}
 
-                {!!promptDetails.tips.value && (
+              {!!promptDetails.tips.value && (
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Value</Text>
-                    <Text style={styles.detailValue}>{promptDetails.tips.value}</Text>
+                  <Text style={styles.detailLabel}>Value</Text>
+                  <Text style={styles.detailValue}>{promptDetails.tips.value}</Text>
                 </View>
-                )}
+              )}
 
-                {!!promptDetails.tips.closing && (
+              {!!promptDetails.tips.closing && (
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Closing</Text>
-                    <Text style={styles.detailValue}>{promptDetails.tips.closing}</Text>
+                  <Text style={styles.detailLabel}>Closing</Text>
+                  <Text style={styles.detailValue}>{promptDetails.tips.closing}</Text>
                 </View>
-                )}
+              )}
             </CollapsibleSection>
-            )}
-            {!sessionStarted && !promptLoading && (
+          </View>
+        )}
+        {!sessionStarted && !promptLoading && (
           <Pressable style={styles.startButton} onPress={handleStartSession}>
             <Text style={styles.startButtonText}>Start Talking</Text>
           </Pressable>
@@ -560,6 +562,9 @@ const styles = StyleSheet.create({
     color: Colors.octonary.DEFAULT,
     textAlign: "center",
     lineHeight: 34,
+  },
+  collapsibleWrap: {
+    width: "100%",
   },
   detailRow: {
     gap: 6,
