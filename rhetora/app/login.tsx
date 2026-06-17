@@ -3,7 +3,10 @@ import { Link, router } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   Image,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -22,11 +25,20 @@ export default function Login() {
   }, [email, password]);
 
   return (
-    <View style={styles.screen}>
+  <KeyboardAvoidingView
+    style={styles.screen}
+    behavior={Platform.OS === "android" ? "padding" : "height"}
+  >
+    <ScrollView
+      contentContainerStyle={styles.scrollContent}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
       <Image
         source={require("../assets/images/auth/login-img.png")}
         style={styles.heroImage}
       />
+
       <View style={styles.card}>
         <Text style={styles.title}>Welcome back!</Text>
         <Text style={styles.subtitle}>
@@ -94,14 +106,18 @@ export default function Login() {
           </Link>
         </Text>
       </View>
-    </View>
-  );
+    </ScrollView>
+  </KeyboardAvoidingView>
+);
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: Colors.tertiary.DEFAULT,
+    backgroundColor: Colors.shade[200],
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   heroImage: {
     width: "100%",

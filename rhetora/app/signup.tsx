@@ -3,7 +3,10 @@ import { Link, useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 import {
   Image,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -28,7 +31,15 @@ export default function Signup() {
   }, [fullName, email, password]);
 
   return (
-    <View style={styles.screen}>
+    <KeyboardAvoidingView
+    style={styles.screen}
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+  >
+    <ScrollView
+      contentContainerStyle={styles.scrollContent}
+      keyboardShouldPersistTaps="handled"
+      showsVerticalScrollIndicator={false}
+    >
       <Image
         source={require("../assets/images/auth/signup-img.png")}
         style={styles.heroImage}
@@ -107,14 +118,18 @@ export default function Signup() {
           </Link>
         </Text>
       </View>
-    </View>
+    </ScrollView>
+  </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: Colors.tertiary.DEFAULT,
+    backgroundColor: Colors.shade[200],
+  },
+  scrollContent: {
+    flexGrow: 1,
   },
   heroImage: {
     width: "100%",

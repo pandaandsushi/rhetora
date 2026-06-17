@@ -98,7 +98,7 @@ export default function EnterCode() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: Colors.tertiary.DEFAULT,
+    backgroundColor: Colors.shade[200],
   },
   heroImage: {
     width: "100%",
