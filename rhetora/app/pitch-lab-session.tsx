@@ -57,6 +57,7 @@ export default function PitchLabSession() {
   const [isPaused, setIsPaused] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [finishVisible, setFinishVisible] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const recordingRef = useRef<Audio.Recording | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -193,12 +194,15 @@ export default function PitchLabSession() {
   };
 
   const handleFinishSession = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     clearTimer();
 
     const audioUri = await stopRecording();
 
     if (!audioUri) {
       Alert.alert("Recording not available", "Please try again.");
+      setIsSubmitting(false);
       return;
     }
 
@@ -236,6 +240,7 @@ export default function PitchLabSession() {
         pitchType: pitchType ?? pitchFallback.pitchType,
         prompt,
       };
+      setIsSubmitting(false);
       router.replace({
         pathname: "/pitch-lab-evaluation",
         params: {
@@ -440,8 +445,14 @@ export default function PitchLabSession() {
         )}
 
         {sessionStarted && (
-          <Pressable style={styles.finishButton} onPress={() => setFinishVisible(true)}>
-            <Text style={styles.finishButtonText}>Finish</Text>
+          <Pressable
+            style={[styles.finishButton, isSubmitting && styles.finishButtonDisabled]}
+            onPress={() => setFinishVisible(true)}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.finishButtonText}>
+              {isSubmitting ? "Processing..." : "Finish"}
+            </Text>
           </Pressable>
         )}
       </ScrollView>
@@ -459,11 +470,12 @@ export default function PitchLabSession() {
               </Pressable>
 
               <Pressable
-                style={styles.modalConfirmButton}
+                style={[styles.modalConfirmButton, isSubmitting && styles.finishButtonDisabled]}
                 onPress={() => {
                   setFinishVisible(false);
                   handleFinishSession();
                 }}
+                disabled={isSubmitting}
               >
                 <Text style={styles.modalConfirmText}>Confirm</Text>
               </Pressable>
@@ -614,6 +626,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 28,
+  },
+  finishButtonDisabled: {
+    opacity: 0.6,
   },
   finishButtonText: {
     fontFamily: "Quicksand-Bold",
