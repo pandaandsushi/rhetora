@@ -1,4 +1,4 @@
-import { Image, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Image, ImageBackground, Pressable, ScrollView, StyleSheet, Text, View, TextInput, Modal } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useMemo, useState } from "react";
 import * as ScreenOrientation from "expo-screen-orientation";
@@ -6,6 +6,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { Colors } from "../constants/colors";
 import feedbackData from "./vr-fallback.json";
 import TopHeader from "@/components/top-header";
+import Toast from "../components/toast";
 
 const bgImage = require("../assets/images/bg-motif.png");
 const scenarioImages = {
@@ -71,6 +72,32 @@ export default function VrEvaluation() {
   const router = useRouter();
   const params = useLocalSearchParams<{ data?: string }>();
   const [selectedPill, setSelectedPill] = useState<string | null>(null);
+  const [aiFeedbackModalOpen, setAiFeedbackModalOpen] = useState(false);
+  const [aiFeedbackRating, setAiFeedbackRating] = useState(0);
+  const [aiFeedbackComment, setAiFeedbackComment] = useState("");
+  const [aiFeedbackSubmitted, setAiFeedbackSubmitted] = useState(false);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [toastVariant, setToastVariant] = useState<"success" | "error" | "info">("success");
+
+  const handleSubmitAiFeedback = () => {
+    console.log("[Evaluation] AI evaluation feedback", {
+      mode: "vr-mode",
+      rating: aiFeedbackRating,
+      comment: aiFeedbackComment,
+      evaluation: evaluationData,
+    });
+
+    setAiFeedbackSubmitted(true);
+    setAiFeedbackModalOpen(false);
+    setToastMessage("Feedback submitted successfully");
+    setToastVariant("success");
+    setToastVisible(true);
+
+    setTimeout(() => {
+      setToastVisible(false);
+    }, 2000);
+  };
 
   const handlePillPress = (word: string) => {
     setSelectedPill((prev) => (prev === word ? null : word));
@@ -152,6 +179,29 @@ export default function VrEvaluation() {
         title="Evaluation"
         variant="transparent"
         onBack={() => router.back()}
+        rightElement={
+          <Pressable
+            style={[
+              styles.headerFeedbackButton,
+              aiFeedbackSubmitted && styles.headerFeedbackButtonSubmitted,
+            ]}
+            onPress={() => setAiFeedbackModalOpen(true)}
+          >
+            <Ionicons
+              name={aiFeedbackSubmitted ? "checkmark" : "chatbubble-ellipses-outline"}
+              size={16}
+              color={aiFeedbackSubmitted ? Colors.senary[300] : Colors.shade[200]}
+            />
+            <Text
+              style={[
+                styles.headerFeedbackText,
+                aiFeedbackSubmitted && styles.headerFeedbackTextSubmitted,
+              ]}
+            >
+              {aiFeedbackSubmitted ? "Sent" : "Feedback"}
+            </Text>
+          </Pressable>
+        }
       />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
@@ -294,6 +344,83 @@ export default function VrEvaluation() {
           <Text style={styles.footerBold}>Always review your transcript.</Text>
         </Text>
       </ScrollView>
+      {/* ── AI evaluation feedback modal ── */}
+      <Modal transparent animationType="fade" visible={aiFeedbackModalOpen}>
+        <View style={styles.aiFeedbackModalOverlay}>
+          <View style={styles.aiFeedbackModalCard}>
+            <View style={styles.aiFeedbackModalHeaderRow}>
+              <Text style={styles.aiFeedbackModalTitle}>Give Feedback</Text>
+              <Pressable onPress={() => setAiFeedbackModalOpen(false)}>
+                <Ionicons name="close" size={20} color={Colors.octonary.DEFAULT} />
+              </Pressable>
+            </View>
+
+            <Text style={styles.aiFeedbackSubtitle}>
+              How helpful was this AI evaluation?
+            </Text>
+
+            <View style={styles.aiFeedbackStarRow}>
+              {[1, 2, 3, 4, 5].map((value) => (
+                <Pressable
+                  key={`ai-feedback-${value}`}
+                  onPress={() => setAiFeedbackRating(value)}
+                  hitSlop={8}
+                >
+                  <Ionicons
+                    name={aiFeedbackRating >= value ? "star" : "star-outline"}
+                    size={32}
+                    color={aiFeedbackRating >= value ? "#F59E0B" : Colors.neutral[500]}
+                  />
+                </Pressable>
+              ))}
+            </View>
+
+            <Text style={styles.aiFeedbackQuestion}>
+              What do you think about this evaluation?
+            </Text>
+
+            <TextInput
+              value={aiFeedbackComment}
+              onChangeText={setAiFeedbackComment}
+              placeholder="Tell us if the feedback was helpful, confusing, inaccurate, or missing something..."
+              placeholderTextColor={Colors.neutral[400]}
+              multiline
+              style={styles.aiFeedbackInput}
+            />
+
+            <Text style={styles.aiFeedbackHint}>
+              Your feedback helps improve the AI evaluation experience.
+            </Text>
+
+            <View style={styles.aiFeedbackModalActions}>
+              <Pressable
+                style={[styles.aiFeedbackModalButton, styles.aiFeedbackModalButtonGhost]}
+                onPress={() => setAiFeedbackModalOpen(false)}
+              >
+                <Text style={styles.aiFeedbackModalGhostText}>Cancel</Text>
+              </Pressable>
+
+              <Pressable
+                style={[
+                  styles.aiFeedbackModalButton,
+                  styles.aiFeedbackModalButtonConfirm,
+                  aiFeedbackRating === 0 && styles.aiFeedbackModalButtonDisabled,
+                ]}
+                disabled={aiFeedbackRating === 0}
+                onPress={handleSubmitAiFeedback}
+              >
+                <Text style={styles.aiFeedbackModalConfirmText}>Submit</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Toast
+        visible={toastVisible}
+        message={toastMessage}
+        variant={toastVariant}
+      />
     </ImageBackground>
   );
 }
@@ -666,4 +793,123 @@ const styles = StyleSheet.create({
     fontFamily: "AlbertSans-Bold",
     color: Colors.octonary.DEFAULT,
   },
+  headerFeedbackButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    minHeight: 36,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 999,
+    backgroundColor: Colors.senary[300],
+  },
+  headerFeedbackButtonSubmitted: {
+    backgroundColor: Colors.shade[200],
+    borderWidth: 1.5,
+    borderColor: Colors.senary[300],
+  },
+  headerFeedbackText: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 12,
+    color: Colors.shade[200],
+  },
+  headerFeedbackTextSubmitted: {
+    color: Colors.senary[300],
+  },
+  aiFeedbackModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+  aiFeedbackModalCard: {
+    width: "100%",
+    maxHeight: "92%",
+    borderRadius: 20,
+    backgroundColor: Colors.shade[200],
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+    gap: 12,
+  },
+  aiFeedbackModalHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  aiFeedbackModalTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 17,
+    color: Colors.octonary.DEFAULT,
+  },
+  aiFeedbackSubtitle: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 15,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 21,
+  },
+  aiFeedbackStarRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    paddingVertical: 2,
+  },
+  aiFeedbackQuestion: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+  },
+  aiFeedbackInput: {
+    borderWidth: 1.5,
+    borderColor: Colors.neutral[200],
+    borderRadius: 14,
+    minHeight: 80,
+    paddingHorizontal: 14,
+    paddingTop: 10,
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+    textAlignVertical: "top",
+  },
+  aiFeedbackHint: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.neutral[500],
+    lineHeight: 17,
+  },
+  aiFeedbackModalActions: {
+    flexDirection: "row",
+    gap: 12,
+    marginTop: 4,
+  },
+  aiFeedbackModalButton: {
+    flex: 1,
+    height: 46,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  aiFeedbackModalButtonGhost: {
+    borderWidth: 2,
+    borderColor: Colors.senary[300],
+    backgroundColor: Colors.shade[200],
+  },
+  aiFeedbackModalButtonConfirm: {
+    backgroundColor: Colors.senary[300],
+  },
+  aiFeedbackModalButtonDisabled: {
+    opacity: 0.5,
+  },
+  aiFeedbackModalGhostText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.senary[300],
+  },
+  aiFeedbackModalConfirmText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.shade[200],
+  },
+
 });
