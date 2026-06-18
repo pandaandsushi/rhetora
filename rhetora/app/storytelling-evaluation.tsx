@@ -2,10 +2,11 @@ import { ImageBackground, Image, Modal, Pressable, ScrollView, StyleSheet, Text,
 import { useMemo, useState } from "react";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import CollapsibleSection from "../components/collapsible-section";
+
 import { Colors } from "../constants/colors";
 import TopHeader from "../components/top-header";
 import SkillRadar from "../components/skill-radar";
+
 const mediaImage = require("../assets/images/storymode/maelle.png");
 const bgImage = require("../assets/images/bg-motif.png");
 
@@ -121,9 +122,7 @@ export default function StorytellingEvaluation() {
   const [skillsModalOpen, setSkillsModalOpen] = useState(false);
 
   const evaluation = useMemo<StorytellingEvaluation>(() => {
-    if (!params.data) {
-      return fallbackEvaluation;
-    }
+    if (!params.data) return fallbackEvaluation;
     try {
       return JSON.parse(params.data);
     } catch {
@@ -168,9 +167,7 @@ export default function StorytellingEvaluation() {
     [safeEvaluation.skillBreakdown]
   );
   const storyScore = useMemo(() => {
-    if (!safeEvaluation.skillBreakdown.length) {
-      return safeEvaluation.storyScore;
-    }
+    if (!safeEvaluation.skillBreakdown.length) return safeEvaluation.storyScore;
     const total = safeEvaluation.skillBreakdown.reduce((sum, skill) => sum + skill.score, 0);
     return Math.round(total / safeEvaluation.skillBreakdown.length);
   }, [safeEvaluation.skillBreakdown, safeEvaluation.storyScore]);
@@ -178,112 +175,133 @@ export default function StorytellingEvaluation() {
   return (
     <ImageBackground source={bgImage} style={styles.screen} resizeMode="cover">
       <TopHeader
-        title="Storytelling Evaluation"
+        title="Evaluation"
         variant="transparent"
         onBack={() => router.back()}
       />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.mediaCard}>
-          <Image source={mediaImage} style={styles.mediaImage} />
 
-          <View style={styles.mediaOverlay} />
-
-          <View style={styles.mediaPlayButton}>
-            <Ionicons name="play" size={26} color={Colors.shade[200]} />
+        {/* ── Hero: genre + media + quick summary ── */}
+        <View style={styles.heroCard}>
+          <View style={styles.mediaCard}>
+            <Image source={mediaImage} style={styles.mediaImage} />
+            <View style={styles.mediaOverlay} />
+            <View style={styles.mediaPlayButton}>
+              <Ionicons name="play" size={22} color={Colors.shade[200]} />
+            </View>
           </View>
-        </View>
 
-        <CollapsibleSection
-            title="Quick Summary"
-            headerStyle={styles.quickSummaryHeader}
-            contentStyle={styles.quickSummaryContent}
-            >
+          <View style={styles.heroBody}>
+            <Text style={styles.eyebrow}>{safeEvaluation.genre} story</Text>
+            <Text style={styles.promptText}>{safeEvaluation.overallFeedback.title}</Text>
             <Text style={styles.quickSummaryText}>{safeEvaluation.quickSummary}</Text>
-        </CollapsibleSection>
+          </View>
+        </View>
 
-        <View style={styles.summaryCard}>
-          <View style={styles.summaryStat}>
-            <Text style={styles.summaryLabel}>Story Score</Text>
-            <Text style={styles.summaryValue}>
+        {/* ── Stats row ── */}
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>
               {storyScore}
-              <Text style={styles.summaryUnit}>/100</Text>
+              <Text style={styles.statUnit}>/100</Text>
             </Text>
+            <Text style={styles.statLabel}>Story score</Text>
           </View>
-          <View style={styles.summaryDivider} />
-          <View style={styles.summaryStat}>
-            <Text style={styles.summaryLabel}>Word Rate</Text>
-            <Text style={styles.summaryValue}>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>
               {safeEvaluation.wordRatePerMinute}
-              <Text style={styles.summaryUnit}>/minute</Text>
+              <Text style={styles.statUnit}> wpm</Text>
             </Text>
+            <Text style={styles.statLabel}>Speaking rate</Text>
           </View>
         </View>
 
-        <Pressable style={styles.skillHeader} onPress={() => setSkillsModalOpen(true)}>
-          <Text style={styles.sectionTitle}>Skill Breakdown</Text>
-          <Ionicons name="chevron-forward" size={18} color={Colors.octonary.DEFAULT} />
-        </Pressable>
-
-        <View style={styles.skillCard}>
-          <SkillRadar labels={skillLabels} values={skillScores} size={220} />
-        </View>
-
-        <CollapsibleSection title="Story Recap">
+        {/* ── Story recap ── */}
+        {safeEvaluation.storyRecap.items.length > 0 && (
+          <View style={styles.sectionCard}>
+            <Text style={styles.cardSectionLabel}>Story recap</Text>
             {safeEvaluation.storyRecap.items.map((item, index) => (
-                <Text
+              <Text
                 key={`${item.speaker}-${index}`}
                 style={item.speaker === "user" ? styles.recapUserText : styles.recapAiText}
-                >
+              >
                 {item.text}
-                </Text>
+              </Text>
             ))}
-        </CollapsibleSection>
+          </View>
+        )}
 
-        <CollapsibleSection title="What You Did Well">
-            {safeEvaluation.whatYouDidWell.map((line) => (
-                <View key={line} style={styles.bulletRow}>
-                <Text style={styles.bullet}>•</Text>
-                <Text style={styles.sectionBody}>{line}</Text>
-                </View>
+        {/* ── What you did well ── */}
+        {safeEvaluation.whatYouDidWell.length > 0 && (
+          <View style={styles.sectionCard}>
+            <Text style={styles.cardSectionLabel}>What you did well</Text>
+            {safeEvaluation.whatYouDidWell.map((line, i) => (
+              <View key={i} style={styles.bulletRow}>
+                <View style={styles.bulletDot} />
+                <Text style={styles.bulletText}>{line}</Text>
+              </View>
             ))}
-        </CollapsibleSection>
+          </View>
+        )}
 
-        <CollapsibleSection title="Structure Analysis">
-            {safeEvaluation.structureAnalysis.map((item) => (
-                <View key={item.title} style={styles.analysisRow}>
-                <View style={styles.bulletRow}>
-                    <Text style={styles.bullet}>•</Text>
-                    <View style={{ flex: 1 }}>
-                    <Text style={styles.analysisTitle}>{item.title}</Text>
-                    <Text style={styles.sectionBody}>{item.description}</Text>
-                    </View>
-                </View>
-                </View>
+        {/* ── Structure analysis ── */}
+        {safeEvaluation.structureAnalysis.length > 0 && (
+          <View style={styles.sectionCard}>
+            <Text style={styles.cardSectionLabel}>Structure analysis</Text>
+            {safeEvaluation.structureAnalysis.map((item, i) => (
+              <View key={i} style={styles.analysisItem}>
+                <Text style={styles.analysisTitle}>{item.title}</Text>
+                <Text style={styles.analysisDescription}>{item.description}</Text>
+              </View>
             ))}
-        </CollapsibleSection>
+          </View>
+        )}
 
-        <CollapsibleSection
-            title="Recommended Actions"
-            containerStyle={styles.recommendedCard}
-            >
-            {safeEvaluation.recommendedActions.map((action) => (
-                <View key={action.title} style={styles.recommendedRow}>
-                <Text style={styles.recommendedTitle}>{action.title}</Text>
-                <Text style={styles.sectionBody}>{action.description}</Text>
+        {/* ── Skill breakdown ── */}
+        {safeEvaluation.skillBreakdown.length > 0 && (
+          <View style={styles.skillCard}>
+            <Pressable style={styles.skillCardHeader} onPress={() => setSkillsModalOpen(true)}>
+              <Text style={styles.skillCardTitle}>Skill Breakdown</Text>
+              <View style={styles.skillDetailChip}>
+                <Text style={styles.skillDetailChipText}>Details</Text>
+                <Ionicons name="chevron-forward" size={13} color={Colors.senary[300]} />
+              </View>
+            </Pressable>
+            <SkillRadar labels={skillLabels} values={skillScores} size={220} />
+          </View>
+        )}
+
+        {/* ── Recommended actions ── */}
+        {safeEvaluation.recommendedActions.length > 0 && (
+          <View style={styles.actionsCard}>
+            <Text style={styles.actionsTitle}>What to work on next</Text>
+            {safeEvaluation.recommendedActions.map((action, i) => (
+              <View key={action.title ?? i} style={styles.actionRow}>
+                <View style={styles.actionNumber}>
+                  <Text style={styles.actionNumberText}>{i + 1}</Text>
                 </View>
+                <View style={styles.actionBody}>
+                  <Text style={styles.actionTitle}>{action.title}</Text>
+                  <Text style={styles.actionDescription}>{action.description}</Text>
+                </View>
+              </View>
             ))}
-        </CollapsibleSection>
+          </View>
+        )}
 
         <Pressable style={styles.primaryButton} onPress={() => router.replace("/home")}>
-          <Text style={styles.primaryButtonText}>Okay</Text>
+          <Text style={styles.primaryButtonText}>Done</Text>
         </Pressable>
+
         <Text style={styles.footerNote}>
-            AI feedback may contain mistakes. {"\n"}
-            <Text style={styles.footerBold}>Please review your transcript and feedback.</Text>
+          AI feedback may contain mistakes.{" "}
+          <Text style={styles.footerBold}>Always review your transcript.</Text>
         </Text>
       </ScrollView>
 
+      {/* ── Skill detail modal ── */}
       <Modal transparent animationType="fade" visible={skillsModalOpen}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -293,16 +311,20 @@ export default function StorytellingEvaluation() {
                 <Ionicons name="close" size={20} color={Colors.octonary.DEFAULT} />
               </Pressable>
             </View>
-            <ScrollView contentContainerStyle={styles.modalContent}>
+
+            <ScrollView contentContainerStyle={styles.modalContent} showsVerticalScrollIndicator={false}>
               {safeEvaluation.skillBreakdown.map((skill) => (
                 <View key={skill.skill} style={styles.modalSkillCard}>
                   <View style={styles.modalSkillHeader}>
                     <Text style={styles.modalSkillTitle}>{skill.skill}</Text>
-                    <Text style={styles.modalSkillScore}>{skill.score}</Text>
+                    <View style={styles.modalSkillScoreWrap}>
+                      <Text style={styles.modalSkillScore}>{skill.score}</Text>
+                      <Text style={styles.modalSkillLevel}>{skill.level}</Text>
+                    </View>
                   </View>
-                  <Text style={styles.modalSkillLevel}>{skill.level}</Text>
+                  <Text style={styles.modalTipLabel}>Reason</Text>
                   <Text style={styles.modalSkillText}>{skill.reason}</Text>
-                  <Text style={styles.modalTipLabel}>Improvement Tip</Text>
+                  <Text style={styles.modalTipLabel}>Tip</Text>
                   <Text style={styles.modalSkillText}>{skill.improvementTip}</Text>
                 </View>
               ))}
@@ -322,121 +344,140 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 40,
-    gap: 16,
+    paddingBottom: 48,
+    gap: 14,
+  },
+
+  // ── Hero card ──
+  heroCard: {
+    backgroundColor: Colors.shade[200],
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "rgba(0,0,0,0.15)",
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
   },
   mediaCard: {
-    height: 180,
-    borderRadius: 18,
+    height: 140,
     backgroundColor: "rgba(0,0,0,0.20)",
     alignItems: "center",
     justifyContent: "center",
-    overflow: "hidden",
   },
-
   mediaImage: {
     ...StyleSheet.absoluteFillObject,
     width: "100%",
     height: "100%",
     resizeMode: "cover",
   },
-
   mediaOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.25)",
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
-
   mediaPlayButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: Colors.senary[300],
     alignItems: "center",
     justifyContent: "center",
   },
-  quickSummaryTitle: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 16,
-    color: Colors.octonary.DEFAULT,
-  },
-  quickSummaryBody: {
-    backgroundColor: Colors.shade[200],
-    borderRadius: 14,
-    padding: 16,
-  },
-  genreLabel: {
-    textAlign: "center",
-    fontFamily: "AlbertSans-Medium",
-    fontSize: 14,
-    color: Colors.shade[100],
-  },
-  genreValue: {
-    textAlign: "center",
-    fontFamily: "Quicksand-Bold",
-    fontSize: 20,
-    color: Colors.octonary.DEFAULT,
-    marginBottom: 6,
-  },
-  summaryCard: {
-    backgroundColor: Colors.shade[200],
-    borderRadius: 18,
-    paddingVertical: 20,
+  heroBody: {
     paddingHorizontal: 18,
+    paddingTop: 14,
+    paddingBottom: 18,
+    gap: 6,
+  },
+  eyebrow: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 11,
+    color: Colors.senary[300],
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+  promptText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 17,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 24,
+  },
+  quickSummaryText: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 13,
+    color: Colors.shade[100],
+    lineHeight: 19,
+    marginTop: 2,
+  },
+
+  // ── Stats row ──
+  statsRow: {
     flexDirection: "row",
+    backgroundColor: Colors.shade[200],
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     alignItems: "center",
-    justifyContent: "space-between",
-    shadowColor: "rgba(0,0,0,0.2)",
+    shadowColor: "rgba(0,0,0,0.10)",
     shadowOpacity: 1,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
   },
-  summaryStat: {
-    alignItems: "center",
+  statItem: {
     flex: 1,
+    alignItems: "center",
+    gap: 2,
   },
-  summaryDivider: {
+  statDivider: {
     width: 1,
-    height: 48,
+    height: 36,
     backgroundColor: Colors.shade[100],
+    opacity: 0.5,
   },
-  summaryLabel: {
-    fontFamily: "AlbertSans-Medium",
+  statValue: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 26,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 30,
+  },
+  statUnit: {
+    fontFamily: "AlbertSans-Regular",
     fontSize: 13,
     color: Colors.shade[100],
   },
-  summaryValue: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 24,
-    color: Colors.octonary.DEFAULT,
-    marginTop: 4,
-  },
-    skillHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      paddingHorizontal: 2,
-    },
-    skillCard: {
-      backgroundColor: Colors.shade[200],
-      borderRadius: 18,
-      paddingVertical: 12,
-      alignItems: "center",
-    },
-  summaryUnit: {
+  statLabel: {
+    fontFamily: "AlbertSans-Regular",
     fontSize: 12,
     color: Colors.shade[100],
   },
+
+  // ── Generic section card ──
   sectionCard: {
     backgroundColor: Colors.shade[200],
-    borderRadius: 18,
-    padding: 18,
-    gap: 8,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 18,
+    gap: 10,
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
   },
-  sectionTitle: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 16,
-    color: Colors.octonary.DEFAULT,
+  cardSectionLabel: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 11,
+    color: Colors.shade[100],
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
   },
   recapAiText: {
     fontFamily: "AlbertSans-Regular",
@@ -452,51 +493,169 @@ const styles = StyleSheet.create({
   },
   bulletRow: {
     flexDirection: "row",
-    gap: 8,
+    alignItems: "flex-start",
+    gap: 10,
   },
-  bullet: {
-    fontFamily: "AlbertSans-Bold",
-    fontSize: 16,
-    color: Colors.quinary[300],
+  bulletDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.senary[300],
+    marginTop: 7,
+    flexShrink: 0,
   },
-  analysisRow: {
-    gap: 4,
+  bulletText: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 20,
+    flex: 1,
+  },
+  analysisItem: {
+    gap: 3,
   },
   analysisTitle: {
     fontFamily: "AlbertSans-Bold",
     fontSize: 14,
-    color: Colors.quinary[300],
+    color: Colors.octonary.DEFAULT,
   },
-  recommendedRow: {
+  analysisDescription: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 13,
+    color: Colors.shade[100],
+    lineHeight: 19,
+  },
+
+  // ── Skill card ──
+  skillCard: {
+    backgroundColor: Colors.shade[200],
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 8,
     gap: 4,
+    alignItems: "center",
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
   },
-  recommendedTitle: {
+  skillCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  skillCardTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 15,
+    color: Colors.octonary.DEFAULT,
+  },
+  skillDetailChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: 1.5,
+    borderColor: Colors.senary[300],
+  },
+  skillDetailChipText: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 12,
+    color: Colors.senary[300],
+  },
+
+  // ── Actions card ──
+  actionsCard: {
+    backgroundColor: Colors.shade[200],
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 18,
+    gap: 14,
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
+  },
+  actionsTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 15,
+    color: Colors.octonary.DEFAULT,
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "flex-start",
+  },
+  actionNumber: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: Colors.senary[300],
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 1,
+    flexShrink: 0,
+  },
+  actionNumberText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 13,
+    color: Colors.shade[200],
+  },
+  actionBody: {
+    flex: 1,
+    gap: 3,
+  },
+  actionTitle: {
     fontFamily: "AlbertSans-Bold",
     fontSize: 14,
     color: Colors.octonary.DEFAULT,
   },
+  actionDescription: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 13,
+    color: Colors.shade[100],
+    lineHeight: 19,
+  },
+
+  // ── Primary button ──
   primaryButton: {
     backgroundColor: Colors.senary[300],
     borderRadius: 999,
-    height: 54,
+    height: 52,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 8,
+    marginTop: 4,
   },
   primaryButtonText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
     color: Colors.shade[200],
   },
+
+  // ── Footer ──
   footerNote: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
-    color: Colors.octonary.DEFAULT,
+    fontSize: 11,
+    color: Colors.shade[100],
     textAlign: "center",
+    lineHeight: 17,
   },
   footerBold: {
     fontFamily: "AlbertSans-Bold",
+    color: Colors.octonary.DEFAULT,
   },
+
+  // ── Modal ──
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
@@ -507,7 +666,7 @@ const styles = StyleSheet.create({
   modalCard: {
     width: "100%",
     maxHeight: "80%",
-    borderRadius: 18,
+    borderRadius: 20,
     backgroundColor: Colors.shade[200],
     padding: 20,
     gap: 12,
@@ -519,7 +678,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 18,
+    fontSize: 17,
     color: Colors.octonary.DEFAULT,
   },
   modalContent: {
@@ -531,26 +690,32 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: Colors.quinary[300],
     padding: 14,
-    gap: 6,
+    gap: 5,
   },
   modalSkillHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
+    marginBottom: 2,
   },
   modalSkillTitle: {
     fontFamily: "AlbertSans-Bold",
     fontSize: 15,
     color: Colors.octonary.DEFAULT,
   },
+  modalSkillScoreWrap: {
+    alignItems: "flex-end",
+    gap: 1,
+  },
   modalSkillScore: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 16,
+    fontSize: 18,
     color: Colors.octonary.DEFAULT,
+    lineHeight: 20,
   },
   modalSkillLevel: {
     fontFamily: "AlbertSans-SemiBold",
-    fontSize: 13,
+    fontSize: 11,
     color: Colors.senary[300],
   },
   modalSkillText: {
@@ -561,36 +726,10 @@ const styles = StyleSheet.create({
   },
   modalTipLabel: {
     fontFamily: "AlbertSans-Bold",
-    fontSize: 12,
-    color: Colors.octonary.DEFAULT,
-    marginTop: 4,
+    fontSize: 11,
+    color: Colors.shade[100],
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+    marginTop: 6,
   },
-  quickSummaryHeader: {
-    backgroundColor: "#F6C99A",
-    },
-
-    quickSummaryContent: {
-    backgroundColor: "#F6C99A",
-    paddingTop: 0,
-    },
-
-    quickSummaryText: {
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 14,
-    color: Colors.octonary.DEFAULT,
-    lineHeight: 20,
-    },
-
-    recommendedCard: {
-    backgroundColor: "#FFEBA6",
-    borderColor: Colors.octonary.DEFAULT,
-    },
-
-    sectionBody: {
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 14,
-    color: Colors.octonary.DEFAULT,
-    lineHeight: 20,
-    flex: 1,
-    },
 });

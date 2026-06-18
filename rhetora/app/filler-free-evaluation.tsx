@@ -12,7 +12,6 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-import CollapsibleSection from "../components/collapsible-section";
 import { Colors } from "../constants/colors";
 import TopHeader from "../components/top-header";
 import SkillRadar from "../components/skill-radar";
@@ -157,123 +156,136 @@ export default function FillerFreeEvaluation() {
       />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.questionText}>{question}</Text>
 
-        <View style={styles.mediaCard}>
-          <Image source={mediaImage} style={styles.mediaImage} />
+        {/* ── Hero: question + media + quick summary ── */}
+        <View style={styles.heroCard}>
+          <View style={styles.mediaCard}>
+            <Image source={mediaImage} style={styles.mediaImage} />
+            <View style={styles.mediaOverlay} />
+            <View style={styles.mediaPlayButton}>
+              <Ionicons name="play" size={22} color={Colors.shade[200]} />
+            </View>
+          </View>
 
-          <View style={styles.mediaOverlay} />
-
-          <View style={styles.mediaPlayButton}>
-            <Ionicons name="play" size={26} color={Colors.shade[200]} />
+          <View style={styles.heroBody}>
+            <Text style={styles.eyebrow}>Your question</Text>
+            <Text style={styles.questionText}>{question}</Text>
+            <Text style={styles.quickSummaryText}>
+              {evaluation.quickSummary ?? "Great effort! Review your filler word usage below."}
+            </Text>
           </View>
         </View>
 
-        <CollapsibleSection
-          title="Quick Summary"
-          headerStyle={styles.quickSummaryHeader}
-          contentStyle={styles.quickSummaryContent}
-        >
-          <Text style={styles.quickSummaryText}>
-            {evaluation.quickSummary ?? "Great effort! Review your filler word usage below."}
-          </Text>
-        </CollapsibleSection>
-
-        <View style={styles.summaryCard}>
-          <View style={styles.summaryStat}>
-            <Text style={styles.summaryLabel}>Total Filler Words</Text>
-            <Text style={styles.summaryValue}>{totalFillerWords}</Text>
+        {/* ── Stats row ── */}
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{totalFillerWords}</Text>
+            <Text style={styles.statLabel}>Filler words</Text>
           </View>
-          <View style={styles.summaryDivider} />
-          <View style={styles.summaryStat}>
-            <Text style={styles.summaryLabel}>Word Rate</Text>
-            <Text style={styles.summaryValue}>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>
               {wordRate}
-              <Text style={styles.summaryUnit}> /min</Text>
+              <Text style={styles.statUnit}> wpm</Text>
             </Text>
+            <Text style={styles.statLabel}>Speaking rate</Text>
           </View>
         </View>
 
-        {fillerPills.length > 0 && (
-          <View style={styles.pillsSection}>
-            <View style={styles.pillsRow}>
-              {fillerPills.map((p) => (
-                <Pressable
-                  key={p.word}
-                  style={[
-                    styles.fillerPill,
-                    selectedPill === p.word && styles.fillerPillSelected,
-                  ]}
-                  onPress={() => handlePillPress(p.word)}
-                >
-                  <View style={styles.fillerBadge}>
-                    <Text style={styles.fillerBadgeText}>{p.count}</Text>
-                  </View>
-                  <Text
-                    style={[
-                      styles.fillerPillWord,
-                      selectedPill === p.word && styles.fillerPillWordSelected,
-                    ]}
-                  >
-                    {p.word}
-                  </Text>
-                </Pressable>
-              ))}
+        {/* ── Filler word pills + transcript (grouped) ── */}
+        {(fillerPills.length > 0 || transcript.length > 0) && (
+          <View style={styles.transcriptCard}>
+            {fillerPills.length > 0 && (
+              <View style={styles.pillsSection}>
+                <Text style={styles.cardSectionLabel}>Filler words detected</Text>
+                <View style={styles.pillsRow}>
+                  {fillerPills.map((p) => (
+                    <Pressable
+                      key={p.word}
+                      style={[
+                        styles.fillerPill,
+                        selectedPill === p.word && styles.fillerPillSelected,
+                      ]}
+                      onPress={() => handlePillPress(p.word)}
+                    >
+                      <View style={styles.fillerBadge}>
+                        <Text style={styles.fillerBadgeText}>{p.count}</Text>
+                      </View>
+                      <Text
+                        style={[
+                          styles.fillerPillWord,
+                          selectedPill === p.word && styles.fillerPillWordSelected,
+                        ]}
+                      >
+                        {p.word}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
+                <Text style={styles.pillsHint}>
+                  {selectedPill
+                    ? `Showing "${selectedPill}" highlights. Tap again to clear.`
+                    : "Tap a word to highlight it in the transcript below."}
+                </Text>
+              </View>
+            )}
+
+            <View style={styles.transcriptDivider} />
+
+            <View style={styles.transcriptBody}>
+              <Text style={styles.cardSectionLabel}>Transcript</Text>
+              <HighlightedTranscript
+                text={transcript}
+                fillerWords={fillerWords}
+                selectedWord={effectiveHighlightWord}
+              />
             </View>
-            <Text style={styles.pillsHint}>
-              {selectedPill
-                ? `Showing "${selectedPill}" highlights. Tap again to clear.`
-                : "Tap a pill to highlight that word in the transcript."}
-            </Text>
           </View>
         )}
 
-        <CollapsibleSection title="Transcript">
-          <HighlightedTranscript
-            text={transcript}
-            fillerWords={fillerWords}
-            selectedWord={effectiveHighlightWord}
-          />
-        </CollapsibleSection>
-
+        {/* ── Skill breakdown ── */}
         {skillBreakdown.length > 0 && (
-          <>
-            <Pressable style={styles.skillHeader} onPress={() => setSkillsModalOpen(true)}>
-              <Text style={styles.sectionTitle}>Skill Breakdown</Text>
-              <Ionicons name="chevron-forward" size={18} color={Colors.octonary.DEFAULT} />
+          <View style={styles.skillCard}>
+            <Pressable style={styles.skillCardHeader} onPress={() => setSkillsModalOpen(true)}>
+              <Text style={styles.skillCardTitle}>Skill Breakdown</Text>
+              <View style={styles.skillDetailChip}>
+                <Text style={styles.skillDetailChipText}>Details</Text>
+                <Ionicons name="chevron-forward" size={13} color={Colors.senary[300]} />
+              </View>
             </Pressable>
-
-            <View style={styles.skillCard}>
-              <SkillRadar labels={skillLabels} values={skillScores} size={220} />
-            </View>
-          </>
+            <SkillRadar labels={skillLabels} values={skillScores} size={220} />
+          </View>
         )}
 
+        {/* ── Recommended actions ── */}
         {recommendedActions.length > 0 && (
-          <CollapsibleSection
-            title="Recommended Actions"
-            containerStyle={styles.recommendedCard}
-          >
+          <View style={styles.actionsCard}>
+            <Text style={styles.actionsTitle}>What to work on next</Text>
             {recommendedActions.map((action, i) => (
-              <View key={action.title ?? i} style={styles.recommendedRow}>
-                <Text style={styles.recommendedTitle}>
-                  {i + 1}. {action.title}
-                </Text>
-                <Text style={styles.sectionBody}>{action.description}</Text>
+              <View key={action.title ?? i} style={styles.actionRow}>
+                <View style={styles.actionNumber}>
+                  <Text style={styles.actionNumberText}>{i + 1}</Text>
+                </View>
+                <View style={styles.actionBody}>
+                  <Text style={styles.actionTitle}>{action.title}</Text>
+                  <Text style={styles.actionDescription}>{action.description}</Text>
+                </View>
               </View>
             ))}
-          </CollapsibleSection>
+          </View>
         )}
 
         <Pressable style={styles.primaryButton} onPress={() => router.replace("/home")}>
-          <Text style={styles.primaryButtonText}>Okay</Text>
+          <Text style={styles.primaryButtonText}>Done</Text>
         </Pressable>
 
         <Text style={styles.footerNote}>
-          AI feedback may contain mistakes. {"\n"}
-          <Text style={styles.footerBold}>Please review your transcript and feedback.</Text>
+          AI feedback may contain mistakes.{" "}
+          <Text style={styles.footerBold}>Always review your transcript.</Text>
         </Text>
       </ScrollView>
+
+      {/* ── Skill detail modal ── */}
       <Modal transparent animationType="fade" visible={skillsModalOpen}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
@@ -284,20 +296,19 @@ export default function FillerFreeEvaluation() {
               </Pressable>
             </View>
 
-            <ScrollView contentContainerStyle={styles.modalContent}>
+            <ScrollView contentContainerStyle={styles.modalContent} showsVerticalScrollIndicator={false}>
               {skillBreakdown.map((skill) => (
                 <View key={skill.skill} style={styles.modalSkillCard}>
                   <View style={styles.modalSkillHeader}>
                     <Text style={styles.modalSkillTitle}>{skill.skill}</Text>
-                    <Text style={styles.modalSkillScore}>{skill.score}</Text>
+                    <View style={styles.modalSkillScoreWrap}>
+                      <Text style={styles.modalSkillScore}>{skill.score}</Text>
+                      <Text style={styles.modalSkillLevel}>{skill.level}</Text>
+                    </View>
                   </View>
-
-                  <Text style={styles.modalSkillLevel}>{skill.level}</Text>
-
                   <Text style={styles.modalTipLabel}>Reason</Text>
                   <Text style={styles.modalSkillText}>{skill.reason}</Text>
-
-                  <Text style={styles.modalTipLabel}>Improvement Tip</Text>
+                  <Text style={styles.modalTipLabel}>Tip</Text>
                   <Text style={styles.modalSkillText}>{skill.improvementTip}</Text>
                 </View>
               ))}
@@ -317,110 +328,155 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 40,
-    gap: 16,
+    paddingBottom: 48,
+    gap: 14,
   },
-  questionText: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 20,
-    color: Colors.octonary.DEFAULT,
-    textAlign: "center",
-    lineHeight: 28,
+
+  // ── Hero card ──
+  heroCard: {
+    backgroundColor: Colors.shade[200],
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "rgba(0,0,0,0.15)",
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
   },
   mediaCard: {
-    height: 180,
-    borderRadius: 18,
+    height: 140,
     backgroundColor: "rgba(0,0,0,0.20)",
     alignItems: "center",
     justifyContent: "center",
-    overflow: "hidden",
   },
-
   mediaImage: {
     ...StyleSheet.absoluteFillObject,
     width: "100%",
     height: "100%",
     resizeMode: "cover",
   },
-
   mediaOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.25)",
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
-
   mediaPlayButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: Colors.senary[300],
     alignItems: "center",
     justifyContent: "center",
   },
-  quickSummaryHeader: {
-    backgroundColor: "#F6C99A",
+  heroBody: {
+    paddingHorizontal: 18,
+    paddingTop: 14,
+    paddingBottom: 18,
+    gap: 6,
   },
-  quickSummaryContent: {
-    backgroundColor: "#F6C99A",
-    paddingTop: 0,
+  eyebrow: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 11,
+    color: Colors.senary[300],
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+  questionText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 17,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 24,
   },
   quickSummaryText: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 14,
-    color: Colors.octonary.DEFAULT,
-    lineHeight: 20,
+    fontSize: 13,
+    color: Colors.shade[100],
+    lineHeight: 19,
+    marginTop: 2,
   },
-  summaryCard: {
-    backgroundColor: Colors.shade[200],
-    borderRadius: 18,
-    paddingVertical: 20,
-    paddingHorizontal: 18,
+
+  // ── Stats row ──
+  statsRow: {
     flexDirection: "row",
+    backgroundColor: Colors.shade[200],
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     alignItems: "center",
-    justifyContent: "space-between",
-    shadowColor: "rgba(0,0,0,0.2)",
+    shadowColor: "rgba(0,0,0,0.10)",
     shadowOpacity: 1,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 8 },
-    elevation: 4,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
   },
-  summaryStat: {
-    alignItems: "center",
+  statItem: {
     flex: 1,
+    alignItems: "center",
+    gap: 2,
   },
-  summaryDivider: {
+  statDivider: {
     width: 1,
-    height: 48,
+    height: 36,
     backgroundColor: Colors.shade[100],
+    opacity: 0.5,
   },
-  summaryLabel: {
-    fontFamily: "AlbertSans-Medium",
-    fontSize: 13,
-    color: Colors.shade[100],
-  },
-  summaryValue: {
+  statValue: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 28,
+    fontSize: 26,
     color: Colors.octonary.DEFAULT,
-    marginTop: 4,
+    lineHeight: 30,
   },
-  summaryUnit: {
+  statUnit: {
+    fontFamily: "AlbertSans-Regular",
     fontSize: 13,
     color: Colors.shade[100],
+  },
+  statLabel: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.shade[100],
+  },
+
+  // ── Transcript card (filler pills + transcript grouped) ──
+  transcriptCard: {
+    backgroundColor: Colors.shade[200],
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
   },
   pillsSection: {
-    gap: 8,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 14,
+    gap: 10,
+  },
+  cardSectionLabel: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 11,
+    color: Colors.shade[100],
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
   },
   pillsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 8,
   },
   fillerPill: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    gap: 7,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     borderRadius: 999,
     borderWidth: 1.5,
     borderColor: Colors.quinary[300],
@@ -431,21 +487,21 @@ const styles = StyleSheet.create({
     borderColor: Colors.senary[300],
   },
   fillerBadge: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     backgroundColor: Colors.senary[300],
     alignItems: "center",
     justifyContent: "center",
   },
   fillerBadgeText: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 12,
+    fontSize: 11,
     color: Colors.shade[200],
   },
   fillerPillWord: {
     fontFamily: "AlbertSans-SemiBold",
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.octonary.DEFAULT,
   },
   fillerPillWordSelected: {
@@ -453,9 +509,20 @@ const styles = StyleSheet.create({
   },
   pillsHint: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
+    fontSize: 11,
     color: Colors.shade[100],
-    textAlign: "center",
+  },
+  transcriptDivider: {
+    height: 1,
+    backgroundColor: Colors.shade[100],
+    opacity: 0.3,
+    marginHorizontal: 16,
+  },
+  transcriptBody: {
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 16,
+    gap: 8,
   },
   transcriptText: {
     fontFamily: "AlbertSans-Regular",
@@ -471,66 +538,137 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.senary[100],
     color: Colors.senary[400],
   },
-  sectionTitle: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 16,
-    color: Colors.octonary.DEFAULT,
-    paddingHorizontal: 2,
-  },
-  sectionBody: {
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 14,
-    color: Colors.octonary.DEFAULT,
-    lineHeight: 20,
-  },
+
+  // ── Skill card ──
   skillCard: {
     backgroundColor: Colors.shade[200],
-    borderRadius: 18,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  recommendedCard: {
-    backgroundColor: "#FFEBA6",
-    borderColor: Colors.octonary.DEFAULT,
-  },
-  recommendedRow: {
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 8,
     gap: 4,
-    marginBottom: 8,
+    alignItems: "center",
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
   },
-  recommendedTitle: {
+  skillCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+  },
+  skillCardTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 15,
+    color: Colors.octonary.DEFAULT,
+  },
+  skillDetailChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: 1.5,
+    borderColor: Colors.senary[300],
+  },
+  skillDetailChipText: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 12,
+    color: Colors.senary[300],
+  },
+
+  // ── Actions card ──
+  actionsCard: {
+    backgroundColor: Colors.shade[200],
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 18,
+    gap: 14,
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
+  },
+  actionsTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 15,
+    color: Colors.octonary.DEFAULT,
+  },
+  actionRow: {
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "flex-start",
+  },
+  actionNumber: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: Colors.senary[300],
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 1,
+    flexShrink: 0,
+  },
+  actionNumberText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 13,
+    color: Colors.shade[200],
+  },
+  actionBody: {
+    flex: 1,
+    gap: 3,
+  },
+  actionTitle: {
     fontFamily: "AlbertSans-Bold",
     fontSize: 14,
     color: Colors.octonary.DEFAULT,
   },
+  actionDescription: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 13,
+    color: Colors.shade[100],
+    lineHeight: 19,
+  },
+
+  // ── Primary button ──
   primaryButton: {
     backgroundColor: Colors.senary[300],
     borderRadius: 999,
-    height: 54,
+    height: 52,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 8,
+    marginTop: 4,
   },
   primaryButtonText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
     color: Colors.shade[200],
   },
+
+  // ── Footer ──
   footerNote: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
-    color: Colors.octonary.DEFAULT,
+    fontSize: 11,
+    color: Colors.shade[100],
     textAlign: "center",
+    lineHeight: 17,
   },
   footerBold: {
     fontFamily: "AlbertSans-Bold",
-  },
-  skillHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 2,
+    color: Colors.octonary.DEFAULT,
   },
 
+  // ── Modal ──
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
@@ -538,76 +676,73 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
   },
-
   modalCard: {
     width: "100%",
     maxHeight: "80%",
-    borderRadius: 18,
+    borderRadius: 20,
     backgroundColor: Colors.shade[200],
     padding: 20,
     gap: 12,
   },
-
   modalHeaderRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-
   modalTitle: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 18,
+    fontSize: 17,
     color: Colors.octonary.DEFAULT,
   },
-
   modalContent: {
     gap: 12,
     paddingBottom: 8,
   },
-
   modalSkillCard: {
     borderRadius: 14,
     borderWidth: 1.5,
     borderColor: Colors.quinary[300],
     padding: 14,
-    gap: 6,
+    gap: 5,
   },
-
   modalSkillHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
+    marginBottom: 2,
   },
-
   modalSkillTitle: {
     fontFamily: "AlbertSans-Bold",
     fontSize: 15,
     color: Colors.octonary.DEFAULT,
   },
-
+  modalSkillScoreWrap: {
+    alignItems: "flex-end",
+    gap: 1,
+  },
   modalSkillScore: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 16,
+    fontSize: 18,
     color: Colors.octonary.DEFAULT,
+    lineHeight: 20,
   },
-
   modalSkillLevel: {
     fontFamily: "AlbertSans-SemiBold",
-    fontSize: 13,
+    fontSize: 11,
     color: Colors.senary[300],
   },
-
   modalSkillText: {
     fontFamily: "AlbertSans-Regular",
     fontSize: 13,
     color: Colors.octonary.DEFAULT,
     lineHeight: 18,
   },
-
   modalTipLabel: {
     fontFamily: "AlbertSans-Bold",
-    fontSize: 12,
-    color: Colors.octonary.DEFAULT,
-    marginTop: 4,
+    fontSize: 11,
+    color: Colors.shade[100],
+    letterSpacing: 0.4,
+    textTransform: "uppercase",
+    marginTop: 6,
   },
 });

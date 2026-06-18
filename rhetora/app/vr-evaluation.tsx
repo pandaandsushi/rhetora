@@ -3,16 +3,69 @@ import { Ionicons } from "@expo/vector-icons";
 import { useEffect, useMemo, useState } from "react";
 import * as ScreenOrientation from "expo-screen-orientation";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import CollapsibleSection from "../components/collapsible-section";
 import { Colors } from "../constants/colors";
 import feedbackData from "./vr-fallback.json";
 import TopHeader from "@/components/top-header";
+
 const bgImage = require("../assets/images/bg-motif.png");
 const scenarioImages = {
   Classroom: require("../assets/images/vr/school.png"),
   "Meeting Room": require("../assets/images/vr/meeting.png"),
   Podium: require("../assets/images/vr/podium.png"),
 } as const;
+
+function HighlightedTranscript({
+  text,
+  fillerWords,
+  selectedWord,
+}: {
+  text: string;
+  fillerWords: string[];
+  selectedWord: string | null;
+}) {
+  if (!text) {
+    return <Text style={styles.transcriptText}>No transcript available.</Text>;
+  }
+
+  if (fillerWords.length === 0) {
+    return <Text style={styles.transcriptText}>{text}</Text>;
+  }
+
+  const escapedWords = fillerWords.map((word) =>
+    word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  );
+  const pattern = new RegExp(`\\b(${escapedWords.join("|")})\\b`, "gi");
+  const parts = text.split(pattern);
+
+  return (
+    <Text style={styles.transcriptText}>
+      {parts.map((part, index) => {
+        const isFillerWord = fillerWords.some(
+          (word) => word.toLowerCase() === part.toLowerCase()
+        );
+        const isSelected = selectedWord
+          ? part.toLowerCase() === selectedWord.toLowerCase()
+          : isFillerWord;
+
+        if (!isFillerWord) {
+          return <Text key={`${part}-${index}`}>{part}</Text>;
+        }
+
+        return (
+          <Text
+            key={`${part}-${index}`}
+            style={[
+              styles.transcriptHighlight,
+              isSelected && styles.transcriptHighlightSelected,
+            ]}
+          >
+            {part}
+          </Text>
+        );
+      })}
+    </Text>
+  );
+}
 
 export default function VrEvaluation() {
   const router = useRouter();
@@ -23,64 +76,8 @@ export default function VrEvaluation() {
     setSelectedPill((prev) => (prev === word ? null : word));
   };
 
-  function HighlightedTranscript({
-    text,
-    fillerWords,
-    selectedWord,
-  }: {
-    text: string;
-    fillerWords: string[];
-    selectedWord: string | null;
-  }) {
-    if (!text) {
-      return <Text style={styles.sectionBody}>No transcript available.</Text>;
-    }
-
-    if (fillerWords.length === 0) {
-      return <Text style={styles.sectionBody}>{text}</Text>;
-    }
-
-    const escapedWords = fillerWords.map((word) =>
-      word.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-    );
-
-    const pattern = new RegExp(`\\b(${escapedWords.join("|")})\\b`, "gi");
-    const parts = text.split(pattern);
-
-    return (
-      <Text style={styles.sectionBody}>
-        {parts.map((part, index) => {
-          const isFillerWord = fillerWords.some(
-            (word) => word.toLowerCase() === part.toLowerCase()
-          );
-
-          const isSelected = selectedWord
-            ? part.toLowerCase() === selectedWord.toLowerCase()
-            : isFillerWord;
-
-          if (!isFillerWord) {
-            return <Text key={`${part}-${index}`}>{part}</Text>;
-          }
-
-          return (
-            <Text
-              key={`${part}-${index}`}
-              style={[
-                styles.transcriptHighlight,
-                isSelected && styles.transcriptHighlightSelected,
-              ]}
-            >
-              {part}
-            </Text>
-          );
-        })}
-      </Text>
-    );
-  }
   const parsedPayload = useMemo(() => {
-    if (!params.data) {
-      return null;
-    }
+    if (!params.data) return null;
     try {
       return JSON.parse(params.data);
     } catch {
@@ -96,14 +93,15 @@ export default function VrEvaluation() {
       : evaluationData.overallFeedback?.summary ??
         "Great effort! Review your speaking performance below.";
 
-  const scenarioTitle = `VR Mode: ${evaluationData.scenario}`;
   const previewImage = useMemo(() => {
-    return scenarioImages[evaluationData.scenario as keyof typeof scenarioImages] ??
-      scenarioImages.Podium;
+    return (
+      scenarioImages[evaluationData.scenario as keyof typeof scenarioImages] ??
+      scenarioImages.Podium
+    );
   }, [evaluationData.scenario]);
+
   useEffect(() => {
     ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
-
     return () => {
       ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
     };
@@ -116,13 +114,9 @@ export default function VrEvaluation() {
 
   const safeSummary = {
     totalFillerWords:
-      evaluationData.totalFillerWords ??
-      legacySummary?.totalFillerWords ??
-      0,
+      evaluationData.totalFillerWords ?? legacySummary?.totalFillerWords ?? 0,
     wordRatePerMinute:
-      evaluationData.wordRatePerMinute ??
-      legacySummary?.wordRatePerMinute ??
-      0,
+      evaluationData.wordRatePerMinute ?? legacySummary?.wordRatePerMinute ?? 0,
     fillerWords: Array.isArray(evaluationData.fillerWords)
       ? evaluationData.fillerWords
       : Array.isArray(legacySummary?.fillerWords)
@@ -130,8 +124,8 @@ export default function VrEvaluation() {
         : [],
   };
 
-
   const fillerWords = safeSummary.fillerWords.map((item) => item.word);
+
   const safeWhatYouDidWell = Array.isArray(evaluationData.whatYouDidWell)
     ? evaluationData.whatYouDidWell
     : [];
@@ -146,6 +140,12 @@ export default function VrEvaluation() {
     end: "-",
   };
 
+  const audienceReactionItems = [
+    { emoji: "🙂", label: "Beginning", value: safeAudienceReaction.beginning },
+    { emoji: "😐", label: "Middle", value: safeAudienceReaction.middle },
+    { emoji: "🙂", label: "End", value: safeAudienceReaction.end },
+  ];
+
   return (
     <ImageBackground source={bgImage} style={styles.screen} resizeMode="cover">
       <TopHeader
@@ -155,147 +155,143 @@ export default function VrEvaluation() {
       />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.scenarioTitle}>{scenarioTitle}</Text>
 
-        <View style={styles.previewCard}>
-          <Image source={previewImage} style={styles.previewImage} />
-          <View style={styles.previewOverlay}>
-            <View style={styles.playButton}>
-              <Ionicons name="play" size={26} color={Colors.shade[200]} />
+        {/* ── Hero: scenario + media + quick summary ── */}
+        <View style={styles.heroCard}>
+          <View style={styles.mediaCard}>
+            <Image source={previewImage} style={styles.mediaImage} />
+            <View style={styles.mediaOverlay} />
+            <View style={styles.mediaPlayButton}>
+              <Ionicons name="play" size={22} color={Colors.shade[200]} />
             </View>
+          </View>
+
+          <View style={styles.heroBody}>
+            <Text style={styles.eyebrow}>VR Mode</Text>
+            <Text style={styles.promptText}>{evaluationData.scenario}</Text>
+            <Text style={styles.quickSummaryText}>{quickSummary}</Text>
           </View>
         </View>
 
-        <CollapsibleSection
-          title="Quick Summary"
-          headerStyle={styles.quickSummaryHeader}
-          contentStyle={styles.quickSummaryContent}
-        >
-          <Text style={styles.quickSummaryText}>{quickSummary}</Text>
-        </CollapsibleSection>
-
-        <View style={styles.summaryCard}>
-          <View style={styles.summaryStats}>
-            <View style={styles.summaryStat}>
-              <Text style={styles.summaryLabel}>Total Filler Words</Text>
-              <Text style={styles.summaryValue}>{safeSummary.totalFillerWords}</Text>
-            </View>
-
-            <View style={styles.summaryDivider} />
-
-            <View style={styles.summaryStat}>
-              <Text style={styles.summaryLabel}>Word Rate</Text>
-              <Text style={styles.summaryValue}>
-                {safeSummary.wordRatePerMinute}
-                <Text style={styles.summaryUnit}>/minute</Text>
-              </Text>
-            </View>
+        {/* ── Stats row ── */}
+        <View style={styles.statsRow}>
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>{safeSummary.totalFillerWords}</Text>
+            <Text style={styles.statLabel}>Filler words</Text>
           </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statItem}>
+            <Text style={styles.statValue}>
+              {safeSummary.wordRatePerMinute}
+              <Text style={styles.statUnit}> wpm</Text>
+            </Text>
+            <Text style={styles.statLabel}>Speaking rate</Text>
+          </View>
+        </View>
 
-          {safeSummary.fillerWords.length > 0 && (
-            <View style={styles.fillerSection}>
-              <View style={styles.fillerRow}>
-                {safeSummary.fillerWords.map((item) => (
-                  <Pressable
-                    key={item.word}
-                    style={[
-                      styles.fillerPill,
-                      selectedPill === item.word && styles.fillerPillSelected,
-                    ]}
-                    onPress={() => handlePillPress(item.word)}
-                  >
-                    <View style={styles.fillerCount}>
-                      <Text style={styles.fillerCountText}>{item.count}</Text>
-                    </View>
-
-                    <Text
+        {/* ── Filler word pills + transcript (grouped) ── */}
+        {(safeSummary.fillerWords.length > 0 || !!evaluationData.transcript) && (
+          <View style={styles.transcriptCard}>
+            {safeSummary.fillerWords.length > 0 && (
+              <View style={styles.pillsSection}>
+                <Text style={styles.cardSectionLabel}>Filler words detected</Text>
+                <View style={styles.pillsRow}>
+                  {safeSummary.fillerWords.map((item) => (
+                    <Pressable
+                      key={item.word}
                       style={[
-                        styles.fillerWord,
-                        selectedPill === item.word && styles.fillerWordSelected,
+                        styles.fillerPill,
+                        selectedPill === item.word && styles.fillerPillSelected,
                       ]}
+                      onPress={() => handlePillPress(item.word)}
                     >
-                      {item.word}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-
-              {safeSummary.fillerWords.length > 0 && (
+                      <View style={styles.fillerBadge}>
+                        <Text style={styles.fillerBadgeText}>{item.count}</Text>
+                      </View>
+                      <Text
+                        style={[
+                          styles.fillerPillWord,
+                          selectedPill === item.word && styles.fillerPillWordSelected,
+                        ]}
+                      >
+                        {item.word}
+                      </Text>
+                    </Pressable>
+                  ))}
+                </View>
                 <Text style={styles.pillsHint}>
                   {selectedPill
                     ? `Showing "${selectedPill}" highlights. Tap again to clear.`
-                    : "Tap a pill to highlight that word in the transcript."}
+                    : "Tap a word to highlight it in the transcript below."}
                 </Text>
-              )}
+              </View>
+            )}
+
+            <View style={styles.transcriptDivider} />
+
+            <View style={styles.transcriptBody}>
+              <Text style={styles.cardSectionLabel}>Transcript</Text>
+              <HighlightedTranscript
+                text={evaluationData.transcript}
+                fillerWords={fillerWords}
+                selectedWord={selectedPill}
+              />
             </View>
-          )}
-        </View>
-
-        <CollapsibleSection title="Transcript">
-          <HighlightedTranscript
-            text={evaluationData.transcript}
-            fillerWords={fillerWords}
-            selectedWord={selectedPill}
-          />
-        </CollapsibleSection>
-
-        <CollapsibleSection title="What You Did Well">
-          {safeWhatYouDidWell.map((item) => (
-            <View key={item} style={styles.bulletRow}>
-              <Text style={styles.bullet}>•</Text>
-              <Text style={styles.sectionBody}>{item}</Text>
-            </View>
-          ))}
-        </CollapsibleSection>
-
-        <CollapsibleSection title="Audience Reaction">
-          <View style={styles.reactionRow}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.sectionBody}>
-              <Text style={styles.reactionLabel}>🙂 Beginning: </Text>
-              {safeAudienceReaction.beginning}
-            </Text>
           </View>
+        )}
 
-          <View style={styles.reactionRow}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.sectionBody}>
-              <Text style={styles.reactionLabel}>😐 Middle: </Text>
-              {safeAudienceReaction.middle}
-            </Text>
+        {/* ── What you did well ── */}
+        {safeWhatYouDidWell.length > 0 && (
+          <View style={styles.sectionCard}>
+            <Text style={styles.cardSectionLabel}>What you did well</Text>
+            {safeWhatYouDidWell.map((item, i) => (
+              <View key={i} style={styles.bulletRow}>
+                <View style={styles.bulletDot} />
+                <Text style={styles.bulletText}>{item}</Text>
+              </View>
+            ))}
           </View>
+        )}
 
-          <View style={styles.reactionRow}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.sectionBody}>
-              <Text style={styles.reactionLabel}>🙂 End: </Text>
-              {safeAudienceReaction.end}
-            </Text>
-          </View>
-        </CollapsibleSection>
-
-        <CollapsibleSection
-          title="Recommended Actions"
-          containerStyle={styles.actionsCard}
-        >
-          {safeRecommendedActions.map((action, index) => (
-            <View key={action.title} style={styles.actionRow}>
-              <Text style={styles.actionIndex}>{index + 1}.</Text>
-              <View style={styles.actionBody}>
-                <Text style={styles.actionTitle}>{action.title}</Text>
-                <Text style={styles.sectionBody}>{action.description}</Text>
+        {/* ── Audience reaction ── */}
+        <View style={styles.sectionCard}>
+          <Text style={styles.cardSectionLabel}>Audience reaction</Text>
+          {audienceReactionItems.map((item) => (
+            <View key={item.label} style={styles.reactionRow}>
+              <Text style={styles.reactionEmoji}>{item.emoji}</Text>
+              <View style={styles.reactionBody}>
+                <Text style={styles.reactionLabel}>{item.label}</Text>
+                <Text style={styles.reactionValue}>{item.value}</Text>
               </View>
             </View>
           ))}
-        </CollapsibleSection>
+        </View>
+
+        {/* ── Recommended actions ── */}
+        {safeRecommendedActions.length > 0 && (
+          <View style={styles.actionsCard}>
+            <Text style={styles.actionsTitle}>What to work on next</Text>
+            {safeRecommendedActions.map((action, i) => (
+              <View key={action.title} style={styles.actionRow}>
+                <View style={styles.actionNumber}>
+                  <Text style={styles.actionNumberText}>{i + 1}</Text>
+                </View>
+                <View style={styles.actionBody}>
+                  <Text style={styles.actionTitle}>{action.title}</Text>
+                  <Text style={styles.actionDescription}>{action.description}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
 
         <Pressable style={styles.primaryButton} onPress={() => router.replace("/home")}>
-          <Text style={styles.primaryButtonText}>Okay</Text>
+          <Text style={styles.primaryButtonText}>Done</Text>
         </Pressable>
 
         <Text style={styles.footerNote}>
-          AI feedback may contain mistakes. {"\n"}
-          <Text style={styles.footerBold}>Please review your transcript and feedback.</Text>
+          AI feedback may contain mistakes.{" "}
+          <Text style={styles.footerBold}>Always review your transcript.</Text>
         </Text>
       </ScrollView>
     </ImageBackground>
@@ -307,291 +303,367 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.shade[200],
   },
-  safeArea: {
-    paddingHorizontal: 20,
-    paddingTop: 6,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: Colors.senary[300],
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  headerTitle: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 20,
-    color: Colors.octonary.DEFAULT,
-  },
   content: {
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 40,
+    paddingBottom: 48,
     gap: 14,
   },
-  scenarioTitle: {
-    textAlign: "center",
-    fontFamily: "Quicksand-Bold",
-    fontSize: 18,
-    color: Colors.octonary.DEFAULT,
-  },
-  previewCard: {
-    borderRadius: 16,
-    overflow: "hidden",
-    borderWidth: 2,
-    borderColor: Colors.octonary.DEFAULT,
+
+  // ── Hero card ──
+  heroCard: {
     backgroundColor: Colors.shade[200],
-    height: 190,
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "rgba(0,0,0,0.15)",
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
   },
-  previewImage: {
+  mediaCard: {
+    height: 140,
+    backgroundColor: "rgba(0,0,0,0.20)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  mediaImage: {
+    ...StyleSheet.absoluteFillObject,
     width: "100%",
     height: "100%",
     resizeMode: "cover",
   },
-  previewOverlay: {
+  mediaOverlay: {
     ...StyleSheet.absoluteFillObject,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.25)",
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
-  playButton: {
-    width: 62,
-    height: 62,
-    borderRadius: 31,
+  mediaPlayButton: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: Colors.senary[300],
     alignItems: "center",
     justifyContent: "center",
   },
-  summaryHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: Colors.octonary.DEFAULT,
-    backgroundColor: Colors.quinary[100],
-    paddingHorizontal: 14,
-    paddingVertical: 12,
+  heroBody: {
+    paddingHorizontal: 18,
+    paddingTop: 14,
+    paddingBottom: 18,
+    gap: 6,
   },
-  summaryTitle: {
+  eyebrow: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 11,
+    color: Colors.senary[300],
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+  promptText: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 16,
+    fontSize: 17,
     color: Colors.octonary.DEFAULT,
+    lineHeight: 24,
   },
-  summaryCard: {
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: Colors.octonary.DEFAULT,
-    backgroundColor: Colors.shade[200],
-    padding: 14,
-    gap: 14,
+  quickSummaryText: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 13,
+    color: Colors.shade[100],
+    lineHeight: 19,
+    marginTop: 2,
   },
-  summaryStats: {
+
+  // ── Stats row ──
+  statsRow: {
     flexDirection: "row",
+    backgroundColor: Colors.shade[200],
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     alignItems: "center",
-    justifyContent: "space-between",
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
   },
-  summaryStat: {
+  statItem: {
     flex: 1,
     alignItems: "center",
-    gap: 4,
+    gap: 2,
   },
-  summaryLabel: {
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
-    color: Colors.octonary.DEFAULT,
-  },
-  summaryValue: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 22,
-    color: Colors.octonary.DEFAULT,
-  },
-  summaryUnit: {
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
-    color: Colors.octonary.DEFAULT,
-  },
-  summaryDivider: {
+  statDivider: {
     width: 1,
     height: 36,
-    backgroundColor: Colors.neutral[300],
+    backgroundColor: Colors.shade[100],
+    opacity: 0.5,
   },
-  fillerRow: {
+  statValue: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 26,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 30,
+  },
+  statUnit: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 13,
+    color: Colors.shade[100],
+  },
+  statLabel: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.shade[100],
+  },
+
+  // ── Transcript card (filler pills + transcript grouped) ──
+  transcriptCard: {
+    backgroundColor: Colors.shade[200],
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
+  },
+  pillsSection: {
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 14,
+    gap: 10,
+  },
+  cardSectionLabel: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 11,
+    color: Colors.shade[100],
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+  },
+  pillsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    gap: 8,
   },
   fillerPill: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+    gap: 7,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     borderRadius: 999,
     borderWidth: 1.5,
-    borderColor: Colors.neutral[300],
-    backgroundColor: Colors.neutral[100],
+    borderColor: Colors.quinary[300],
+    backgroundColor: Colors.shade[200],
   },
-  fillerCount: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
+  fillerPillSelected: {
+    backgroundColor: Colors.senary[100],
+    borderColor: Colors.senary[300],
+  },
+  fillerBadge: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: Colors.senary[300],
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: Colors.senary[300],
   },
-  fillerCountText: {
-    fontFamily: "AlbertSans-Bold",
-    fontSize: 12,
+  fillerBadgeText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 11,
     color: Colors.shade[200],
   },
-  fillerWord: {
+  fillerPillWord: {
     fontFamily: "AlbertSans-SemiBold",
-    fontSize: 12,
-    color: Colors.octonary.DEFAULT,
-  },
-  summaryHint: {
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
-    color: Colors.neutral[500],
-    textAlign: "center",
-  },
-  sectionHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 4,
-  },
-  sectionTitle: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 16,
-    color: Colors.octonary.DEFAULT,
-  },
-  sectionCard: {
-    borderRadius: 14,
-    borderWidth: 1.5,
-    borderColor: Colors.neutral[300],
-    backgroundColor: Colors.shade[200],
-    padding: 14,
-    gap: 10,
-  },
-  sectionBody: {
-    fontFamily: "AlbertSans-Regular",
     fontSize: 13,
     color: Colors.octonary.DEFAULT,
-    lineHeight: 18,
-    flex: 1,
+  },
+  fillerPillWordSelected: {
+    color: Colors.senary[300],
+  },
+  pillsHint: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 11,
+    color: Colors.shade[100],
+  },
+  transcriptDivider: {
+    height: 1,
+    backgroundColor: Colors.shade[100],
+    opacity: 0.3,
+    marginHorizontal: 16,
+  },
+  transcriptBody: {
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 16,
+    gap: 8,
+  },
+  transcriptText: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 22,
+  },
+  transcriptHighlight: {
+    color: Colors.senary[300],
+    fontFamily: "AlbertSans-Bold",
+  },
+  transcriptHighlightSelected: {
+    backgroundColor: Colors.senary[100],
+    color: Colors.senary[400],
+  },
+
+  // ── Generic section card ──
+  sectionCard: {
+    backgroundColor: Colors.shade[200],
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 18,
+    gap: 10,
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
   },
   bulletRow: {
     flexDirection: "row",
-    gap: 8,
+    alignItems: "flex-start",
+    gap: 10,
   },
-  bullet: {
-    fontFamily: "AlbertSans-Bold",
+  bulletDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.senary[300],
+    marginTop: 7,
+    flexShrink: 0,
+  },
+  bulletText: {
+    fontFamily: "AlbertSans-Regular",
     fontSize: 14,
     color: Colors.octonary.DEFAULT,
+    lineHeight: 20,
+    flex: 1,
   },
+
+  // ── Audience reaction ──
   reactionRow: {
     flexDirection: "row",
-    gap: 8,
+    alignItems: "flex-start",
+    gap: 12,
+  },
+  reactionEmoji: {
+    fontSize: 18,
+    lineHeight: 22,
+  },
+  reactionBody: {
+    flex: 1,
+    gap: 1,
   },
   reactionLabel: {
-    fontFamily: "AlbertSans-SemiBold",
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 12,
+    color: Colors.shade[100],
+    letterSpacing: 0.3,
+    textTransform: "uppercase",
+  },
+  reactionValue: {
+    fontFamily: "AlbertSans-Regular",
     fontSize: 13,
     color: Colors.octonary.DEFAULT,
-    minWidth: 74,
+    lineHeight: 19,
   },
+
+  // ── Actions card ──
   actionsCard: {
-    backgroundColor: Colors.warning[100],
-    borderColor: Colors.warning[400],
+    backgroundColor: Colors.shade[200],
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 18,
+    gap: 14,
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
+  },
+  actionsTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 15,
+    color: Colors.octonary.DEFAULT,
   },
   actionRow: {
     flexDirection: "row",
-    gap: 10,
+    gap: 12,
+    alignItems: "flex-start",
   },
-  actionIndex: {
+  actionNumber: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: Colors.senary[300],
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 1,
+    flexShrink: 0,
+  },
+  actionNumberText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 13,
+    color: Colors.shade[200],
+  },
+  actionBody: {
+    flex: 1,
+    gap: 3,
+  },
+  actionTitle: {
     fontFamily: "AlbertSans-Bold",
     fontSize: 14,
     color: Colors.octonary.DEFAULT,
   },
-  actionBody: {
-    flex: 1,
-    gap: 4,
-  },
-  actionTitle: {
-    fontFamily: "AlbertSans-SemiBold",
+  actionDescription: {
+    fontFamily: "AlbertSans-Regular",
     fontSize: 13,
-    color: Colors.octonary.DEFAULT,
+    color: Colors.shade[100],
+    lineHeight: 19,
   },
+
+  // ── Primary button ──
   primaryButton: {
-    marginTop: 8,
-    borderRadius: 16,
     backgroundColor: Colors.senary[300],
+    borderRadius: 999,
     height: 52,
     alignItems: "center",
     justifyContent: "center",
+    marginTop: 4,
   },
   primaryButtonText: {
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
     color: Colors.shade[200],
   },
+
+  // ── Footer ──
   footerNote: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
-    color: Colors.octonary.DEFAULT,
+    fontSize: 11,
+    color: Colors.shade[100],
     textAlign: "center",
+    lineHeight: 17,
   },
   footerBold: {
     fontFamily: "AlbertSans-Bold",
-  },
-  quickSummaryHeader: {
-    backgroundColor: "#F6C99A",
-  },
-
-  quickSummaryContent: {
-    backgroundColor: "#F6C99A",
-    paddingTop: 0,
-  },
-
-  quickSummaryText: {
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 14,
     color: Colors.octonary.DEFAULT,
-    lineHeight: 20,
-  },
-  fillerPillSelected: {
-    backgroundColor: Colors.senary[100],
-    borderColor: Colors.senary[300],
-  },
-
-  fillerWordSelected: {
-    color: Colors.senary[300],
-  },
-
-  pillsHint: {
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
-    color: Colors.neutral[500],
-    textAlign: "center",
-  },
-
-  transcriptHighlight: {
-    color: Colors.senary[300],
-    fontFamily: "AlbertSans-Bold",
-  },
-
-  transcriptHighlightSelected: {
-    backgroundColor: Colors.senary[100],
-    color: Colors.senary[400],
-  },
-  fillerSection: {
-    gap: 8,
   },
 });

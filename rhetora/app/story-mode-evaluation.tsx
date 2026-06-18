@@ -12,7 +12,6 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 
-import CollapsibleSection from "../components/collapsible-section";
 import { Colors } from "../constants/colors";
 import TopHeader from "../components/top-header";
 import storyModeFallback from "./story-mode-fallback.json";
@@ -21,6 +20,7 @@ const confettiImage = require("../assets/images/confetti.png");
 const bgImage = require("../assets/images/bg-motif.png");
 const timeToFocusBadge = require("../assets/images/badge/5.png");
 const mediaImage = require("../assets/images/storymode/maelle.png");
+
 type FillerCount = Record<string, number>;
 
 type Evaluation = {
@@ -90,9 +90,7 @@ function HighlightedTranscript({
 
 export default function StoryModeEvaluation() {
   const router = useRouter();
-  const params = useLocalSearchParams<{
-    data?: string;
-  }>();
+  const params = useLocalSearchParams<{ data?: string }>();
 
   const [selectedPill, setSelectedPill] = useState<string | null>(null);
   const [showBadgeModal, setShowBadgeModal] = useState(false);
@@ -104,7 +102,6 @@ export default function StoryModeEvaluation() {
         evaluation: storyModeFallback,
       };
     }
-
     try {
       return JSON.parse(params.data);
     } catch {
@@ -136,8 +133,6 @@ export default function StoryModeEvaluation() {
     .map((word) => ({ word, count: fillerCounts[word] ?? 0 }))
     .filter((p) => p.count > 0);
 
-  const effectiveHighlightWord = selectedPill;
-
   const handlePillPress = (word: string) => {
     setSelectedPill((prev) => (prev === word ? null : word));
   };
@@ -151,141 +146,133 @@ export default function StoryModeEvaluation() {
       />
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.headerWrapper}>
-          <Text style={styles.episodeTitle}>The First Introduction</Text>
-          <Text style={styles.episodeSubtitle}>Now your new friends know you well!</Text>
-        </View>
 
-        <View style={styles.mediaCard}>
-          <Image source={mediaImage} style={styles.mediaImage} />
+        {/* ── Hero: episode title + media + quick summary ── */}
+        <View style={styles.heroCard}>
+          <View style={styles.mediaCard}>
+            <Image source={mediaImage} style={styles.mediaImage} />
+            <View style={styles.mediaOverlay} />
+            <View style={styles.mediaPlayButton}>
+              <Ionicons name="play" size={22} color={Colors.shade[200]} />
+            </View>
+          </View>
 
-          <View style={styles.mediaOverlay} />
-
-          <View style={styles.mediaPlayButton}>
-            <Ionicons name="play" size={26} color={Colors.shade[200]} />
+          <View style={styles.heroBody}>
+            <Text style={styles.eyebrow}>The First Introduction</Text>
+            <Text style={styles.promptText}>Now your new friends know you well!</Text>
+            <Text style={styles.quickSummaryText}>
+              {evaluation.quickSummary ?? "Great effort! Review your performance below."}
+            </Text>
           </View>
         </View>
 
-        <CollapsibleSection
-          title="Quick Summary"
-          headerStyle={styles.quickSummaryHeader}
-          contentStyle={styles.quickSummaryContent}
-        >
-          <Text style={styles.quickSummaryText}>
-            {evaluation.quickSummary ?? "Great effort! Review your performance below."}
-          </Text>
-
-          {/* <View style={styles.summaryCard}>
-            <View style={styles.summaryStat}>
-              <Text style={styles.summaryLabel}>Total Filler Words</Text>
-              <Text style={styles.summaryValue}>{totalFillerWords}</Text>
-            </View>
-            <View style={styles.summaryDivider} />
-            <View style={styles.summaryStat}>
-              <Text style={styles.summaryLabel}>Word Rate</Text>
-              <Text style={styles.summaryValue}>
-                {wordRate}
-                <Text style={styles.summaryUnit}> /minute</Text>
-              </Text>
-            </View>
-          </View> */}
-
-          {fillerPills.length > 0 && (
-            <View style={styles.pillsSection}>
-              <View style={styles.pillsRow}>
-                {fillerPills.map((p) => (
-                  <Pressable
-                    key={p.word}
-                    style={[
-                      styles.fillerPill,
-                      selectedPill === p.word && styles.fillerPillSelected,
-                    ]}
-                    onPress={() => handlePillPress(p.word)}
-                  >
-                    <View style={styles.fillerBadge}>
-                      <Text style={styles.fillerBadgeText}>{p.count}</Text>
-                    </View>
-                    <Text
+        {/* ── Filler word pills + transcript (grouped) ── */}
+        {(fillerPills.length > 0 || transcript.length > 0) && (
+          <View style={styles.transcriptCard}>
+            {fillerPills.length > 0 && (
+              <View style={styles.pillsSection}>
+                <Text style={styles.cardSectionLabel}>Filler words detected</Text>
+                <View style={styles.pillsRow}>
+                  {fillerPills.map((p) => (
+                    <Pressable
+                      key={p.word}
                       style={[
-                        styles.fillerPillWord,
-                        selectedPill === p.word && styles.fillerPillWordSelected,
+                        styles.fillerPill,
+                        selectedPill === p.word && styles.fillerPillSelected,
                       ]}
+                      onPress={() => handlePillPress(p.word)}
                     >
-                      {p.word}
-                    </Text>
-                  </Pressable>
-                ))}
-              </View>
-              <Text style={styles.pillsHint}>
-                {selectedPill
-                  ? `Showing "${selectedPill}" highlights.`
-                  : "Click to see details"}
-              </Text>
-            </View>
-          )}
-        </CollapsibleSection>
-
-        <CollapsibleSection title="Transcript">
-          <HighlightedTranscript
-            text={transcript}
-            fillerWords={trackedFillerWords}
-            selectedWord={effectiveHighlightWord}
-          />
-        </CollapsibleSection>
-
-        {whatYouDidWell.length > 0 && (
-          <CollapsibleSection title="What You Did Well">
-            <View style={styles.listContainer}>
-              {whatYouDidWell.map((item, i) => (
-                <View key={i} style={styles.listItem}>
-                  <Text style={styles.bulletPoint}>•</Text>
-                  <Text style={styles.sectionBody}>{item}</Text>
+                      <View style={styles.fillerBadge}>
+                        <Text style={styles.fillerBadgeText}>{p.count}</Text>
+                      </View>
+                      <Text
+                        style={[
+                          styles.fillerPillWord,
+                          selectedPill === p.word && styles.fillerPillWordSelected,
+                        ]}
+                      >
+                        {p.word}
+                      </Text>
+                    </Pressable>
+                  ))}
                 </View>
-              ))}
-            </View>
-          </CollapsibleSection>
-        )}
-
-        {structureAnalysis.length > 0 && (
-          <CollapsibleSection title="Structure Analysis">
-            <View style={styles.listContainer}>
-              {structureAnalysis.map((item, i) => (
-                <View key={i} style={styles.analysisItem}>
-                  <Text style={styles.analysisPoint}>• {item.point}:</Text>
-                  <Text style={styles.analysisExcerpt}>"{item.excerpt}"</Text>
-                  <Text style={styles.analysisFeedback}>→ {item.feedback}</Text>
-                </View>
-              ))}
-            </View>
-          </CollapsibleSection>
-        )}
-
-        {recommendedActions.length > 0 && (
-          <CollapsibleSection
-            title="Recommended Actions"
-            containerStyle={styles.recommendedCard}
-          >
-            {recommendedActions.map((action, i) => (
-              <View key={action.title ?? i} style={styles.recommendedRow}>
-                <Text style={styles.recommendedTitle}>
-                  {i + 1}. {action.title}
+                <Text style={styles.pillsHint}>
+                  {selectedPill
+                    ? `Showing "${selectedPill}" highlights. Tap again to clear.`
+                    : "Tap a word to highlight it in the transcript below."}
                 </Text>
-                <Text style={styles.sectionBody}>{action.description}</Text>
+              </View>
+            )}
+
+            <View style={styles.transcriptDivider} />
+
+            <View style={styles.transcriptBody}>
+              <Text style={styles.cardSectionLabel}>Transcript</Text>
+              <HighlightedTranscript
+                text={transcript}
+                fillerWords={trackedFillerWords}
+                selectedWord={selectedPill}
+              />
+            </View>
+          </View>
+        )}
+
+        {/* ── What you did well ── */}
+        {whatYouDidWell.length > 0 && (
+          <View style={styles.sectionCard}>
+            <Text style={styles.cardSectionLabel}>What you did well</Text>
+            {whatYouDidWell.map((item, i) => (
+              <View key={i} style={styles.bulletRow}>
+                <View style={styles.bulletDot} />
+                <Text style={styles.bulletText}>{item}</Text>
               </View>
             ))}
-          </CollapsibleSection>
+          </View>
+        )}
+
+        {/* ── Structure analysis ── */}
+        {structureAnalysis.length > 0 && (
+          <View style={styles.sectionCard}>
+            <Text style={styles.cardSectionLabel}>Structure analysis</Text>
+            {structureAnalysis.map((item, i) => (
+              <View key={i} style={styles.analysisItem}>
+                <Text style={styles.analysisTitle}>{item.point}</Text>
+                <Text style={styles.analysisExcerpt}>"{item.excerpt}"</Text>
+                <Text style={styles.analysisDescription}>→ {item.feedback}</Text>
+              </View>
+            ))}
+          </View>
+        )}
+
+        {/* ── Recommended actions ── */}
+        {recommendedActions.length > 0 && (
+          <View style={styles.actionsCard}>
+            <Text style={styles.actionsTitle}>What to work on next</Text>
+            {recommendedActions.map((action, i) => (
+              <View key={action.title ?? i} style={styles.actionRow}>
+                <View style={styles.actionNumber}>
+                  <Text style={styles.actionNumberText}>{i + 1}</Text>
+                </View>
+                <View style={styles.actionBody}>
+                  <Text style={styles.actionTitle}>{action.title}</Text>
+                  <Text style={styles.actionDescription}>{action.description}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
         )}
 
         <Pressable style={styles.primaryButton} onPress={() => setShowBadgeModal(true)}>
-          <Text style={styles.primaryButtonText}>Okay</Text>
+          <Text style={styles.primaryButtonText}>Done</Text>
         </Pressable>
 
         <Text style={styles.footerNote}>
-          AI feedback may contain mistakes. {"\n"}
-          <Text style={styles.footerBold}>Please review your transcript and feedback.</Text>
+          AI feedback may contain mistakes.{" "}
+          <Text style={styles.footerBold}>Always review your transcript.</Text>
         </Text>
       </ScrollView>
 
+      {/* ── Badge modal ── */}
       <Modal
         animationType="fade"
         transparent
@@ -293,11 +280,7 @@ export default function StoryModeEvaluation() {
         onRequestClose={() => setShowBadgeModal(false)}
       >
         <View style={styles.modalOverlay}>
-          <Image
-            source={confettiImage}
-            style={styles.confetti}
-            pointerEvents="none"
-          />
+          <Image source={confettiImage} style={styles.confetti} pointerEvents="none" />
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>You've just earned a new badge!</Text>
             <View style={styles.modalBadgeWrap}>
@@ -349,139 +332,180 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 40,
-    gap: 16,
+    paddingBottom: 48,
+    gap: 14,
   },
-  headerWrapper: {
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  episodeTitle: {
-    fontFamily: "Quicksand-Bold",
-    fontSize: 20,
-    color: Colors.octonary.DEFAULT,
-    textAlign: "center",
-  },
-  episodeSubtitle: {
-    fontFamily: "AlbertSans-Regular",
-    fontSize: 14,
-    color: Colors.octonary.DEFAULT,
-    textAlign: "center",
+
+  // ── Hero card ──
+  heroCard: {
+    backgroundColor: Colors.shade[200],
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "rgba(0,0,0,0.15)",
+    shadowOpacity: 1,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
   },
   mediaCard: {
-    height: 180,
-    borderRadius: 18,
+    height: 140,
     backgroundColor: "rgba(0,0,0,0.20)",
     alignItems: "center",
     justifyContent: "center",
-    overflow: "hidden",
   },
-
   mediaImage: {
     ...StyleSheet.absoluteFillObject,
     width: "100%",
     height: "100%",
     resizeMode: "cover",
   },
-
   mediaOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.25)",
+    backgroundColor: "rgba(0,0,0,0.3)",
   },
-
   mediaPlayButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: Colors.senary[300],
     alignItems: "center",
     justifyContent: "center",
   },
-  quickSummaryHeader: {
-    backgroundColor: "#F6C99A",
+  heroBody: {
+    paddingHorizontal: 18,
+    paddingTop: 14,
+    paddingBottom: 18,
+    gap: 6,
   },
-  quickSummaryContent: {
-    backgroundColor: "#F6C99A",
-    paddingTop: 0,
-    gap: 16,
+  eyebrow: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 11,
+    color: Colors.senary[300],
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+  promptText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 17,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 24,
   },
   quickSummaryText: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 14,
-    color: Colors.octonary.DEFAULT,
-    lineHeight: 20,
+    fontSize: 13,
+    color: Colors.shade[100],
+    lineHeight: 19,
+    marginTop: 2,
   },
-  summaryCard: {
-    backgroundColor: "transparent",
+
+  // ── Stats row ──
+  statsRow: {
     flexDirection: "row",
+    backgroundColor: Colors.shade[200],
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     alignItems: "center",
-    justifyContent: "space-between",
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
   },
-  summaryStat: {
-    alignItems: "center",
+  statItem: {
     flex: 1,
+    alignItems: "center",
+    gap: 2,
   },
-  summaryDivider: {
+  statDivider: {
     width: 1,
-    height: 48,
-    backgroundColor: Colors.octonary.DEFAULT,
+    height: 36,
+    backgroundColor: Colors.shade[100],
+    opacity: 0.5,
   },
-  summaryLabel: {
-    fontFamily: "AlbertSans-Medium",
-    fontSize: 13,
-    color: Colors.octonary.DEFAULT,
-  },
-  summaryValue: {
+  statValue: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 28,
+    fontSize: 26,
     color: Colors.octonary.DEFAULT,
-    marginTop: 4,
+    lineHeight: 30,
   },
-  summaryUnit: {
+  statUnit: {
+    fontFamily: "AlbertSans-Regular",
     fontSize: 13,
-    color: Colors.octonary.DEFAULT,
+    color: Colors.shade[100],
+  },
+  statLabel: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.shade[100],
+  },
+
+  // ── Transcript card (filler pills + transcript grouped) ──
+  transcriptCard: {
+    backgroundColor: Colors.shade[200],
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
   },
   pillsSection: {
-    gap: 12,
-    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 14,
+    gap: 10,
+  },
+  cardSectionLabel: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 11,
+    color: Colors.shade[100],
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
   },
   pillsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
-    justifyContent: "center",
+    gap: 8,
   },
   fillerPill: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    gap: 7,
+    paddingHorizontal: 12,
+    paddingVertical: 7,
     borderRadius: 999,
     borderWidth: 1.5,
-    borderColor: Colors.octonary.DEFAULT,
-    backgroundColor: "transparent",
+    borderColor: Colors.quinary[300],
+    backgroundColor: Colors.shade[200],
   },
   fillerPillSelected: {
     backgroundColor: Colors.senary[100],
     borderColor: Colors.senary[300],
   },
   fillerBadge: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: Colors.octonary.DEFAULT,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: Colors.senary[300],
     alignItems: "center",
     justifyContent: "center",
   },
   fillerBadgeText: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 12,
+    fontSize: 11,
     color: Colors.shade[200],
   },
   fillerPillWord: {
     fontFamily: "AlbertSans-SemiBold",
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.octonary.DEFAULT,
   },
   fillerPillWordSelected: {
@@ -489,9 +513,20 @@ const styles = StyleSheet.create({
   },
   pillsHint: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
-    color: Colors.octonary.DEFAULT,
-    textAlign: "center",
+    fontSize: 11,
+    color: Colors.shade[100],
+  },
+  transcriptDivider: {
+    height: 1,
+    backgroundColor: Colors.shade[100],
+    opacity: 0.3,
+    marginHorizontal: 16,
+  },
+  transcriptBody: {
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 16,
+    gap: 8,
   },
   transcriptText: {
     fontFamily: "AlbertSans-Regular",
@@ -507,91 +542,168 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.senary[100],
     color: Colors.senary[400],
   },
-  sectionBody: {
+
+  // ── Generic section card ──
+  sectionCard: {
+    backgroundColor: Colors.shade[200],
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 18,
+    gap: 10,
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
+  },
+  bulletRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  bulletDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.senary[300],
+    marginTop: 7,
+    flexShrink: 0,
+  },
+  bulletText: {
     fontFamily: "AlbertSans-Regular",
     fontSize: 14,
     color: Colors.octonary.DEFAULT,
     lineHeight: 20,
     flex: 1,
   },
-  listContainer: {
-    gap: 8,
-  },
-  listItem: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 6,
-  },
-  bulletPoint: {
-    fontFamily: "AlbertSans-Bold",
-    fontSize: 14,
-    color: Colors.octonary.DEFAULT,
-    marginTop: 1,
-  },
   analysisItem: {
-    marginBottom: 10,
+    gap: 3,
   },
-  analysisPoint: {
+  analysisTitle: {
     fontFamily: "AlbertSans-Bold",
     fontSize: 14,
     color: Colors.octonary.DEFAULT,
   },
   analysisExcerpt: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 14,
-    color: Colors.neutral[600],
+    fontSize: 13,
+    color: Colors.shade[100],
     fontStyle: "italic",
-    marginLeft: 12,
-    marginTop: 2,
+    lineHeight: 19,
+    marginLeft: 4,
   },
-  analysisFeedback: {
-    fontFamily: "AlbertSans-Medium",
-    fontSize: 14,
+  analysisDescription: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 13,
+    color: Colors.shade[100],
+    lineHeight: 19,
+  },
+
+  // ── Actions card ──
+  actionsCard: {
+    backgroundColor: Colors.shade[200],
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 18,
+    gap: 14,
+    shadowColor: "rgba(0,0,0,0.10)",
+    shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.5)",
+  },
+  actionsTitle: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 15,
     color: Colors.octonary.DEFAULT,
-    marginLeft: 12,
-    marginTop: 4,
   },
-  recommendedCard: {
-    backgroundColor: "#FFEBA6",
-    borderColor: Colors.octonary.DEFAULT,
+  actionRow: {
+    flexDirection: "row",
+    gap: 12,
+    alignItems: "flex-start",
   },
-  recommendedRow: {
-    gap: 4,
-    marginBottom: 8,
+  actionNumber: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: Colors.senary[300],
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 1,
+    flexShrink: 0,
   },
-  recommendedTitle: {
+  actionNumberText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 13,
+    color: Colors.shade[200],
+  },
+  actionBody: {
+    flex: 1,
+    gap: 3,
+  },
+  actionTitle: {
     fontFamily: "AlbertSans-Bold",
     fontSize: 14,
     color: Colors.octonary.DEFAULT,
   },
+  actionDescription: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 13,
+    color: Colors.shade[100],
+    lineHeight: 19,
+  },
+
+  // ── Primary button ──
   primaryButton: {
     backgroundColor: Colors.senary[300],
-    borderRadius: 14,
-    height: 54,
+    borderRadius: 999,
+    height: 52,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 8,
+    marginTop: 4,
   },
   primaryButtonText: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 18,
+    fontSize: 16,
     color: Colors.shade[200],
   },
+
+  // ── Footer ──
   footerNote: {
     fontFamily: "AlbertSans-Regular",
-    fontSize: 12,
-    color: Colors.octonary.DEFAULT,
+    fontSize: 11,
+    color: Colors.shade[100],
     textAlign: "center",
+    lineHeight: 17,
   },
   footerBold: {
     fontFamily: "AlbertSans-Bold",
+    color: Colors.octonary.DEFAULT,
   },
+
+  // ── Badge modal ──
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.45)",
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 24,
+  },
+  confetti: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
   },
   modalCard: {
     width: "100%",
@@ -667,15 +779,5 @@ const styles = StyleSheet.create({
     fontFamily: "Quicksand-Bold",
     fontSize: 16,
     color: Colors.shade[200],
-  },
-  confetti: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-    resizeMode: "cover",
   },
 });
