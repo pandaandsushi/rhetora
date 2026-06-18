@@ -63,8 +63,8 @@ export default function PitchLabSession() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const progress = initialTotalSeconds > 0 ? remainingSeconds / initialTotalSeconds : 0;
-  const ringSize = 110;
-  const ringStroke = 8;
+  const ringSize = 160;
+  const ringStroke = 10;
   const ringRadius = (ringSize - ringStroke) / 2;
   const ringCircumference = 2 * Math.PI * ringRadius;
   const ringOffset = ringCircumference * (1 - progress);
@@ -340,7 +340,7 @@ export default function PitchLabSession() {
           }
         />
 
-        <View style={styles.controlsRow}>
+        <View style={styles.timerBlock}>
           <View style={styles.timerCircle}>
             <Svg width={ringSize} height={ringSize} style={styles.timerSvg}>
               <Circle
@@ -365,13 +365,18 @@ export default function PitchLabSession() {
                 origin={`${ringSize / 2}, ${ringSize / 2}`}
               />
             </Svg>
-            <Text style={styles.timerText}>{formattedTime}</Text>
+            <View style={styles.timerInner}>
+              <Text style={styles.timerText}>{formattedTime}</Text>
+              <Text style={styles.timerLabel}>
+                {!sessionStarted ? "ready" : isPaused ? "paused" : "remaining"}
+              </Text>
+            </View>
           </View>
 
           <View style={styles.actionButtonsWrap}>
             <Pressable style={styles.actionButton} onPress={handleRestart}>
               <View style={styles.actionIconWrap}>
-                <Ionicons name="refresh" size={24} color={Colors.shade[200]} />
+                <Ionicons name="refresh" size={20} color={Colors.shade[200]} />
               </View>
               <Text style={styles.actionLabel}>Restart</Text>
             </Pressable>
@@ -380,7 +385,7 @@ export default function PitchLabSession() {
               <View style={styles.actionIconWrapLight}>
                 <Ionicons
                   name={isPaused ? "play" : "pause"}
-                  size={24}
+                  size={20}
                   color={Colors.senary[300]}
                 />
               </View>
@@ -502,17 +507,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 28,
   },
-  controlsRow: {
-    flexDirection: "row",
+  timerBlock: {
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: 20,
     width: "100%",
-    paddingHorizontal: 10,
   },
   timerCircle: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors.shade[200],
@@ -522,38 +525,50 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
   },
+  timerInner: {
+    alignItems: "center",
+    gap: 2,
+  },
   timerText: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 26,
+    fontSize: 34,
     color: Colors.octonary.DEFAULT,
+    letterSpacing: 1,
+  },
+  timerLabel: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.shade[100],
+    letterSpacing: 0.5,
   },
   actionButtonsWrap: {
     flexDirection: "row",
-    gap: 20,
+    gap: 32,
+    justifyContent: "center",
   },
   actionButton: {
     alignItems: "center",
-    gap: 10,
+    gap: 8,
   },
   actionIconWrap: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: Colors.error[500],
     alignItems: "center",
     justifyContent: "center",
   },
   actionIconWrapLight: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: Colors.warning[100],
     alignItems: "center",
     justifyContent: "center",
   },
   actionLabel: {
     fontFamily: "AlbertSans-Bold",
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.octonary.DEFAULT,
   },
   promptContainer: {

@@ -87,8 +87,8 @@ export default function FillerFreeSession() {
   const fullTranscriptRef = useRef<string>("");
 
   const progress = initialTotalSeconds > 0 ? remainingSeconds / initialTotalSeconds : 0;
-  const ringSize = 110;
-  const ringStroke = 8;
+  const ringSize = 160;
+  const ringStroke = 10;
   const ringRadius = (ringSize - ringStroke) / 2;
   const ringCircumference = 2 * Math.PI * ringRadius;
   const ringOffset = ringCircumference * (1 - progress);
@@ -444,7 +444,7 @@ export default function FillerFreeSession() {
           }
         />
 
-        <View style={styles.controlsRow}>
+        <View style={styles.timerBlock}>
           <View style={styles.timerCircle}>
             <Svg width={ringSize} height={ringSize} style={styles.timerSvg}>
               <Circle
@@ -469,26 +469,33 @@ export default function FillerFreeSession() {
                 origin={`${ringSize / 2}, ${ringSize / 2}`}
               />
             </Svg>
-            <Text style={styles.timerText}>{formattedTime}</Text>
+            <View style={styles.timerInner}>
+              <Text style={styles.timerText}>{formattedTime}</Text>
+              <Text style={styles.timerLabel}>
+                {!sessionStarted ? "starting…" : isPaused ? "paused" : "remaining"}
+              </Text>
+            </View>
           </View>
 
           <View style={styles.actionButtonsWrap}>
             <Pressable style={styles.actionButton} onPress={handleRestart}>
               <View style={styles.actionIconWrap}>
-                <Ionicons name="refresh" size={24} color={Colors.shade[200]} />
+                <Ionicons name="refresh" size={20} color={Colors.shade[200]} />
               </View>
               <Text style={styles.actionLabel}>Restart</Text>
             </Pressable>
 
             <Pressable style={styles.actionButton} onPress={handlePauseResume} disabled={!sessionStarted}>
-              <View style={styles.actionIconWrapLight}>
+              <View style={[styles.actionIconWrapLight, !sessionStarted && styles.actionIconDisabled]}>
                 <Ionicons
                   name={isPaused ? "play" : "pause"}
-                  size={24}
-                  color={Colors.senary[300]}
+                  size={20}
+                  color={sessionStarted ? Colors.senary[300] : Colors.shade[100]}
                 />
               </View>
-              <Text style={styles.actionLabel}>{isPaused ? "Resume" : "Pause"}</Text>
+              <Text style={[styles.actionLabel, !sessionStarted && styles.actionLabelDisabled]}>
+                {isPaused ? "Resume" : "Pause"}
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -568,17 +575,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 24,
   },
-  controlsRow: {
-    flexDirection: "row",
+  timerBlock: {
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: 20,
     width: "100%",
-    paddingHorizontal: 10,
   },
   timerCircle: {
-    width: 110,
-    height: 110,
-    borderRadius: 55,
+    width: 160,
+    height: 160,
+    borderRadius: 80,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: Colors.shade[200],
@@ -588,39 +593,57 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
   },
+  timerInner: {
+    alignItems: "center",
+    gap: 2,
+  },
   timerText: {
     fontFamily: "Quicksand-Bold",
-    fontSize: 26,
+    fontSize: 34,
     color: Colors.octonary.DEFAULT,
+    letterSpacing: 1,
+  },
+  timerLabel: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.shade[100],
+    letterSpacing: 0.5,
   },
   actionButtonsWrap: {
     flexDirection: "row",
-    gap: 20,
+    gap: 32,
+    justifyContent: "center",
   },
   actionButton: {
     alignItems: "center",
-    gap: 10,
+    gap: 8,
   },
   actionIconWrap: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: Colors.error[500],
     alignItems: "center",
     justifyContent: "center",
   },
   actionIconWrapLight: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     backgroundColor: Colors.warning[100],
     alignItems: "center",
     justifyContent: "center",
   },
+  actionIconDisabled: {
+    opacity: 0.4,
+  },
   actionLabel: {
     fontFamily: "AlbertSans-Bold",
-    fontSize: 14,
+    fontSize: 13,
     color: Colors.octonary.DEFAULT,
+  },
+  actionLabelDisabled: {
+    color: Colors.shade[100],
   },
   questionContainer: {
     width: "100%",

@@ -55,8 +55,8 @@ export default function PracticeSession() {
 
 
   const progress = remainingSeconds / initialTotalSeconds;
-  const ringSize = 86;
-  const ringStroke = 8;
+  const ringSize = 160;
+  const ringStroke = 10;
   const ringRadius = (ringSize - ringStroke) / 2;
   const ringCircumference = 2 * Math.PI * ringRadius;
   const ringOffset = ringCircumference * (1 - progress);
@@ -243,7 +243,7 @@ export default function PracticeSession() {
           <Text style={styles.disclaimerBold}>My Recordings</Text>
         </Text>
         
-        <View style={styles.timerRow}>
+        <View style={styles.timerBlock}>
           <View style={styles.timerCircle}>
             <Svg width={ringSize} height={ringSize} style={styles.timerSvg}>
               <Circle
@@ -268,29 +268,36 @@ export default function PracticeSession() {
                 origin={`${ringSize / 2}, ${ringSize / 2}`}
               />
             </Svg>
-            <Text style={styles.timerText}>{formattedTime}</Text>
+            <View style={styles.timerInner}>
+              <Text style={styles.timerText}>{formattedTime}</Text>
+              <Text style={styles.timerLabel}>
+                {isPaused ? "paused" : "remaining"}
+              </Text>
+            </View>
           </View>
 
-          <Pressable style={styles.actionButton} onPress={() => setRestartVisible(true)}>
-            <View style={styles.actionIconWrap}>
-              <Ionicons name="refresh" size={22} color={Colors.shade[200]} />
-            </View>
-            <Text style={styles.actionLabel}>Restart</Text>
-          </Pressable>
+          <View style={styles.actionButtonsWrap}>
+            <Pressable style={styles.actionButton} onPress={() => setRestartVisible(true)}>
+              <View style={styles.actionIconWrap}>
+                <Ionicons name="refresh" size={20} color={Colors.shade[200]} />
+              </View>
+              <Text style={styles.actionLabel}>Restart</Text>
+            </Pressable>
 
-          <Pressable
-            style={styles.actionButton}
-            onPress={() => setIsPaused((prev) => !prev)}
-          >
-            <View style={styles.actionIconWrapLight}>
-              <Ionicons
-                name={isPaused ? "play" : "pause"}
-                size={22}
-                color={Colors.octonary.DEFAULT}
-              />
-            </View>
-            <Text style={styles.actionLabel}>Pause</Text>
-          </Pressable>
+            <Pressable
+              style={styles.actionButton}
+              onPress={() => setIsPaused((prev) => !prev)}
+            >
+              <View style={styles.actionIconWrapLight}>
+                <Ionicons
+                  name={isPaused ? "play" : "pause"}
+                  size={20}
+                  color={Colors.octonary.DEFAULT}
+                />
+              </View>
+              <Text style={styles.actionLabel}>{isPaused ? "Resume" : "Pause"}</Text>
+            </Pressable>
+          </View>
         </View>
 
         <Pressable 
@@ -355,11 +362,14 @@ const styles = StyleSheet.create({
   mainTitle: { fontFamily: "Quicksand-Bold", fontSize: 20, color: Colors.octonary.DEFAULT },
   disclaimerText: { fontFamily: "AlbertSans-Regular", fontSize: 12, color: Colors.octonary.DEFAULT, textAlign: "center" },
   disclaimerBold: { fontFamily: "AlbertSans-Bold" },
-  timerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", width: "100%", marginTop: 6 },
-  timerCircle: { width: 86, height: 86, borderRadius: 43, alignItems: "center", justifyContent: "center", backgroundColor: Colors.shade[200] },
+  timerBlock: { alignItems: "center", gap: 20, width: "100%" },
+  timerCircle: { width: 160, height: 160, borderRadius: 80, alignItems: "center", justifyContent: "center", backgroundColor: Colors.shade[200] },
   timerSvg: { position: "absolute", top: 0, left: 0 },
-  timerText: { fontFamily: "Quicksand-Bold", fontSize: 18, color: Colors.octonary.DEFAULT },
-  actionButton: { alignItems: "center", gap: 6, flex: 1 },
+  timerInner: { alignItems: "center", gap: 2 },
+  timerText: { fontFamily: "Quicksand-Bold", fontSize: 34, color: Colors.octonary.DEFAULT, letterSpacing: 1 },
+  timerLabel: { fontFamily: "AlbertSans-Regular", fontSize: 12, color: Colors.shade[100], letterSpacing: 0.5 },
+  actionButtonsWrap: { flexDirection: "row", gap: 32, justifyContent: "center" },
+  actionButton: { alignItems: "center", gap: 8 },
   actionIconWrap: { width: 52, height: 52, borderRadius: 26, backgroundColor: Colors.error[400], alignItems: "center", justifyContent: "center" },
   actionIconWrapLight: { width: 52, height: 52, borderRadius: 26, backgroundColor: Colors.warning[100], alignItems: "center", justifyContent: "center" },
   actionLabel: { fontFamily: "AlbertSans-SemiBold", fontSize: 13, color: Colors.octonary.DEFAULT },
