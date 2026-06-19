@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Svg, { Circle } from "react-native-svg";
 import { Audio } from "expo-av";
 
-import { BACKEND_URL } from "../constants/api";
+import { BACKEND_URL, NGROK_HEADERS } from "../constants/api";
 
 import { Colors } from "../constants/colors";
 import PracticeCameraPanel from "../components/practice-camera-panel";
@@ -154,6 +154,7 @@ export default function PracticeSession() {
 
       const res = await fetch(`${BACKEND_URL}/story-mode/evaluate`, {
         method: "POST",
+        headers: { ...NGROK_HEADERS },
         body: formData,
       });
 

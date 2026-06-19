@@ -3,7 +3,7 @@ import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from "rea
 import { useLocalSearchParams, useRouter } from "expo-router";
 import * as ScreenOrientation from "expo-screen-orientation";
 
-import { BACKEND_URL } from "../constants/api";
+import { BACKEND_URL, NGROK_HEADERS } from "../constants/api";
 
 export default function VrComplete() {
   const router = useRouter();
@@ -59,6 +59,7 @@ export default function VrComplete() {
 
       const response = await fetch(`${BACKEND_URL}/evaluate`, {
         method: "POST",
+        headers: { ...NGROK_HEADERS },
         body: formData,
       });
 

@@ -19,7 +19,7 @@ import { Audio } from "expo-av";
 import { Colors } from "../constants/colors";
 import TopHeader from "../components/top-header";
 import PracticeCameraPanel from "../components/practice-camera-panel";
-import { BACKEND_URL } from "../constants/api";
+import { BACKEND_URL, NGROK_HEADERS } from "../constants/api";
 import fillerFreeFallback from "./filler-free-fallback.json";
 
 const logoRhetora = require("../assets/images/logorhetora.png");
@@ -125,7 +125,7 @@ export default function FillerFreeSession() {
 
   const openWebSocket = useCallback(() => {
     const fillerParam = parsedFillerWords.join(",");
-    const wsUrl = BACKEND_URL.replace(/^http/, "ws") + `/filler-free/stream?fillerWords=${encodeURIComponent(fillerParam)}`;
+    const wsUrl = BACKEND_URL.replace(/^https/, "wss").replace(/^http/, "ws") + `/filler-free/stream?fillerWords=${encodeURIComponent(fillerParam)}`;
 
     const ws = new WebSocket(wsUrl);
 
@@ -323,6 +323,7 @@ export default function FillerFreeSession() {
 
       const response = await fetch(`${BACKEND_URL}/filler-free/evaluate`, {
         method: "POST",
+        headers: { ...NGROK_HEADERS },
         body: formData,
       });
 
@@ -377,7 +378,7 @@ export default function FillerFreeSession() {
       try {
         const response = await fetch(`${BACKEND_URL}/filler-free/question`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...NGROK_HEADERS },
         });
         if (!response.ok) throw new Error(await response.text());
         const data = await response.json();

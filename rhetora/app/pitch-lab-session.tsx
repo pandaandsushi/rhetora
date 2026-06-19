@@ -19,7 +19,7 @@ import { Audio } from "expo-av";
 import { Colors } from "../constants/colors";
 import TopHeader from "../components/top-header";
 import PracticeCameraPanel from "../components/practice-camera-panel";
-import { BACKEND_URL } from "../constants/api";
+import { BACKEND_URL, NGROK_HEADERS } from "../constants/api";
 import pitchFallback from "./pitchlab-fallback.json";
 
 const logoRhetora = require("../assets/images/logorhetora.png");
@@ -219,6 +219,7 @@ export default function PitchLabSession() {
 
       const response = await fetch(`${BACKEND_URL}/pitch/evaluate`, {
         method: "POST",
+        headers: { ...NGROK_HEADERS },
         body: formData,
       });
 
@@ -257,7 +258,7 @@ export default function PitchLabSession() {
       try {
         const response = await fetch(`${BACKEND_URL}/pitch/initial`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...NGROK_HEADERS },
           body: JSON.stringify({ pitchType }),
         });
 

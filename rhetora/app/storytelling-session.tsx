@@ -17,7 +17,7 @@ import { Audio } from "expo-av";
 import { Colors } from "../constants/colors";
 import PracticeCameraPanel from "../components/practice-camera-panel";
 import TopHeader from "../components/top-header";
-import { BACKEND_URL } from "../constants/api";
+import { BACKEND_URL, NGROK_HEADERS } from "../constants/api";
 const logoRhetora = require("../assets/images/logorhetora.png");
 
 type StoryTurn = {
@@ -99,7 +99,7 @@ export default function StorytellingSession() {
   try {
     const response = await fetch(`${BACKEND_URL}/storytelling/initial`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...NGROK_HEADERS },
       body: JSON.stringify({ genre }),
     });
 
@@ -295,6 +295,7 @@ export default function StorytellingSession() {
 
       const response = await fetch(`${BACKEND_URL}/storytelling/turn`, {
         method: "POST",
+        headers: { ...NGROK_HEADERS },
         body: formData,
       });
 
@@ -330,7 +331,7 @@ export default function StorytellingSession() {
     try {
       const response = await fetch(`${BACKEND_URL}/storytelling/evaluate`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...NGROK_HEADERS },
         body: JSON.stringify({ turns: nextTurns, genre, metrics }),
       });
 
