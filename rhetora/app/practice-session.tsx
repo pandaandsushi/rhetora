@@ -4,6 +4,7 @@ import {
   Modal,
   Pressable,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -224,7 +225,11 @@ export default function PracticeSession() {
         />
       </SafeAreaView>
 
-      <View style={styles.body}>
+      <ScrollView
+        style={styles.bodyScroll}
+        contentContainerStyle={styles.bodyContent}
+        showsVerticalScrollIndicator={false}
+      >
         <Text style={styles.mainTitle}>Introduce Yourself!</Text>
 
         <PracticeCameraPanel
@@ -300,14 +305,18 @@ export default function PracticeSession() {
             </Pressable>
           </View>
         </View>
+      </ScrollView>
 
+      <SafeAreaView style={styles.bottomSafeArea}>
         <Pressable 
           style={[styles.finishButton, isProcessing && { opacity: 0.7 }]} 
           onPress={() => !isProcessing && setFinishVisible(true)}
         >
-          <Text style={styles.finishButtonText}>{isProcessing ? "Processing..." : "Finish"}</Text>
+          <Text style={styles.finishButtonText}>
+            {isProcessing ? "Processing..." : "Finish"}
+          </Text>
         </Pressable>
-      </View>
+      </SafeAreaView>
       
 
       <Modal transparent animationType="fade" visible={restartVisible}>
@@ -359,7 +368,24 @@ export default function PracticeSession() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Colors.shade[200] },
   topSafeArea: { backgroundColor: Colors.senary[300] },
-  body: { flex: 1, paddingHorizontal: 24, paddingTop: 24, paddingBottom: 32, alignItems: "center", gap: 20 },
+  bodyScroll: {
+    flex: 1,
+  },
+
+  bodyContent: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 24,
+    alignItems: "center",
+    gap: 20,
+  },
+
+  bottomSafeArea: {
+    backgroundColor: Colors.shade[200],
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 16,
+  },  
   mainTitle: { fontFamily: "Quicksand-Bold", fontSize: 20, color: Colors.octonary.DEFAULT },
   disclaimerText: { fontFamily: "AlbertSans-Regular", fontSize: 12, color: Colors.octonary.DEFAULT, textAlign: "center" },
   disclaimerBold: { fontFamily: "AlbertSans-Bold" },
