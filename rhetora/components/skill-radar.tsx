@@ -1,12 +1,13 @@
 import { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import Svg, { Circle, Line, Polygon } from "react-native-svg";
+import Svg, { Circle, Line, Polygon, Text as SvgText } from "react-native-svg";
 
 import { Colors } from "../constants/colors";
 
 type SkillRadarProps = {
   labels: string[];
   values: number[];
+  scores?: number[];
   size?: number;
   strokeColor?: string;
   fillColor?: string;
@@ -42,6 +43,7 @@ const buildLabelPositions = (size: number, count: number) => {
 export default function SkillRadar({
   labels,
   values,
+  scores,
   size = 220,
   strokeColor = Colors.blue[400],
   fillColor = "rgba(88, 130, 219, 0.28)",
@@ -99,6 +101,32 @@ export default function SkillRadar({
         {radarPoints.map((point, index) => (
           <Circle key={`dot-${index}`} cx={point.x} cy={point.y} r={3} fill={Colors.turquoise[400]} />
         ))}
+        {scores && radarPoints.map((point, index) => {
+          const score = scores[index];
+          if (score == null) return null;
+          const cx = size / 2;
+          const cy = size / 2;
+          const dx = point.x - cx;
+          const dy = point.y - cy;
+          const len = Math.sqrt(dx * dx + dy * dy) || 1;
+          const offset = 12;
+          const lx = point.x + (dx / len) * offset;
+          const ly = point.y + (dy / len) * offset;
+          return (
+            <SvgText
+              key={`score-${index}`}
+              x={lx}
+              y={ly}
+              textAnchor="middle"
+              alignmentBaseline="middle"
+              fontSize={10}
+              fontWeight="700"
+              fill={Colors.turquoise[400]}
+            >
+              {score}
+            </SvgText>
+          );
+        })}
       </Svg>
 
       {labelPositions.map((point, index) => {

@@ -332,7 +332,7 @@ export default function StorytellingEvaluation() {
                 <Ionicons name="chevron-forward" size={13} color={Colors.senary[300]} />
               </View>
             </Pressable>
-            <SkillRadar labels={skillLabels} values={skillScores} size={220} />
+            <SkillRadar labels={skillLabels} values={skillScores} scores={skillScores} size={220} />
           </View>
         )}
 
