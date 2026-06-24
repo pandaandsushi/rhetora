@@ -110,6 +110,25 @@ export default function TimePractice() {
   const linePath = useMemo(() => buildLinePath(chartWidth, 170, chartValues), [chartValues]);
   const areaPath = useMemo(() => buildAreaPath(chartWidth, 170, chartValues), [chartValues]);
 
+  const totalMinutes = chartValues.reduce((sum, v) => sum + v, 0);
+  const avgMinutes =
+    chartValues.length > 0 ? Math.round(totalMinutes / chartValues.length) : 0;
+  const totalHours = Math.floor(totalMinutes / 60);
+  const totalRemainingMins = totalMinutes % 60;
+  const totalFormatted =
+    totalHours > 0
+      ? `${totalHours}h ${totalRemainingMins}m`
+      : `${totalMinutes}m`;
+
+  const avgPeriodLabel =
+    activePeriod === "daily"
+      ? "avg / day"
+      : activePeriod === "weekly"
+      ? "avg / week"
+      : activePeriod === "monthly"
+      ? "avg / month"
+      : "avg / year";
+
   const handleSelectRange = (rangeId: string) => {
     setSelectedRangeIds((prev) => ({
       ...prev,
@@ -235,6 +254,18 @@ export default function TimePractice() {
                 {label}
               </Text>
             ))}
+          </View>
+        </View>
+
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{totalFormatted}</Text>
+            <Text style={styles.statLabel}>total practice</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{avgMinutes}m</Text>
+            <Text style={styles.statLabel}>{avgPeriodLabel}</Text>
           </View>
         </View>
 
@@ -455,5 +486,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.senary[300],
     textDecorationLine: "underline",
+  },
+  statsRow: {
+    flexDirection: "row",
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: Colors.senary[300],
+    backgroundColor: Colors.shade[200],
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    alignItems: "center",
+  },
+  statCard: {
+    flex: 1,
+    alignItems: "center",
+    gap: 4,
+  },
+  statDivider: {
+    width: 1.5,
+    height: 36,
+    backgroundColor: Colors.senary[300],
+    opacity: 0.35,
+  },
+  statValue: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 22,
+    color: Colors.senary[300],
+  },
+  statLabel: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.octonary.DEFAULT,
   },
 });

@@ -107,6 +107,18 @@ export default function SkillProgress() {
     [chartValues]
   );
 
+  const firstScore = chartValues[0] ?? 0;
+  const lastScore = chartValues[chartValues.length - 1] ?? 0;
+  const growth = lastScore - firstScore;
+  const bestScore = chartValues.length > 0 ? Math.max(...chartValues) : 0;
+  const growthPercent =
+    firstScore > 0
+      ? `${growth >= 0 ? "+" : ""}${((growth / firstScore) * 100).toFixed(1)}%`
+      : growth > 0
+      ? "+∞"
+      : "—";
+  const growthDisplay = `${growth >= 0 ? "+" : ""}${growth}`;
+
   const handleSelectRange = (rangeId: string) => {
     setSelectedRangeIds((prev) => ({ ...prev, [activePeriod]: rangeId }));
   };
@@ -260,6 +272,28 @@ export default function SkillProgress() {
                 {label}
               </Text>
             ))}
+          </View>
+        </View>
+
+        <View style={styles.statsRow}>
+          <View style={styles.statCard}>
+            <View style={styles.statValueRow}>
+              <Text style={styles.statValue}>{growthDisplay}</Text>
+              <Text
+                style={[
+                  styles.statBadge,
+                  growth >= 0 ? styles.statBadgePositive : styles.statBadgeNegative,
+                ]}
+              >
+                {growthPercent}
+              </Text>
+            </View>
+            <Text style={styles.statLabel}>score growth</Text>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{bestScore}</Text>
+            <Text style={styles.statLabel}>best score</Text>
           </View>
         </View>
 
@@ -503,5 +537,57 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.senary[300],
     textDecorationLine: "underline",
+  },
+  statsRow: {
+    flexDirection: "row",
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: Colors.senary[300],
+    backgroundColor: Colors.shade[200],
+    paddingVertical: 18,
+    paddingHorizontal: 20,
+    alignItems: "center",
+  },
+  statCard: {
+    flex: 1,
+    alignItems: "center",
+    gap: 4,
+  },
+  statDivider: {
+    width: 1.5,
+    height: 36,
+    backgroundColor: Colors.senary[300],
+    opacity: 0.35,
+  },
+  statValueRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  statValue: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 22,
+    color: Colors.senary[300],
+  },
+  statBadge: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    overflow: "hidden",
+  },
+  statBadgePositive: {
+    color: "#4caf50",
+    backgroundColor: "rgba(76, 175, 80, 0.12)",
+  },
+  statBadgeNegative: {
+    color: "#e57373",
+    backgroundColor: "rgba(229, 115, 115, 0.12)",
+  },
+  statLabel: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.octonary.DEFAULT,
   },
 });
