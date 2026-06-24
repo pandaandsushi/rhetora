@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { getEvaluationRouteByMode } from "./utils/get-evaluation-route";
 import { Ionicons } from "@expo/vector-icons";
-import Svg, { Circle, Line, Path } from "react-native-svg";
+import Svg, { Circle, Line, Path, Text as SvgText } from "react-native-svg";
 
 import NavBar from "../components/nav-bar";
 import RecentActivityCard from "../components/recent-activity-card";
@@ -218,6 +218,7 @@ export default function Progress() {
               <SkillRadar
                 labels={dashboardData.skillMap.labels}
                 values={radarValues}
+                scores={radarValues}
                 size={chartWidth}
               />
             </View>
@@ -255,9 +256,20 @@ export default function Progress() {
                   const yScale = (170 - padding * 2) / maxValue;
                   const x = padding + index * xStep;
                   const y = 170 - padding - value * yScale;
-                  return (
-                    <Circle key={`dot-${index}`} cx={x} cy={y} r={3} fill={Colors.senary[300]} />
-                  );
+                  return [
+                    <Circle key={`dot-${index}`} cx={x} cy={y} r={3} fill={Colors.senary[300]} />,
+                    <SvgText
+                      key={`label-${index}`}
+                      x={x}
+                      y={y - 8}
+                      textAnchor="middle"
+                      fontSize={9}
+                      fontWeight="700"
+                      fill={Colors.senary[300]}
+                    >
+                      {value}
+                    </SvgText>,
+                  ];
                 })}
               </Svg>
               <View style={styles.dayRow}>

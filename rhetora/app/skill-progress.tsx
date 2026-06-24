@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import Svg, { Circle, Line, Path } from "react-native-svg";
+import Svg, { Circle, Line, Path, Text as SvgText } from "react-native-svg";
 
 import TopHeader from "../components/top-header";
 import NavBar from "../components/nav-bar";
@@ -237,9 +237,20 @@ export default function SkillProgress() {
               const yScale = (170 - padding * 2) / maxValue;
               const x = padding + index * xStep;
               const y = 170 - padding - value * yScale;
-              return (
-                <Circle key={`dot-${index}`} cx={x} cy={y} r={3} fill={Colors.senary[300]} />
-              );
+              return [
+                <Circle key={`dot-${index}`} cx={x} cy={y} r={3} fill={Colors.senary[300]} />,
+                <SvgText
+                  key={`label-${index}`}
+                  x={x}
+                  y={y - 8}
+                  textAnchor="middle"
+                  fontSize={9}
+                  fontWeight="700"
+                  fill={Colors.senary[300]}
+                >
+                  {value}
+                </SvgText>,
+              ];
             })}
           </Svg>
 
