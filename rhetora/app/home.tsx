@@ -9,7 +9,6 @@ import {
   Text,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { frameList } from "../constants/frames";
@@ -53,7 +52,6 @@ const challengePreview = [
 
 export default function Home() {
   const router = useRouter();
-  const insets = useSafeAreaInsets();
   const hasUnclaimedChallenges = true;
   const hasNewNotifications = true;
   const [userData, setUserData] = useState(getMockUserData());
@@ -85,10 +83,7 @@ export default function Home() {
       >
         <SafeAreaView style={styles.safeArea}>
           <ScrollView
-            contentContainerStyle={[
-              styles.content,
-              { paddingBottom: 130 + insets.bottom },
-            ]}
+            contentContainerStyle={styles.content}
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.headerRow}>
@@ -165,7 +160,6 @@ export default function Home() {
                     size={20}
                     color={Colors.octonary.DEFAULT}
                   />
-                
               </View>
               <View style={styles.subtitleRow}>
                 <Text style={styles.sectionSubtitle}>
@@ -195,7 +189,7 @@ export default function Home() {
                         </View>
                         <ProgressBar
                           progress={progress}
-                        />
+                          />
                       </View>
                     </View>
                   );
@@ -286,7 +280,7 @@ export default function Home() {
           </ScrollView>
         </SafeAreaView>
 
-        <View style={[styles.navWrap, { paddingBottom: Math.max(insets.bottom, 10) }]}>
+        <View style={styles.navWrap}>
           <NavBar activeKey="home" />
         </View>
       </ImageBackground>
@@ -310,6 +304,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 60,
+    paddingBottom: 130,
     gap: 22,
   },
   headerRow: {
@@ -638,5 +633,6 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
+    paddingBottom: 10,
   },
 });

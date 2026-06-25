@@ -37,7 +37,7 @@ const dailyChallenges: Challenge[] = [
     title: "Check personal progress in\ndashboard",
     current: 1,
     total: 1,
-    coinValue: 160,
+    coinValue: 25,
     route: "/progress",
   },
   {
@@ -45,7 +45,7 @@ const dailyChallenges: Challenge[] = [
     title: "Finish public speaking\nexercise 1 time",
     current: 2,
     total: 2,
-    coinValue: 160,
+    coinValue: 25,
     route: "/casual-mode",
   },
   {
@@ -53,7 +53,7 @@ const dailyChallenges: Challenge[] = [
     title: "Give 3 feedbacks to other's performance",
     current: 1,
     total: 3,
-    coinValue: 160,
+    coinValue: 25,
     route: "/feedback",
   },
 ];
@@ -64,7 +64,7 @@ const weeklyChallenges: Challenge[] = [
     title: "Finish public speaking\nexercise 3 time",
     current: 1,
     total: 3,
-    coinValue: 160,
+    coinValue: 25,
     route: "/casual-mode",
   },
   {
@@ -72,7 +72,7 @@ const weeklyChallenges: Challenge[] = [
     title: "Finish public speaking\nexercise 1 time",
     current: 1,
     total: 2,
-    coinValue: 160,
+    coinValue: 25,
     route: "/casual-mode",
   },
   {
@@ -80,7 +80,7 @@ const weeklyChallenges: Challenge[] = [
     title: "Give 3 feedbacks to other's\nperformance",
     current: 1,
     total: 3,
-    coinValue: 160,
+    coinValue: 25,
     route: "/feedback",
   },
 ];
@@ -269,7 +269,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
-    paddingBottom: 160,
+    paddingBottom: 25,
     gap: 20,
   },
   sectionHeader: {

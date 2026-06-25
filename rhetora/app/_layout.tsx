@@ -1,5 +1,27 @@
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
+import { StyleSheet, View } from "react-native";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+
+function AppSafeArea({ children }: { children: React.ReactNode }) {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View
+      style={[
+        styles.safeArea,
+        {
+          paddingBottom: insets.bottom + 8,
+        },
+      ]}
+    >
+      {children}
+    </View>
+  );
+}
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -17,5 +39,17 @@ export default function RootLayout() {
     return null;
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <SafeAreaProvider>
+      <AppSafeArea>
+        <Stack screenOptions={{ headerShown: false }} />
+      </AppSafeArea>
+    </SafeAreaProvider>
+  );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+  },
+});
