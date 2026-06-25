@@ -1,4 +1,4 @@
-import { Dimensions, Image, ImageBackground, PanResponder, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Dimensions, Image, ImageBackground, KeyboardAvoidingView, Modal, PanResponder, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -36,7 +36,7 @@ const tagLabels: Record<PeerFeedbackPost["tag"], string> = {
 
 export default function Feedback() {
   const router = useRouter();
-  const params = useLocalSearchParams<{ tab?: string }>();
+  const params = useLocalSearchParams<{ tab?: string; sort?: string }>();
   const [activeTab, setActiveTab] = useState<"explore" | "my-posts">(
     params.tab === "my-posts" ? "my-posts" : "explore"
   );
@@ -64,6 +64,7 @@ export default function Feedback() {
   const sheetHeightRef = useRef(sheetHeight);
 
   const [filterOpen, setFilterOpen] = useState(false);
+  const [tutorialVisible, setTutorialVisible] = useState(false);
 
   const [selectedModes, setSelectedModes] = useState<string[]>(([
     "Story",
@@ -73,7 +74,7 @@ export default function Feedback() {
   ]));
 
   const [sortMode, setSortMode] = useState<"popular" | "recent">(
-    "popular",
+    params.sort === "popular" ? "popular" : "recent",
   );
   useEffect(() => {
     if (params.tab === "my-posts") {
@@ -83,7 +84,16 @@ export default function Feedback() {
     if (params.tab === "explore") {
       setActiveTab("explore");
     }
-  }, [params.tab]);
+
+    if (params.sort === "popular" || params.sort === "recent") {
+      setSortMode(params.sort);
+    }
+  }, [params.tab, params.sort]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setTutorialVisible(true), 600);
+    return () => clearTimeout(timer);
+  }, []);
   
   useEffect(() => {
     const unsubscribe = subscribeToMockUser((next) => {
@@ -181,11 +191,16 @@ export default function Feedback() {
     const sorted = [...filtered];
 
     if (sortMode === "popular") {
-      sorted.sort(
-        (a, b) =>
-          getEntriesForPost(b.id).length -
-          getEntriesForPost(a.id).length,
-      );
+      sorted.sort((a, b) => {
+        const entryDiff =
+          getEntriesForPost(b.id).length - getEntriesForPost(a.id).length;
+        if (entryDiff !== 0) return entryDiff;
+        // tiebreak by newest first so freshly posted posts appear at top
+        return (
+          new Date(b.createdAt ?? b.dateLabel).getTime() -
+          new Date(a.createdAt ?? a.dateLabel).getTime()
+        );
+      });
     } else {
       sorted.sort(
         (a, b) =>
@@ -354,7 +369,16 @@ export default function Feedback() {
       </View>
 
       {ratingOpen && (
-        <View style={styles.modalOverlay}>
+        <KeyboardAvoidingView
+          style={styles.modalOverlayKAV}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <ScrollView
+            style={styles.modalScrollView}
+            contentContainerStyle={styles.modalScrollContent}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
           <View style={styles.modalCard}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Give Feedback</Text>
@@ -470,7 +494,8 @@ export default function Feedback() {
               </Pressable>
             </View>
           </View>
-        </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       )}
 
       {commentsOpen && (
@@ -687,7 +712,7 @@ export default function Feedback() {
                     "Filler-Free",
                   ]);
 
-                  setSortMode("popular");
+                  setSortMode("recent");
                 }}
               >
                 <Text style={styles.filterResetText}>
@@ -746,6 +771,22 @@ export default function Feedback() {
         message={toastMessage}
         variant="success"
       />
+
+      <Modal transparent visible={tutorialVisible} animationType="fade">
+        <Pressable
+          style={styles.tutorialOverlay}
+          onPress={() => setTutorialVisible(false)}
+        >
+          <View style={styles.tooltipContainer}>
+            <View style={styles.tooltipTriangle} />
+            <View style={styles.tooltipCard}>
+              <Text style={styles.tooltipText}>
+                Tap here to share your video and get feedback from peers!
+              </Text>
+            </View>
+          </View>
+        </Pressable>
+      </Modal>
     </ImageBackground>
   );
 }
@@ -1266,5 +1307,62 @@ const styles = StyleSheet.create({
 
   deleteButton: {
     backgroundColor: Colors.error[500],
+  },
+  modalScrollContent: {
+    flexGrow: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+  },
+  modalOverlayKAV: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
+  },
+  modalScrollView: {
+    flex: 1,
+    width: "100%",
+  },
+  tutorialOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
+  },
+  tooltipContainer: {
+    position: "absolute",
+    top: 90,
+    right: 20,
+    alignItems: "flex-end",
+  },
+  tooltipTriangle: {
+    width: 0,
+    height: 0,
+    backgroundColor: "transparent",
+    borderStyle: "solid",
+    borderLeftWidth: 10,
+    borderRightWidth: 10,
+    borderBottomWidth: 15,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderBottomColor: "white",
+    marginRight: 16,
+  },
+  tooltipCard: {
+    backgroundColor: "white",
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    borderRadius: 16,
+    width: 220,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  tooltipText: {
+    fontFamily: "Quicksand-Bold",
+    fontSize: 16,
+    color: Colors.octonary.DEFAULT,
+    textAlign: "center",
+    lineHeight: 22,
   },
 });

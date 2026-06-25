@@ -97,6 +97,7 @@ export default function FeedbackShare() {
       message: description.trim() || "Hi, this is my result for practicing today! What do you guys think?",
       tag: tagFromMode(selectedRecording.mode),
       dateLabel: formatPostDate(now),
+      createdAt: now.toISOString(),
       feedbackVisible: !hideFeedback,
       isMine: true,
     };
