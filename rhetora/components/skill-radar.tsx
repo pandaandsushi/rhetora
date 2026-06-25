@@ -27,9 +27,9 @@ const buildRadarPoints = (size: number, values: number[]) => {
   });
 };
 
-const buildLabelPositions = (size: number, count: number) => {
+const buildLabelPositions = (size: number, count: number, offset = 14) => {
   const center = size / 2;
-  const radius = size / 2 - 2;
+  const radius = size / 2 + offset;
   const step = (Math.PI * 2) / count;
 
   return Array.from({ length: count }).map((_, index) => {
@@ -60,8 +60,10 @@ export default function SkillRadar({
     [size, normalized]
   );
 
+  const labelOffset = 16;
+
   const labelPositions = useMemo(
-    () => buildLabelPositions(size, labels.length),
+    () => buildLabelPositions(size, labels.length, labelOffset),
     [size, labels.length]
   );
 
@@ -71,82 +73,102 @@ export default function SkillRadar({
   );
 
   return (
-    <View style={[styles.radarWrap, { width: size, height: size }]}>
-      <Svg width={size} height={size}>
-        {[0.2, 0.4, 0.6, 0.8, 1].map((fraction) => (
-          <Circle
-            key={`ring-${fraction}`}
-            cx={size / 2}
-            cy={size / 2}
-            r={(size / 2 - 12) * fraction}
-            stroke={Colors.neutral[200]}
-            strokeWidth={1}
-            fill="none"
-          />
-        ))}
-        {labelPositions.map((point, index) => (
-          <Line
-            key={`axis-${index}`}
-            x1={size / 2}
-            y1={size / 2}
-            x2={point.x}
-            y2={point.y}
-            stroke={Colors.neutral[200]}
-            strokeWidth={1}
-          />
-        ))}
-        {polygonPoints ? (
-          <Polygon points={polygonPoints} fill={fillColor} stroke={strokeColor} strokeWidth={2} />
-        ) : null}
-        {radarPoints.map((point, index) => (
-          <Circle key={`dot-${index}`} cx={point.x} cy={point.y} r={3} fill={Colors.turquoise[400]} />
-        ))}
-        {scores && radarPoints.map((point, index) => {
-          const score = scores[index];
-          if (score == null) return null;
-          const cx = size / 2;
-          const cy = size / 2;
-          const dx = point.x - cx;
-          const dy = point.y - cy;
-          const len = Math.sqrt(dx * dx + dy * dy) || 1;
-          const offset = 12;
-          const lx = point.x + (dx / len) * offset;
-          const ly = point.y + (dy / len) * offset;
-          return (
-            <SvgText
-              key={`score-${index}`}
-              x={lx}
-              y={ly}
-              textAnchor="middle"
-              alignmentBaseline="middle"
-              fontSize={10}
-              fontWeight="700"
+    <View style={[styles.radarWrap, { width: size + 48, height: size + 48 }]}>
+      <View style={[styles.radarInner, { width: size, height: size }]}>
+        <Svg width={size} height={size}>
+          {[0.2, 0.4, 0.6, 0.8, 1].map((fraction) => (
+            <Circle
+              key={`ring-${fraction}`}
+              cx={size / 2}
+              cy={size / 2}
+              r={(size / 2 - 12) * fraction}
+              stroke={Colors.neutral[200]}
+              strokeWidth={1}
+              fill="none"
+            />
+          ))}
+
+          {labelPositions.map((point, index) => (
+            <Line
+              key={`axis-${index}`}
+              x1={size / 2}
+              y1={size / 2}
+              x2={Math.max(Math.min(point.x, size), 0)}
+              y2={Math.max(Math.min(point.y, size), 0)}
+              stroke={Colors.neutral[200]}
+              strokeWidth={1}
+            />
+          ))}
+
+          {polygonPoints ? (
+            <Polygon
+              points={polygonPoints}
+              fill={fillColor}
+              stroke={strokeColor}
+              strokeWidth={2}
+            />
+          ) : null}
+
+          {radarPoints.map((point, index) => (
+            <Circle
+              key={`dot-${index}`}
+              cx={point.x}
+              cy={point.y}
+              r={3}
               fill={Colors.turquoise[400]}
+            />
+          ))}
+
+          {scores &&
+            radarPoints.map((point, index) => {
+              const score = scores[index];
+              if (score == null) return null;
+
+              const cx = size / 2;
+              const cy = size / 2;
+              const dx = point.x - cx;
+              const dy = point.y - cy;
+              const len = Math.sqrt(dx * dx + dy * dy) || 1;
+              const offset = 12;
+              const lx = point.x + (dx / len) * offset;
+              const ly = point.y + (dy / len) * offset;
+
+              return (
+                <SvgText
+                  key={`score-${index}`}
+                  x={lx}
+                  y={ly}
+                  textAnchor="middle"
+                  alignmentBaseline="middle"
+                  fontSize={10}
+                  fontWeight="700"
+                  fill={Colors.turquoise[400]}
+                >
+                  {score}
+                </SvgText>
+              );
+            })}
+        </Svg>
+
+        {labelPositions.map((point, index) => {
+          const label = labels[index] ?? "";
+          return (
+            <Text
+              key={`label-${label}-${index}`}
+              style={[
+                styles.radarLabel,
+                {
+                  left: point.x - 35,
+                  top: point.y - 10,
+                  width: 70,
+                },
+              ]}
             >
-              {score}
-            </SvgText>
+              {label}
+            </Text>
           );
         })}
-      </Svg>
-
-      {labelPositions.map((point, index) => {
-        const label = labels[index] ?? "";
-        return (
-          <Text
-            key={`label-${label}-${index}`}
-            style={[
-              styles.radarLabel,
-              {
-                left: point.x - 28,
-                top: point.y - 10,
-                width: 70,
-              },
-            ]}
-          >
-            {label}
-          </Text>
-        );
-      })}
+      </View>
     </View>
   );
 }
@@ -155,6 +177,9 @@ const styles = StyleSheet.create({
   radarWrap: {
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
+  },
+  radarInner: {
     position: "relative",
   },
   radarLabel: {
