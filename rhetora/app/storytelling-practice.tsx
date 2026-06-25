@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   Image,
   ImageBackground,
@@ -39,6 +39,7 @@ const genres = [
 export default function StorytellingPractice() {
   const router = useRouter();
   const [maxTurns, setMaxTurns] = useState("4");
+  const maxTurnsInputRef = useRef<TextInput>(null);
   const [tutorialVisible, setTutorialVisible] = useState(true);
   const [tutorialIndex, setTutorialIndex] = useState(0);
   const [tutorialCollapsed, setTutorialCollapsed] = useState(false);
@@ -72,6 +73,10 @@ export default function StorytellingPractice() {
       return;
     }
     setTutorialIndex((prev) => prev + 1);
+  };
+
+  const handlePreviousTutorial = () => {
+    setTutorialIndex((prev) => Math.max(prev - 1, 0));
   };
 
   const handleStart = () => {
@@ -167,8 +172,12 @@ export default function StorytellingPractice() {
         
         <Text style={styles.genreLabel}>Max Turns</Text>
 
-        <View style={styles.turnInputCard}>
+        <Pressable
+          style={styles.turnInputCard}
+          onPress={() => maxTurnsInputRef.current?.focus()}
+        >
           <TextInput
+            ref={maxTurnsInputRef}
             style={styles.turnInput}
             value={maxTurns}
             onChangeText={handleMaxTurnsChange}
@@ -178,7 +187,7 @@ export default function StorytellingPractice() {
             placeholderTextColor={Colors.neutral[400]}
           />
           <Text style={styles.turnInputHint}>Maximum 10 turns</Text>
-        </View>
+        </Pressable>
 
         <Text style={styles.genreLabel}>Select Genre</Text>
         <View style={styles.genreWrap}>
@@ -226,9 +235,14 @@ export default function StorytellingPractice() {
 
             <View style={styles.tutorialDots}>
               {tutorialSteps.map((_, index) => (
-                <View
+                <Pressable
                   key={`dot-${index}`}
-                  style={[styles.tutorialDot, index === tutorialIndex && styles.tutorialDotActive]}
+                  onPress={() => setTutorialIndex(index)}
+                  hitSlop={8}
+                  style={[
+                    styles.tutorialDot,
+                    index === tutorialIndex && styles.tutorialDotActive,
+                  ]}
                 />
               ))}
             </View>
