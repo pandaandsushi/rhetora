@@ -56,9 +56,9 @@ const cards: PracticeCard[] = [
     image: require("../assets/images/casualmode/filler-free.png"),
     route: "/filler-free",
     tags: [
-      { label: "Confidence", color: Colors.blue[300] },
+      { label: "Critical Thinking", color: Colors.success[500] },
       { label: "Fluency", color: Colors.turquoise[300] },
-      { label: "Filler Words", color: Colors.success[500] },
+      { label: "Filler Words", color: Colors.pink[500] },
     ],
   },
 ];
