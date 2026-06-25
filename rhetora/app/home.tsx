@@ -153,19 +153,19 @@ export default function Home() {
               </Pressable>
             </View>
 
+            <Pressable onPress={() => router.push("/challenges")}>
             <View style={styles.sectionGroup}>
               <View style={styles.sectionHeader}>
                 <View style={styles.sectionTitleRow}>
                   <Text style={styles.sectionTitle}>Challenges</Text>
                   {hasUnclaimedChallenges && <View style={styles.badgeDot} />}
                 </View>
-                <Pressable onPress={() => router.push("/challenges")}>
                   <Ionicons
                     name="chevron-forward"
                     size={20}
                     color={Colors.octonary.DEFAULT}
                   />
-                </Pressable>
+                
               </View>
               <View style={styles.subtitleRow}>
                 <Text style={styles.sectionSubtitle}>
@@ -202,6 +202,7 @@ export default function Home() {
                 })}
               </View>
             </View>
+            </Pressable>
 
             <Pressable
               style={styles.shopCardWrapper}
