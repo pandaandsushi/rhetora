@@ -1,14 +1,16 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 
+import DropdownButton from "./dropdown-button";
 import { Colors } from "../constants/colors";
 
 type DropdownSelectProps = {
   value?: string;
-  options: string[];
+  options: readonly string[];
   placeholder?: string;
   onSelect: (value: string) => void;
+  descriptions?: Partial<Record<string, string>>;
+  showSelectedDescription?: boolean;
 };
 
 export default function DropdownSelect({
@@ -16,28 +18,32 @@ export default function DropdownSelect({
   options,
   placeholder = "Select",
   onSelect,
+  descriptions,
+  showSelectedDescription = false,
 }: DropdownSelectProps) {
   const [open, setOpen] = useState(false);
   const displayValue = value ?? placeholder;
-  const isPlaceholder = value == null;
+  const selectedDescription = value ? descriptions?.[value] : undefined;
 
   return (
     <View>
-      <Pressable style={styles.selectField} onPress={() => setOpen((prev) => !prev)}>
-        <Text style={[styles.selectValue, isPlaceholder && styles.selectPlaceholder]}>
-          {displayValue}
-        </Text>
-        <Ionicons
-          name={open ? "chevron-up" : "chevron-down"}
-          size={18}
-          color={Colors.neutral[400]}
-        />
-      </Pressable>
+      <DropdownButton
+        label={displayValue}
+        placeholder={placeholder}
+        open={open}
+        onPress={() => setOpen((prev) => !prev)}
+      />
+
+      {showSelectedDescription && selectedDescription ? (
+        <Text style={styles.selectedDescription}>{selectedDescription}</Text>
+      ) : null}
 
       {open && (
         <View style={styles.selectList}>
           {options.map((option, index) => {
             const selected = option === value;
+            const description = descriptions?.[option];
+
             return (
               <Pressable
                 key={option}
@@ -59,6 +65,17 @@ export default function DropdownSelect({
                 >
                   {option}
                 </Text>
+
+                {description ? (
+                  <Text
+                    style={[
+                      styles.selectItemDescription,
+                      selected && styles.selectItemDescriptionActive,
+                    ]}
+                  >
+                    {description}
+                  </Text>
+                ) : null}
               </Pressable>
             );
           })}
@@ -69,26 +86,6 @@ export default function DropdownSelect({
 }
 
 const styles = StyleSheet.create({
-  selectField: {
-    marginTop: 8,
-    borderRadius: 12,
-    borderWidth: 1.5,
-    borderColor: Colors.neutral[300],
-    backgroundColor: Colors.shade[200],
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  selectValue: {
-    fontFamily: "AlbertSans-SemiBold",
-    fontSize: 14,
-    color: Colors.octonary.DEFAULT,
-  },
-  selectPlaceholder: {
-    color: Colors.neutral[400],
-  },
   selectList: {
     borderRadius: 12,
     borderWidth: 1.5,
@@ -102,6 +99,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.neutral[200],
+    gap: 4,
   },
   selectItemLast: {
     borderBottomWidth: 0,
@@ -116,5 +114,21 @@ const styles = StyleSheet.create({
   },
   selectItemTextActive: {
     color: Colors.shade[200],
+  },
+  selectItemDescription: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 12,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 16,
+  },
+  selectItemDescriptionActive: {
+    color: Colors.shade[200],
+  },
+  selectedDescription: {
+    fontFamily: "AlbertSans-Regular",
+    fontSize: 13,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 18,
+    marginTop: 8,
   },
 });
