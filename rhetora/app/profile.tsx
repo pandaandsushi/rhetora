@@ -370,6 +370,13 @@ export default function Profile() {
             }}
           />
           <SafeAreaView style={styles.titleSheet}>
+            {sortOpen && (
+              <Pressable
+                style={styles.sortDismissLayer}
+                onPress={() => setSortOpen(false)}
+              />
+            )}
+
             <View style={styles.editHandle} />
             <View style={styles.titleHeaderRow}>
               <Text style={styles.titleSheetTitle}>My Titles</Text>
@@ -1018,6 +1025,8 @@ const styles = StyleSheet.create({
   sortWrap: {
     alignItems: "flex-end",
     position: "relative",
+    zIndex: 3,
+    elevation: 3,
   },
   sortButton: {
     flexDirection: "row",
@@ -1308,5 +1317,9 @@ const styles = StyleSheet.create({
   },
   titleDetailEquipDisabled: {
     backgroundColor: Colors.neutral[300],
+  },
+  sortDismissLayer: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1,
   },
 });
