@@ -54,4 +54,58 @@ export const avatarList: AvatarItem[] = [
     description: "Relaxed, calm, and ready to go.",
     image: require("../assets/images/avatar/av-coffe.png"),
   },
+  {
+    id: "sing",
+    title: "Sing",
+    description: "Singing my heart out and feeling the music.",
+    image: require("../assets/images/avatar/av-sing.png"),
+  },
+  {
+    id: "grafitti",
+    title: "Grafitti",
+    description: "Brings color to your life.",
+    image: require("../assets/images/avatar/av-naughty.png"),
+  },
+  {
+    id: "family",
+    title: "Family",
+    description: "Family is everything.",
+    image: require("../assets/images/avatar/av-child.png"),
+  },
+  {
+    id: "slay",
+    title: "Slay",
+    description: "Slaying the day with confidence.",
+    image: require("../assets/images/avatar/av-slay.png"),
+  },
+  {
+    id: "school",
+    title: "School",
+    description: "Ready to learn and grow.",
+    image: require("../assets/images/avatar/av-school.png"),
+  },
+  {
+    id: "grocery",
+    title: "Grocery",
+    description: "Shopping for the essentials.",
+    image: require("../assets/images/avatar/av-grocery.png"),
+  },
+  {
+    id: "skateboard",
+    title: "Skateboard",
+    description: "Cruising through life with style.",
+    image: require("../assets/images/avatar/av-skateboard.png"),
+  },
+  {
+    id: "nurse",
+    title: "Nurse",
+    description: "Caring for others with compassion.",
+    image: require("../assets/images/avatar/av-nurse.png"),
+  },
+  {
+    id: "passanger",
+    title: "Passanger",
+    description: "On a journey with friends.",
+    image: require("../assets/images/avatar/av-passanger.png"),
+  }
 ];
