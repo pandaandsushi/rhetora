@@ -186,13 +186,7 @@ export default function VrReady() {
           </View>
 
           <View style={styles.promptCard}>
-            <View style={styles.promptHeaderRow}>
-              <View style={styles.promptIconWrap}>
-                <Ionicons name="chatbubble-ellipses" size={16} color={Colors.senary[300]} />
-              </View>
-              <Text style={styles.promptLabel}>Speaking Prompt</Text>
-            </View>
-            <Text style={styles.promptQuestion}>{speakingPrompt}</Text>
+            <Text style={styles.promptQuestion}>{scenario.speakingPrompt}</Text>
           </View>
 
           <Text style={styles.helperText}>
@@ -338,12 +332,9 @@ const styles = StyleSheet.create({
   },
   promptCard: {
     width: "100%",
-    borderRadius: 18,
-    borderWidth: 1.5,
-    borderColor: Colors.quinary[300],
-    backgroundColor: Colors.shade[200],
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: 12,
+    alignItems: "center",
+    justifyContent: "center",
     gap: 6,
   },
   promptHeaderRow: {
@@ -367,10 +358,11 @@ const styles = StyleSheet.create({
     color: Colors.senary[300],
   },
   promptQuestion: {
-    fontFamily: "AlbertSans-SemiBold",
-    fontSize: 14,
+    fontFamily: "Quicksand-Bold",
+    fontSize: 18,
     color: Colors.octonary.DEFAULT,
-    lineHeight: 20,
+    textAlign: "center",
+    lineHeight: 32,
   },
   startButton: {
     width: 120,

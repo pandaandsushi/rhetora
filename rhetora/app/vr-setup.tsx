@@ -89,15 +89,9 @@ export default function VrSetup() {
           <Text style={styles.scenarioTitle}>{scenario.title}</Text>
         </View>
 
-        <View style={styles.promptCard}>
-          <View style={styles.promptHeaderRow}>
-            <View style={styles.promptIconWrap}>
-              <Ionicons name="chatbubble-ellipses" size={15} color={Colors.senary[300]} />
-            </View>
-            <Text style={styles.promptLabel}>Speaking Prompt</Text>
-          </View>
+        {/* <View style={styles.promptCard}>
           <Text style={styles.promptQuestion}>{scenario.speakingPrompt}</Text>
-        </View>
+        </View> */}
 
         <SpeakingTimeInput value={timeValue} onChange={setTimeValue} />
 
@@ -182,13 +176,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   promptCard: {
-    borderRadius: 16,
-    borderWidth: 1.5,
-    borderColor: Colors.quinary[300],
-    backgroundColor: Colors.shade[200],
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    gap: 8,
+    width: "100%",
+    paddingHorizontal: 8,
+    alignItems: "center",
+    justifyContent: "center",
   },
   promptHeaderRow: {
     flexDirection: "row",
@@ -211,10 +202,11 @@ const styles = StyleSheet.create({
     color: Colors.senary[300],
   },
   promptQuestion: {
-    fontFamily: "AlbertSans-SemiBold",
-    fontSize: 14,
+    fontFamily: "Quicksand-Bold",
+    fontSize: 22,
     color: Colors.octonary.DEFAULT,
-    lineHeight: 20,
+    textAlign: "center",
+    lineHeight: 32,
   },
   timerRow: {
     flexDirection: "row",
