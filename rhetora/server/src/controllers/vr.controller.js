@@ -9,9 +9,17 @@ const evaluateVr = async (req, res) => {
 
     const scenario = req.body?.scenario || "";
     const audience = req.body?.audience || "";
+    const speakingPrompt = req.body?.speakingPrompt || "";
+    const speakingContext = req.body?.speakingContext || "";
     const llmOptions = getLlmOptionsFromRequest(req);
 
-    const result = await evaluateVrSession(req.file, { scenario, audience, llmOptions });
+    const result = await evaluateVrSession(req.file, {
+      scenario,
+      audience,
+      speakingPrompt,
+      speakingContext,
+      llmOptions,
+    });
     return res.json(result);
   } catch (error) {
     return res.status(500).json({ error: error?.message ?? "Unknown error" });

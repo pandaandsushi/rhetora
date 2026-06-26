@@ -29,16 +29,25 @@ const vrScenarios = [
     id: "vr-classroom",
     title: "Classroom",
     image: vrClassroomImage,
+    speakingPrompt: "Explain one study habit that helps you learn better.",
+    speakingContext:
+      "The user is speaking to classmates in a classroom setting. Evaluate whether the speech explains the idea clearly for a student audience.",
   },
   {
     id: "vr-meeting",
     title: "Meeting Room",
     image: vrMeetingImage,
+    speakingPrompt: "Share one idea to improve your team's productivity.",
+    speakingContext:
+      "The user is speaking in a team meeting. Evaluate whether the speech presents a practical idea with a clear reason.",
   },
   {
     id: "vr-podium",
     title: "Podium",
     image: vrPodiumImage,
+    speakingPrompt: "Give a short speech about one habit that helps people grow.",
+    speakingContext:
+      "The user is speaking to a larger audience from a podium. Evaluate whether the speech has a clear message and closing.",
   },
 ];
 
@@ -80,6 +89,16 @@ export default function VrSetup() {
           <Text style={styles.scenarioTitle}>{scenario.title}</Text>
         </View>
 
+        <View style={styles.promptCard}>
+          <View style={styles.promptHeaderRow}>
+            <View style={styles.promptIconWrap}>
+              <Ionicons name="chatbubble-ellipses" size={15} color={Colors.senary[300]} />
+            </View>
+            <Text style={styles.promptLabel}>Speaking Prompt</Text>
+          </View>
+          <Text style={styles.promptQuestion}>{scenario.speakingPrompt}</Text>
+        </View>
+
         <SpeakingTimeInput value={timeValue} onChange={setTimeValue} />
 
         <View style={styles.selectRow}>
@@ -105,6 +124,8 @@ export default function VrSetup() {
                 audience: selectedAudience ?? "",
                 time: timeLabel,
                 timeSeconds: String(totalSeconds),
+                speakingPrompt: scenario.speakingPrompt,
+                speakingContext: scenario.speakingContext,
               },
             });
           }}
@@ -159,6 +180,41 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: Colors.octonary.DEFAULT,
     paddingVertical: 10,
+  },
+  promptCard: {
+    borderRadius: 16,
+    borderWidth: 1.5,
+    borderColor: Colors.quinary[300],
+    backgroundColor: Colors.shade[200],
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 8,
+  },
+  promptHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  promptIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.quinary[300],
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: Colors.shade[200],
+  },
+  promptLabel: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 13,
+    color: Colors.senary[300],
+  },
+  promptQuestion: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 20,
   },
   timerRow: {
     flexDirection: "row",

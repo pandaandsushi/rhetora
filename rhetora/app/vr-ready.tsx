@@ -23,16 +23,25 @@ const vrScenarios = [
     id: "vr-classroom",
     title: "Classroom",
     image: vrClassroomImage,
+    speakingPrompt: "Explain one study habit that helps you learn better.",
+    speakingContext:
+      "The user is speaking to classmates in a classroom setting. Evaluate whether the speech explains the idea clearly for a student audience.",
   },
   {
     id: "vr-meeting",
     title: "Meeting Room",
     image: vrMeetingImage,
+    speakingPrompt: "Share one idea to improve your team's productivity.",
+    speakingContext:
+      "The user is speaking in a team meeting. Evaluate whether the speech presents a practical idea with a clear reason.",
   },
   {
     id: "vr-podium",
     title: "Podium",
     image: vrPodiumImage,
+    speakingPrompt: "Give a short speech about one habit that helps people grow.",
+    speakingContext:
+      "The user is speaking to a larger audience from a podium. Evaluate whether the speech has a clear message and closing.",
   },
 ];
 
@@ -43,6 +52,8 @@ export default function VrReady() {
     audience?: string;
     time?: string;
     timeSeconds?: string;
+    speakingPrompt?: string;
+    speakingContext?: string;
   }>();
   const [micDetected, setMicDetected] = useState(false);
   const [micLevel, setMicLevel] = useState(0);
@@ -51,6 +62,9 @@ export default function VrReady() {
   const scenario = useMemo(() => {
     return vrScenarios.find((item) => item.id === params.scenarioId) ?? vrScenarios[0];
   }, [params.scenarioId]);
+
+  const speakingPrompt = params.speakingPrompt ?? scenario.speakingPrompt;
+  const speakingContext = params.speakingContext ?? scenario.speakingContext;
   useEffect(() => {
   ScreenOrientation.lockAsync(
     ScreenOrientation.OrientationLock.LANDSCAPE,
@@ -171,6 +185,16 @@ export default function VrReady() {
             </View>
           </View>
 
+          <View style={styles.promptCard}>
+            <View style={styles.promptHeaderRow}>
+              <View style={styles.promptIconWrap}>
+                <Ionicons name="chatbubble-ellipses" size={16} color={Colors.senary[300]} />
+              </View>
+              <Text style={styles.promptLabel}>Speaking Prompt</Text>
+            </View>
+            <Text style={styles.promptQuestion}>{speakingPrompt}</Text>
+          </View>
+
           <Text style={styles.helperText}>
             We use VR Cardboard. Please rotate your device to landscape before starting.
           </Text>
@@ -185,6 +209,8 @@ export default function VrReady() {
                   audience: params.audience ?? "",
                   time: params.time ?? "",
                   timeSeconds: params.timeSeconds ?? "",
+                  speakingPrompt,
+                  speakingContext,
                 },
               })
             }
@@ -268,7 +294,7 @@ const styles = StyleSheet.create({
   },
   detailsColumn: {
     flex: 1,
-    gap: 14,
+    gap: 10,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -309,6 +335,42 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     textAlign: "center",
     marginHorizontal: 12,
+  },
+  promptCard: {
+    width: "100%",
+    borderRadius: 18,
+    borderWidth: 1.5,
+    borderColor: Colors.quinary[300],
+    backgroundColor: Colors.shade[200],
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 6,
+  },
+  promptHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  promptIconWrap: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: Colors.quinary[300],
+    backgroundColor: Colors.shade[200],
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  promptLabel: {
+    fontFamily: "AlbertSans-Bold",
+    fontSize: 13,
+    color: Colors.senary[300],
+  },
+  promptQuestion: {
+    fontFamily: "AlbertSans-SemiBold",
+    fontSize: 14,
+    color: Colors.octonary.DEFAULT,
+    lineHeight: 20,
   },
   startButton: {
     width: 120,
