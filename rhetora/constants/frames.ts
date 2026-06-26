@@ -54,4 +54,28 @@ export const frameList: FrameItem[] = [
     description: "A cute bunny frame for playful moments.",
     image: require("../assets/images/frame/frame-7.png"),
   },
+  {
+    id: "neon-lights",
+    title: "Neon Lights",
+    description: "Vibrant neon lights for a lively vibe.",
+    image: require("../assets/images/frame/frame-9.png"),
+  },
+  {
+    id: "kitty",
+    title: "Kitty",
+    description: "A cute cat frame for all cat lovers.",
+    image: require("../assets/images/frame/frame-10.png"),
+  },
+  {
+    id: "garden",
+    title: "Garden",
+    description: "A serene garden frame for peaceful moments.",
+    image: require("../assets/images/frame/frame-11.png"),
+  },
+  {
+    id: "fly",
+    title: "I Believe I Can Fly",
+    description: "I believe I can touch the sky.",
+    image: require("../assets/images/frame/frame-12.png"),
+  }
 ];
