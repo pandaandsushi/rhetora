@@ -28,7 +28,7 @@ const micImage = require("../assets/images/dashboard/db-microphone.png");
 const alarmImage = require("../assets/images/dashboard/db-alarm.png");
 
 const { width: screenWidth } = Dimensions.get("window");
-const chartWidth = Math.min(screenWidth - 80, 320);
+const chartWidth = Math.min(screenWidth - 120, 320);
 
 const dashboardData = {
   overview: {
