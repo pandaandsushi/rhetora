@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
       height: 26,
     },
     label: {
-      fontSize: 12,
+      fontSize: 10,
     },
   },
   md: {
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
       height: 32,
     },
     label: {
-      fontSize: 14,
+      fontSize: 12,
     },
   },
 });
