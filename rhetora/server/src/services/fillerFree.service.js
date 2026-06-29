@@ -1,28 +1,9 @@
 import { transcribeBuffer } from "./deepgram.service.js";
 import { callLLM } from "./llm.service.js";
 import { buildSpeechMetrics } from "../utils/speechMetrics.js";
-import {
-  buildFillerFreeQuestionPrompt,
-  buildFillerFreeEvaluationPrompt,
-} from "../prompts/fillerFree.prompt.js";
+import { buildFillerFreeEvaluationPrompt } from "../prompts/fillerFree.prompt.js";
 
-const FALLBACK_QUESTIONS = [
-  "Describe a place you love to visit and what makes it special.",
-  "What is one skill you have always wanted to learn and why?",
-  "What is your favorite way to spend your free time?",
-  "Tell me about a memorable meal you have had recently.",
-  "What does your ideal weekend look like?",
-  "Describe a book, movie, or show that you recently enjoyed.",
-  "What is something you are currently looking forward to?",
-  "Talk about a hobby that you enjoy and how you got into it.",
-  "What is one thing you would change about your daily routine?",
-  "Describe your favorite season and why you enjoy it.",
-  "What is a goal you have for the next year and how do you plan to achieve it?",
-  "Tell me about a person who has had a positive impact on your life.",
-  "What is a recent accomplishment you are proud of and why?",
-  "What is something new you have learned recently and how did you learn it?",
-  "What is your favorite type of music and how does it make you feel?",
-];
+const FILLER_FREE_QUESTION = "What is your favorite way to spend your free time?";
 
 // Fallback evaluation when Gemini is unavailable but Deepgram succeeded
 const buildFallbackEvaluation = () => ({
@@ -73,14 +54,8 @@ const buildFallbackEvaluation = () => ({
   ],
 });
 
-const getRandomFallbackQuestion = () => {
-  const index = Math.floor(Math.random() * FALLBACK_QUESTIONS.length);
-  return FALLBACK_QUESTIONS[index];
-};
-
 const getFillerFreeQuestion = async (llmOptions = {}) => {
-  const index = Math.floor(Math.random() * FALLBACK_QUESTIONS.length);
-  return { question: FALLBACK_QUESTIONS[index] };
+  return { question: FILLER_FREE_QUESTION };
 };
 
 const evaluateFillerFree = async ({ file, fillerWords, question, llmOptions = {} }) => {

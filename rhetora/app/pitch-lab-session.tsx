@@ -36,6 +36,18 @@ type PitchPrompt = {
   };
 };
 
+const HARDCODED_PITCH_PROMPT: PitchPrompt = {
+  title: "Context: You are pitching a mobile app that helps students improve their productivity.",
+  instruction: "Question: Explain what the app does, who it helps, and why people should use it.",
+  tips: {
+    hook: "Start with a clear problem students face when managing time and assignments.",
+    problem: "Describe why procrastination, deadlines, or distraction make studying harder.",
+    solution: "Introduce the app as a simple tool that helps students plan and stay focused.",
+    value: "Explain the main benefit in practical terms, such as saving time or reducing stress.",
+    closing: "End with a direct invitation to try the app or join the beta.",
+  },
+};
+
 export default function PitchLabSession() {
   const router = useRouter();
   const { pitchType, totalSeconds, cameraOn } = useLocalSearchParams<{
@@ -49,8 +61,8 @@ export default function PitchLabSession() {
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 600;
   }, [totalSeconds]);
 
-  const [prompt, setPrompt] = useState<PitchPrompt>(pitchFallback.prompt);
-  const [promptLoading, setPromptLoading] = useState(true);
+  const [prompt] = useState<PitchPrompt>(HARDCODED_PITCH_PROMPT);
+  const [promptLoading] = useState(false);
   const [sessionStarted, setSessionStarted] = useState(false);
 
   const [remainingSeconds, setRemainingSeconds] = useState(initialTotalSeconds);
@@ -252,37 +264,7 @@ export default function PitchLabSession() {
   };
 
   useEffect(() => {
-    let isMounted = true;
-
-    const loadPrompt = async () => {
-      try {
-        const response = await fetch(`${BACKEND_URL}/pitch/initial`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", ...NGROK_HEADERS },
-          body: JSON.stringify({ pitchType }),
-        });
-
-        if (!response.ok) {
-          throw new Error(await response.text());
-        }
-
-        const data = await response.json();
-        if (isMounted && data?.prompt) {
-          setPrompt(data.prompt);
-        }
-      } catch (error) {
-        console.warn("[Pitch] Failed to load prompt", error);
-      } finally {
-        if (isMounted) {
-          setPromptLoading(false);
-        }
-      }
-    };
-
-    loadPrompt();
-
     return () => {
-      isMounted = false;
       clearTimer();
 
       if (recordingRef.current) {
@@ -290,7 +272,7 @@ export default function PitchLabSession() {
         recordingRef.current = null;
       }
     };
-  }, [pitchType]);
+  }, []);
 
   useEffect(() => {
     if (!timerRef.current || !sessionStarted) {

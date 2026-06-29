@@ -23,6 +23,7 @@ import { BACKEND_URL, NGROK_HEADERS } from "../constants/api";
 import fillerFreeFallback from "./filler-free-fallback.json";
 
 const logoRhetora = require("../assets/images/logorhetora.png");
+const FILLER_FREE_QUESTION = "What is your favorite way to spend your free time?";
 
 function FillerPill({ word, count, animate }: { word: string; count: number; animate: boolean }) {
   const scale = useRef(new Animated.Value(1)).current;
@@ -67,8 +68,7 @@ export default function FillerFreeSession() {
     }
   }, [fillerWords]);
 
-  const [question, setQuestion] = useState("Loading your question...");
-  const [questionLoaded, setQuestionLoaded] = useState(false);
+  const question = FILLER_FREE_QUESTION;
   const [remainingSeconds, setRemainingSeconds] = useState(initialTotalSeconds);
   const [isPaused, setIsPaused] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
@@ -372,32 +372,7 @@ export default function FillerFreeSession() {
   };
 
   useEffect(() => {
-    let isMounted = true;
-
-    const loadQuestion = async () => {
-      try {
-        const response = await fetch(`${BACKEND_URL}/filler-free/question`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json", ...NGROK_HEADERS },
-        });
-        if (!response.ok) throw new Error(await response.text());
-        const data = await response.json();
-        if (isMounted) {
-          setQuestion(data.question ?? "What is your favorite way to spend your free time?");
-          setQuestionLoaded(true);
-        }
-      } catch {
-        if (isMounted) {
-          setQuestion(fillerFreeFallback.question);
-          setQuestionLoaded(true);
-        }
-      }
-    };
-
-    loadQuestion();
-
     return () => {
-      isMounted = false;
       clearTimerInterval();
       closeWebSocket();
       if (recordingRef.current) {
@@ -408,10 +383,10 @@ export default function FillerFreeSession() {
   }, []);
 
   useEffect(() => {
-    if (questionLoaded && !sessionStarted) {
+    if (!sessionStarted) {
       handleStartSession();
     }
-  }, [questionLoaded]);
+  }, []);
 
   const fillerPills = useMemo(() => {
     return parsedFillerWords.map((word) => ({
